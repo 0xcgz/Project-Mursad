@@ -405,3 +405,402 @@ Before proceeding to the next phase, verify all of the following:
 `[01] Project Architecture` ← **You are here:** `[02] Proxmox Deployment` → `[03] pfSense Edge Firewall`
 
 </div>
+
+# Phase 1 — `[03]` pfSense Edge Firewall Installation & Baseline Setup
+
+> **Scope:** Deployment of the **Netgate pfSense Plus** virtual appliance within Proxmox, mapping all network interfaces to the Linux Bridges engineered in `[02]`, and establishing baseline routing for the Mursad SOC environment.
+
+---
+
+## Overview
+
+```
+Proxmox Node: mursad
+└── VM 100 — Firewall (pfSense Plus)
+        ├── vtnet0  →  vmbr0  →  WAN   (192.168.140.x — DHCP from host)
+        ├── vtnet1  →  vmbr1  →  LAN   (10.22.0.1/24   — Workstation)
+        ├── vtnet2  →  vmbr2  →  OPT1  (10.22.7.1/24   — Servers)
+        └── vtnet3  →  vmbr3  →  OPT2  (192.168.50.1/24 — DMZ)
+```
+
+| Step | Section | Description |
+|------|---------|-------------|
+| A | VM Provisioning | Create the VM container and attach network interfaces |
+| B | OS Installation | Install pfSense onto the virtual disk |
+| C | Interface & Routing | Map bridges, assign IPs, and enable DHCP |
+
+---
+
+## Part A — Virtual Machine Provisioning
+
+> *Create the virtual hardware container, upload the pfSense ISO, and configure the VM before first boot.*
+
+### Step 1 — Download pfSense ISO
+
+<img width="1222" height="887" alt="1" src="https://github.com/user-attachments/assets/3fb40940-64ec-4a72-b7c2-b4bdcbb50f0c" />
+<img width="1111" height="776" alt="2" src="https://github.com/user-attachments/assets/a34523a6-f5f4-4924-8f3b-de108e33b15c" />
+
+
+Navigate to [pfsense.org/download](https://www.pfsense.org/download/) and download with these options:
+
+| Setting | Value |
+|---------|-------|
+| Architecture | AMD64 (64-bit) |
+| Installer | DVD Image (ISO) |
+| Console | VGA |
+
+> ⚠️ The download arrives as a `.gz` compressed file. Extract it to obtain the `.iso` before uploading to Proxmox.
+
+---
+
+### Step 2 — Upload ISO to Proxmox
+
+<img width="1051" height="738" alt="3" src="https://github.com/user-attachments/assets/08d05f59-4370-45b7-b6f7-11b673e2335e" />
+<img width="887" height="605" alt="4" src="https://github.com/user-attachments/assets/76858e07-0a3a-4700-a28b-8951af9330c1" />
+<img width="406" height="312" alt="5" src="https://github.com/user-attachments/assets/ace26d91-a790-4c7b-8bbb-9d179aa0a95a" />
+<img width="1911" height="537" alt="6" src="https://github.com/user-attachments/assets/2ad9c755-c04d-4643-af6b-2a995e7d2235" />
+
+1. In the Proxmox Web GUI, navigate to **mursad → local (mursad) → ISO Images**
+2. Click **Upload → Select File**, browse to the extracted pfSense `.iso`
+3. Click **Upload** and wait for the task log to show:
+
+```
+TASK OK
+```
+
+---
+
+### Step 3 — Create the VM
+
+<img width="460" height="472" alt="7" src="https://github.com/user-attachments/assets/d874199a-96e4-45e3-8bdd-e974653b0c3d" />
+
+Click **"Create VM"** in the top-right corner of the Proxmox interface.
+
+---
+
+### Step 4 — General Tab
+
+<img width="721" height="534" alt="8" src="https://github.com/user-attachments/assets/2d20dc43-a1bc-43ab-9b7e-fb4c624bc64a" />
+
+
+| Setting | Value |
+|---------|-------|
+| VM ID | `100` |
+| Name | `Firewall` |
+| Node | `mursad` |
+
+---
+
+### Step 5 — OS Tab
+
+<img width="788" height="539" alt="9" src="https://github.com/user-attachments/assets/eca6d83d-692b-4b37-b0bf-d6f696bd12d5" />
+
+
+| Setting | Value |
+|---------|-------|
+| Storage | `local (mursad)` |
+| ISO Image | pfSense ISO you uploaded |
+| Guest OS Type | Other |
+
+---
+
+### Step 6 — System Tab
+
+
+<img width="716" height="537" alt="10" src="https://github.com/user-attachments/assets/4dd7f1b1-b566-4a4e-ba26-63516c470873" />
+
+| Setting | Value |
+|---------|-------|
+| BIOS | SeaBIOS |
+| Machine | i440fx |
+| SCSI Controller | VirtIO SCSI |
+
+> Leave defaults — do not change to OVMF/UEFI as pfSense CE installer does not require it.
+
+---
+
+### Step 7 — Disks Tab
+
+<img width="719" height="539" alt="11" src="https://github.com/user-attachments/assets/da1a221c-1442-4245-af10-4d7f1bef1445" />
+
+
+| Setting | Value |
+|---------|-------|
+| Storage | `local-lvm` |
+| Disk Size | `32 GiB` |
+| Format | raw |
+| Cache | No cache |
+
+---
+
+### Step 8 — CPU Tab
+
+<img width="722" height="534" alt="12" src="https://github.com/user-attachments/assets/6efdcca8-1312-4ba1-9b8a-2321629bd46b" />
+
+| Setting | Value |
+|---------|-------|
+| Cores | `2` |
+| Type | `host` |
+
+> Setting CPU type to `host` passes AMD Ryzen flags directly to the VM — critical for stable pfSense/FreeBSD operation.
+
+---
+
+### Step 9 — Memory Tab
+
+<img width="722" height="539" alt="13" src="https://github.com/user-attachments/assets/62db1e06-74a7-4d0c-9995-95a1bcdb7812" />
+
+
+| Setting | Value |
+|---------|-------|
+| Memory | `4096 MiB (4 GB)` |
+
+> 4 GB provides headroom for pfSense plus future Suricata IDS/IPS package installation.
+
+---
+
+### Step 10 — Network Tab
+
+<img width="721" height="540" alt="14" src="https://github.com/user-attachments/assets/00513ee8-acbf-4af8-8fe6-4d58835ed1a2" />
+
+
+| Setting | Value |
+|---------|-------|
+| Bridge | `vmbr0` |
+| Model | `VirtIO (paravirtualized)` |
+| Firewall | Unchecked |
+
+> This attaches the WAN interface only. The remaining 3 bridges will be added after OS installation.
+
+---
+
+### Step 11 — Confirm & Finish
+
+<img width="718" height="538" alt="15" src="https://github.com/user-attachments/assets/a5e3caca-e066-4773-96b7-c52a9ec0930c" />
+
+
+Review the hardware summary and click **Finish**. Do **not** check "Start after created" — additional NICs need to be added first.
+
+---
+
+## Part B — pfSense OS Installation
+
+> *Boot the VM from the ISO and install the FreeBSD-based firewall OS.*
+
+### Step 12 — Add Remaining Network Interfaces
+
+Before first boot, attach the remaining three bridges.
+
+Navigate to **VM 100 → Hardware → Add → Network Device** and add:
+
+| NIC | Bridge | Model |
+|-----|--------|-------|
+| net1 | `vmbr1` | VirtIO |
+| net2 | `vmbr2` | VirtIO |
+| net3 | `vmbr3` | VirtIO |
+
+---
+
+### Step 13 — Boot & Launch Console
+
+<img width="1914" height="743" alt="16" src="https://github.com/user-attachments/assets/209f7861-d692-491a-bf8c-27fc7571d6f1" />
+<img width="1826" height="1021" alt="17" src="https://github.com/user-attachments/assets/f51641f6-ebbd-4457-b4b4-12f920a0d8e3" />
+
+
+Select **VM 100 (Firewall)** from the sidebar, click **Start**, then open **Console**.
+
+The pfSense bootloader will appear. Allow the timer to expire or press **Enter** to boot immediately.
+
+---
+
+### Step 14 — Accept License
+
+<img width="1832" height="1008" alt="18" src="https://github.com/user-attachments/assets/aa7419e4-6074-4384-86de-c4acf363d09a" />
+
+
+Accept the Netgate Copyright and Trademark notice to proceed.
+
+---
+
+### Step 15 — Select Install
+
+<img width="1445" height="767" alt="19" src="https://github.com/user-attachments/assets/d4a80dcc-f2a1-4b68-9ad6-c1cfb2795730" />
+
+Select **Install pfSense** from the welcome menu.
+
+---
+
+### Step 16 — Partition Scheme
+
+<img width="1812" height="1009" alt="20" src="https://github.com/user-attachments/assets/a9cf0420-c040-4159-8c74-597dd4eaaf26" />
+
+
+Select **Auto (ZFS)** for the partition setup.
+
+| Option | Reason |
+|--------|--------|
+| Auto (ZFS) | Superior data integrity, snapshot support, ideal for firewall appliances |
+
+Proceed with default ZFS options and select the virtual disk when prompted.
+
+---
+
+## Part C — Interface Assignment & Routing Configuration
+
+> *Map the Proxmox bridges to pfSense interfaces and configure IP addressing for each zone.*
+
+### Step 17 — VLAN Setup
+
+<img width="1830" height="1012" alt="22" src="https://github.com/user-attachments/assets/62497691-b1de-4e89-a0cc-27a1de8848f3" />
+
+When prompted:
+```
+Should VLANs be set up now? [y/n]
+```
+Type `n` and press **Enter**. VLANs are not required — our segmentation is handled by separate bridges.
+
+---
+
+### Step 18 — Assign Interfaces
+
+<img width="1823" height="976" alt="23" src="https://github.com/user-attachments/assets/71ffea5d-b1d2-4d8a-abbc-9df6d232f0c8" />
+<img width="1818" height="1002" alt="24" src="https://github.com/user-attachments/assets/bfe16e14-bfe2-437a-a141-281c20c39efc" />
+<img width="1827" height="1006" alt="25" src="https://github.com/user-attachments/assets/557a26d7-1b4c-4c35-8deb-995254bddfcf" />
+<img width="1832" height="1005" alt="26" src="https://github.com/user-attachments/assets/c4499423-f730-413b-853a-7d0d643d47d1" />
+
+
+Assign each interface as follows when prompted:
+
+| Prompt | Input | Maps To |
+|--------|-------|---------|
+| WAN interface | `vtnet0` | `vmbr0` — Host NAT / Internet |
+| LAN interface | `vtnet1` | `vmbr1` — Workstation segment |
+| OPT1 interface | `vtnet2` | `vmbr2` — Servers segment |
+| OPT2 interface | `vtnet3` | `vmbr3` — DMZ |
+
+When the assignment summary is displayed, type `y` and press **Enter** to confirm.
+
+---
+
+### Step 19 — Verify Boot & WAN DHCP
+
+<img width="1820" height="1006" alt="27" src="https://github.com/user-attachments/assets/dc6b95ec-adc2-476d-9330-236e0ec4e277" />
+<img width="1820" height="1003" alt="28" src="https://github.com/user-attachments/assets/439cfa86-0660-44a4-b7bc-c3d07eeecbcb" />
+
+
+pfSense will initialize all interfaces and start routing services. Once the console menu appears, verify:
+
+```
+WAN (vtnet0) →  192.168.140.xxx/24   ← DHCP from Proxmox host ✅
+LAN (vtnet1) →  no IP yet            ← we configure this next
+```
+
+---
+
+### Step 20 — Set LAN IP Address
+
+<img width="1829" height="1012" alt="29" src="https://github.com/user-attachments/assets/be136960-8327-4237-8582-bc752d7a646a" />
+<img width="1914" height="989" alt="30" src="https://github.com/user-attachments/assets/359a4de9-de78-40d7-acd3-016d239679d1" />
+
+From the pfSense console menu, type `2` → press **Enter** to enter **"Set interface(s) IP address"**.
+
+Select option `2` for the **LAN** interface.
+
+---
+
+### Step 21 — Configure LAN
+
+<img width="1203" height="660" alt="31" src="https://github.com/user-attachments/assets/4835f9b7-2b7a-4cee-bc91-233205219248" />
+<img width="1137" height="654" alt="32" src="https://github.com/user-attachments/assets/837976e1-3106-4774-ba8d-91957acb0fb1" />
+<img width="1177" height="404" alt="33" src="https://github.com/user-attachments/assets/e2307588-7ea4-4810-a4fc-6d59cd16dd8a" />
+
+
+Enter the following when prompted:
+
+| Prompt | Value |
+|--------|-------|
+| IPv4 Address | `10.22.0.1` |
+| Subnet bit count | `24` |
+| Upstream gateway | *(press Enter — none)* |
+| IPv6 address | *(press Enter — skip)* |
+
+---
+
+### Step 22 — Enable DHCP on LAN
+
+<img width="1151" height="186" alt="35" src="https://github.com/user-attachments/assets/7eea0b2c-b401-4fdf-9801-00769d530a62" />
+<img width="1175" height="388" alt="36" src="https://github.com/user-attachments/assets/a47bfb2f-c184-40a0-a1e6-80a075cbddef" />
+<img width="1176" height="267" alt="37" src="https://github.com/user-attachments/assets/19c5ba61-d30e-42b4-827a-10ca312bc302" />
+<img width="1163" height="556" alt="34" src="https://github.com/user-attachments/assets/d0705f08-fa84-4cf5-811b-f373c31dec22" />
+
+
+When asked to enable the DHCP server on LAN, type `y`.
+
+| Prompt | Value |
+|--------|-------|
+| DHCP range start | `10.22.0.100` |
+| DHCP range end | `10.22.0.200` |
+
+---
+
+### Step 23 — Confirm & Access WebConfigurator
+
+<img width="1169" height="716" alt="38" src="https://github.com/user-attachments/assets/3f21233a-6fc6-4268-a484-15ed81cceeda" />
+<img width="1173" height="879" alt="39" src="https://github.com/user-attachments/assets/3acda81b-24a7-4aed-98ef-54e76eb81e0d" />
+
+When asked to revert webConfigurator to HTTP, type `n` (keep HTTPS).
+
+The console will confirm the LAN IP is set:
+
+```
+LAN (vtnet1) →  10.22.0.1/24  ✅
+```
+
+The pfSense WebConfigurator is now accessible from any machine on the Workstation network at:
+
+```
+https://10.22.0.1
+```
+
+Default credentials:
+| Field | Value |
+|-------|-------|
+| Username | `admin` |
+| Password | `pfsense` |
+
+> 🔐 **Change the default password immediately** upon first login.
+
+---
+
+## Interface Summary
+
+| pfSense Interface | vtnet | Bridge | IP | Zone |
+|-------------------|-------|--------|----|------|
+| WAN | vtnet0 | vmbr0 | DHCP (`192.168.140.x`) | Internet uplink |
+| LAN | vtnet1 | vmbr1 | `10.22.0.1/24` | Workstation |
+| OPT1 | vtnet2 | vmbr2 | `10.22.7.1/24` | Servers *(configured in `[04]`)* |
+| OPT2 | vtnet3 | vmbr3 | `192.168.50.1/24` | DMZ *(configured in `[04]`)* |
+
+---
+
+## Checklist
+
+- [ ] pfSense ISO uploaded to Proxmox local storage
+- [ ] VM 100 created with correct CPU type `host`
+- [ ] All 4 NICs attached (vmbr0 → vmbr3)
+- [ ] pfSense installed with Auto (ZFS) partitioning
+- [ ] Interfaces assigned — vtnet0=WAN, vtnet1=LAN, vtnet2=OPT1, vtnet3=OPT2
+- [ ] WAN pulling DHCP from host network
+- [ ] LAN configured at `10.22.0.1/24` with DHCP pool `100–200`
+- [ ] WebConfigurator accessible at `https://10.22.0.1`
+- [ ] Default `admin` password changed
+
+---
+
+<div align="center">
+
+**🟢 Phase Complete**
+
+`[02] Proxmox Deployment` ← **You are here:** `[03] pfSense Installation` → `[04] Advanced Firewall Routing`
+
+</div>
