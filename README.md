@@ -323,14 +323,64 @@ Click **OK**, then click **"Apply Configuration"** at the top of the network pan
 
 ---
 
+### Step 17 — Create Additional SOC Bridges
+
+With the lab design finalised, three additional Linux Bridges are required beyond the default `vmbr0`. Repeat the **Create → Linux Bridge** process from Step 16 for each entry below:
+
+| Bridge | CIDR | Autostart | Comment | Role |
+|--------|------|-----------|---------|------|
+| `vmbr0` | `192.168.140.129/24` | ✅ Yes | — | Management / NAT uplink via `nic0` |
+| `vmbr1` | `10.22.0.1/24` | ✅ Yes | `Workstation` | Workstation VLAN segment |
+| `vmbr2` | `10.22.7.1/24` | ✅ Yes | `Servers` | Internal servers segment |
+| `vmbr3` | `192.168.50.1/24` | ✅ Yes | `DMZ` | Demilitarized Zone |
+
+> ⚠️ **Note:** `vmbr2` and `vmbr3` will show **Active: No** until a VM is attached and the bridge comes up. This is expected.
+
+Once all bridges are created, click **"Apply Configuration"** to push the changes to `/etc/network/interfaces`. The pending diff shown at the bottom of the Network pane confirms what will be written:
+
+```diff
++auto vmbr2
++iface vmbr2 inet static
++    address 10.22.7.1/24
++    bridge-ports none
++    bridge-stp off
++    bridge-fd 0
+```
+
+---
+
+## Final Network State
+
+The screenshot below confirms the completed bridge configuration for the **mursad** node:
+
+<img width="1601" height="687" alt="24" src="https://github.com/user-attachments/assets/2b9c6b02-c07e-48db-a001-3a26f7a0ccf3" />
+
+![Proxmox Network Bridges](./assets/phase1-02-network-bridges.png)
+
+| Bridge | Type | Active | Autostart | CIDR | Gateway | Comment |
+|--------|------|--------|-----------|------|---------|---------|
+| `nic0` | Network Device | Yes | No | — | — | Physical uplink (`enp2s1`) |
+| `vmbr0` | Linux Bridge | ✅ Yes | ✅ Yes | `192.168.140.129/24` | `192.168.140.2` | Management / NAT |
+| `vmbr1` | Linux Bridge | ✅ Yes | ✅ Yes | `10.22.0.1/24` | — | Workstation |
+| `vmbr2` | Linux Bridge | No | ✅ Yes | `10.22.7.1/24` | — | Servers |
+| `vmbr3` | Linux Bridge | No | ✅ Yes | `192.168.50.1/24` | — | DMZ |
+
+---
+
 ## Network Summary
 
-After completing Part C, the Proxmox node should have two active bridges:
+All four bridges are now engineered and ready to receive VMs. Each bridge maps directly to a network zone in the Mursad SOC architecture:
 
-| Bridge | Role | Address | Connected VMs |
-|--------|------|---------|---------------|
-| `vmbr0` | Management / NAT uplink | `192.168.140.129/24` | pfSense WAN |
-| `vmbr1` | Internal SOC network | `10.22.0.1/24` | All internal VMs |
+```
+Proxmox Node: mursad
+│
+├── vmbr0  ──►  Management / NAT     192.168.140.129/24   (nic0 uplink)
+├── vmbr1  ──►  Workstation Segment  10.22.0.1/24
+├── vmbr2  ──►  Servers Segment      10.22.7.1/24
+└── vmbr3  ──►  DMZ Zone             192.168.50.1/24
+```
+
+> These bridges will be assigned to pfSense interfaces in the next phase, giving the firewall full visibility and control over inter-zone traffic.
 
 ---
 
@@ -340,9 +390,11 @@ Before proceeding to the next phase, verify all of the following:
 
 - [ ] Proxmox VE 9.1 installed and booting correctly
 - [ ] Web GUI accessible at `https://192.168.140.129:8006/`
-- [ ] `vmbr0` active with correct management IP
-- [ ] `vmbr1` bridge created at `10.22.0.1/24` with Autostart enabled
-- [ ] "Apply Configuration" confirmed — no pending network changes
+- [ ] `vmbr0` active — management IP `192.168.140.129/24`, gateway `192.168.140.2`
+- [ ] `vmbr1` created — `10.22.0.1/24`, comment `Workstation`, Autostart enabled
+- [ ] `vmbr2` created — `10.22.7.1/24`, comment `Servers`, Autostart enabled
+- [ ] `vmbr3` created — `192.168.50.1/24`, comment `DMZ`, Autostart enabled
+- [ ] **"Apply Configuration"** clicked — no pending changes remaining
 
 ---
 
