@@ -1,34 +1,46 @@
 <div align="center">
 
-```
-███╗   ███╗██╗   ██╗██████╗ ███████╗ █████╗ ██████╗
-████╗ ████║██║   ██║██╔══██╗██╔════╝██╔══██╗██╔══██╗
-██╔████╔██║██║   ██║██████╔╝███████╗███████║██║  ██║
-██║╚██╔╝██║██║   ██║██╔══██╗╚════██║██╔══██║██║  ██║
-██║ ╚═╝ ██║╚██████╔╝██║  ██║███████║██║  ██║██████╔╝
-╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝
-```
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:1a1a2e,50:16213e,100:0f3460&height=200&section=header&text=PROJECT%20MURSAD&fontSize=52&fontColor=e94560&fontAlignY=38&desc=Enterprise%20Security%20Architecture%20%26%20SOC%20Telemetry%20Lab&descAlignY=58&descColor=a8b2d8&animation=fadeIn" width="100%"/>
 
-**👁️ Enterprise Security Architecture & SOC Telemetry Lab**
+<br>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Proxmox-E57000?style=for-the-badge&logo=proxmox&logoColor=white"/>
-  <img src="https://img.shields.io/badge/pfSense-000000?style=for-the-badge&logo=pfsense&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Proxmox_VE-E57000?style=for-the-badge&logo=proxmox&logoColor=white"/>
+  <img src="https://img.shields.io/badge/pfSense_CE-212121?style=for-the-badge&logo=pfsense&logoColor=white"/>
   <img src="https://img.shields.io/badge/Active_Directory-0078D4?style=for-the-badge&logo=microsoft&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Wazuh-6B4CFF?style=for-the-badge&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Suricata-EF6C00?style=for-the-badge&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Wazuh_SIEM-6B4CFF?style=for-the-badge&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Suricata_IDS/IPS-EF6C00?style=for-the-badge&logoColor=white"/>
   <img src="https://img.shields.io/badge/Kali_Linux-557C94?style=for-the-badge&logo=kali-linux&logoColor=white"/>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Status-Phase%201%20Complete-brightgreen?style=flat-square"/>
-  <img src="https://img.shields.io/badge/Next-Phase%202%20%C2%B7%20Identity%20%26%20Segmentation-blue?style=flat-square"/>
-  <img src="https://img.shields.io/badge/Platform-Proxmox%20VE%209.1-E57000?style=flat-square"/>
-  <img src="https://img.shields.io/badge/Domain-mursad.local-grey?style=flat-square"/>
+  <img src="https://img.shields.io/badge/─────────────────────────────────────────-1a1a2e?style=flat-square"/>
 </p>
 
-> *A fully virtualized SOC environment on Proxmox featuring a segmented pfSense network,*
-> *Active Directory, Wazuh SIEM, Suricata IDS/IPS, and isolated Red Team capability.*
+<p align="center">
+  <img src="https://img.shields.io/badge/▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░-1a1a2e?style=flat-square&label=Phase%201%20Complete%20%7C%2040%25&labelColor=0f3460&color=e94560"/>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Phase_1-COMPLETE-2ecc71?style=flat-square&labelColor=1a1a2e"/>
+  <img src="https://img.shields.io/badge/Phase_2-IN_PROGRESS-e94560?style=flat-square&labelColor=1a1a2e"/>
+  <img src="https://img.shields.io/badge/Phase_3-PENDING-555?style=flat-square&labelColor=1a1a2e"/>
+  <img src="https://img.shields.io/badge/Phase_4-PENDING-555?style=flat-square&labelColor=1a1a2e"/>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Platform-Proxmox%20VE%209.1-E57000?style=flat-square&logo=proxmox&logoColor=white&labelColor=1a1a2e"/>
+  <img src="https://img.shields.io/badge/AD%20Domain-mursad.local-0078D4?style=flat-square&logo=microsoft&logoColor=white&labelColor=1a1a2e"/>
+  <img src="https://img.shields.io/badge/Host%20FQDN-mursad.me-6B4CFF?style=flat-square&labelColor=1a1a2e"/>
+  <img src="https://img.shields.io/badge/License-MIT-2ecc71?style=flat-square&labelColor=1a1a2e"/>
+</p>
+
+<br>
+
+> *A fully virtualized, enterprise-grade SOC environment built on Proxmox.*
+> *Segmented firewall zones · Active Directory · Wazuh SIEM · Suricata IDS/IPS · Red Team capability.*
+
+<br>
 
 </div>
 
@@ -43,8 +55,9 @@
 - [Tech Stack](#-tech-stack)
 - [Roadmap](#-roadmap)
 - [Deployment Docs](#-deployment-docs)
-  - [Phase 1 · 02 — Proxmox Deployment](#phase-1--02--proxmox-hypervisor-deployment--bridge-vlan-configuration)
-  - [Phase 1 · 03 — pfSense Installation](#phase-1--03--pfsense-edge-firewall-installation--baseline-setup)
+  - [Phase 1 · 02 — Proxmox Deployment](#phase-1--02)
+  - [Phase 1 · 03 — pfSense Installation](#phase-1--03)
+  - [Phase 1 · 04 — Advanced Firewall Routing](#phase-1--04)
 - [Repository Structure](#-repository-structure)
 - [Disclaimer](#-disclaimer)
 
@@ -52,47 +65,56 @@
 
 ## 🔍 Overview
 
-Project Mursad is a fully virtualized, enterprise-grade Security Operations Center lab designed for hands-on Blue Team and Red Team practice. Running entirely on a single Proxmox host nested inside VMware Workstation, it simulates a realistic corporate environment with proper zone segmentation, Active Directory identity management, inline intrusion detection, and centralized SIEM telemetry.
+Project Mursad is a fully virtualized, enterprise-grade Security Operations Center lab built for hands-on Blue Team and Red Team practice. Running entirely on a single Proxmox host nested inside VMware Workstation Pro, it simulates a realistic corporate environment with proper zone segmentation, Active Directory identity management, inline intrusion detection via Suricata, and centralized SIEM telemetry through Wazuh.
 
 **Core objectives:**
-- Deploy and harden a segmented enterprise network with pfSense
-- Simulate adversary TTPs from an isolated Red Team machine
-- Monitor endpoint and network behavior through Wazuh SIEM
-- Validate detection with Suricata IDS/IPS signature testing
-- Practice incident response in a realistic, controlled environment
+
+| Objective | Description |
+|-----------|-------------|
+| 🔒 Network Segmentation | Multi-zone pfSense firewall — Workstation, Servers, DMZ isolation |
+| 🎯 Adversary Simulation | Red Team capability via isolated Kali Linux on the WAN |
+| 📊 SOC Telemetry | Wazuh SIEM collecting logs from all endpoints and network infrastructure |
+| 🚨 Intrusion Detection | Suricata IDS/IPS inline on pfSense for live traffic inspection |
+| 🛡️ Endpoint Hardening | CIS benchmarks, EDR via Kaspersky Security Center, AV integration |
+| 🔁 Incident Response | Realistic alert triage, correlation, and response workflows |
 
 ---
 
 ## 🗺️ Architecture
 
 ```
-╔══════════════════════════════════════════════════════════════════════╗
-║              VMware Workstation Pro 17  ·  Windows 11 Host           ║
-║  ┌─────────────────────────────────────────────────────────────────┐ ║
-║  │                   Proxmox VE 9.1  —  mursad                     │ ║
-║  │                                                                  │ ║
-║  │   [ INTERNET / WAN ]  ◄──  vmbr0  ·  192.168.140.x/24          │ ║
-║  │           │                                                      │ ║
-║  │    ┌──────▼──────────────────────────────────────────────────┐  │ ║
-║  │    │             VM 100  ·  pfSense CE  ·  Firewall           │  │ ║
-║  │    │     vtnet0=WAN  vtnet1=LAN  vtnet2=OPT1  vtnet3=OPT2    │  │ ║
-║  │    │              │               │              │            │  │ ║
-║  │    │           [Suricata IDS/IPS inline]                      │  │ ║
-║  │    └──────┬────────────────────────┬──────────────┬───────────┘  │ ║
-║  │           │                        │              │              │ ║
-║  │     vmbr1 · LAN              vmbr2 · OPT1   vmbr3 · OPT2        │ ║
-║  │     10.22.0.0/24             10.22.7.0/24   192.168.50.0/24      │ ║
-║  │     WORKSTATION              SERVERS        DMZ                  │ ║
-║  │    ┌──────────────┐         ┌──────────┐   ┌──────────────┐     │ ║
-║  │    │  DC · .0.2   │         │  Wazuh   │   │  DMZ Server  │     │ ║
-║  │    │  mursad.local│         │  SIEM    │   │  .50.10      │     │ ║
-║  │    │  IT WS · .0.3│         │  .7.2    │   └──────────────┘     │ ║
-║  │    │  FIN WS · .0.4│        └──────────┘                        │ ║
-║  │    └──────────────┘                                              │ ║
-║  │                                                                  │ ║
-║  │   [ Kali Linux ]  ◄──  WAN/DHCP  ·  External Red Team           │ ║
-║  └─────────────────────────────────────────────────────────────────┘ ║
-╚══════════════════════════════════════════════════════════════════════╝
+╔════════════════════════════════════════════════════════════════════════════╗
+║                  VMware Workstation Pro 17  ·  Windows 11 Host             ║
+║  ┌─────────────────────────────────────────────────────────────────────┐   ║
+║  │                     Proxmox VE 9.1  —  node: mursad                 │   ║
+║  │                                                                      │   ║
+║  │         [ INTERNET ]                                                 │   ║
+║  │              │                                                       │   ║
+║  │         vmbr0 · 192.168.140.x/24  ◄── NAT via VMware                │   ║
+║  │              │                                                       │   ║
+║  │   ┌──────────▼──────────────────────────────────────────────────┐   │   ║
+║  │   │               VM 100  ·  pfSense CE  ·  Firewall             │   │   ║
+║  │   │          ┌──────────────────────────────────────┐            │   │   ║
+║  │   │          │        Suricata IDS/IPS (inline)      │            │   │   ║
+║  │   │          └──────────────────────────────────────┘            │   │   ║
+║  │   │    vtnet0     vtnet1          vtnet2        vtnet3            │   │   ║
+║  │   │     WAN        LAN            OPT1          OPT2             │   │   ║
+║  │   └──────┼──────────┼──────────────┼─────────────┼───────────────┘   │   ║
+║  │          │          │              │             │                    │   ║
+║  │      [ignored]  vmbr1           vmbr2          vmbr3                 │   ║
+║  │               10.22.0.0/24   10.22.7.0/24   192.168.50.0/24          │   ║
+║  │               WORKSTATION      SERVERS           DMZ                 │   ║
+║  │                   │               │               │                  │   ║
+║  │          ┌────────┴──────┐   ┌────┴─────┐   ┌────┴──────┐           │   ║
+║  │          │  DC  10.22.0.2│   │  Wazuh   │   │DMZ Server │           │   ║
+║  │          │  mursad.local │   │  SIEM    │   │192.168.   │           │   ║
+║  │          │  IT  10.22.0.3│   │10.22.7.2 │   │  50.10    │           │   ║
+║  │          │  FIN 10.22.0.4│   └──────────┘   └───────────┘           │   ║
+║  │          └───────────────┘                                           │   ║
+║  │                                                                      │   ║
+║  │   [ Kali Linux ]  ──  WAN/DHCP  ──  External Red Team Attacker      │   ║
+║  └─────────────────────────────────────────────────────────────────────┘   ║
+╚════════════════════════════════════════════════════════════════════════════╝
 ```
 
 ---
@@ -100,23 +122,23 @@ Project Mursad is a fully virtualized, enterprise-grade Security Operations Cent
 ## 🌐 Network Zones
 
 | Zone | Bridge | Subnet | Gateway | Purpose |
-|------|--------|--------|---------|---------|
-| WAN / Management | `vmbr0` | `192.168.140.0/24` | `192.168.140.2` | NAT uplink · Proxmox host access |
-| Workstation | `vmbr1` | `10.22.0.0/24` | `10.22.0.1` | Domain-joined endpoints |
-| Servers | `vmbr2` | `10.22.7.0/24` | `10.22.7.1` | Internal services · Wazuh SIEM |
-| DMZ | `vmbr3` | `192.168.50.0/24` | `192.168.50.1` | Isolated public-facing services |
+|------|:------:|--------|:-------:|---------|
+| 🌍 WAN / Management | `vmbr0` | `192.168.140.0/24` | `192.168.140.2` | NAT uplink · Proxmox host access |
+| 💻 Workstation | `vmbr1` | `10.22.0.0/24` | `10.22.0.1` | Domain-joined endpoints (IT · Finance · DC) |
+| 🖥️ Servers | `vmbr2` | `10.22.7.0/24` | `10.22.7.1` | Internal services · Wazuh SIEM |
+| 🔶 DMZ | `vmbr3` | `192.168.50.0/24` | `192.168.50.1` | Isolated public-facing services |
 
 ---
 
 ## 📡 IP Address Table
 
-| Host | IP | Zone | Role |
-|------|----|------|------|
+| Host | IP Address | Zone | Role |
+|------|:----------:|:----:|------|
 | Proxmox Node | `192.168.140.129` | Management | Hypervisor — Web UI `:8006` |
-| pfSense WAN | `192.168.140.x` (DHCP) | WAN | Internet uplink |
-| pfSense LAN | `10.22.0.1` | Workstation | Default gateway |
-| pfSense OPT1 | `10.22.7.1` | Servers | Servers gateway |
-| pfSense OPT2 | `192.168.50.1` | DMZ | DMZ gateway |
+| pfSense — WAN | `192.168.140.x` (DHCP) | WAN | Internet uplink |
+| pfSense — LAN | `10.22.0.1` | Workstation | Default gateway |
+| pfSense — SERVERS | `10.22.7.1` | Servers | Servers gateway |
+| pfSense — DMZ | `192.168.50.1` | DMZ | DMZ gateway |
 | Windows Server DC | `10.22.0.2` | Workstation | AD · DNS · `mursad.local` |
 | IT Workstation | `10.22.0.3` | Workstation | Domain-joined · Wazuh agent |
 | Finance Workstation | `10.22.0.4` | Workstation | Domain-joined · Wazuh agent |
@@ -129,67 +151,101 @@ Project Mursad is a fully virtualized, enterprise-grade Security Operations Cent
 ## 🧰 Tech Stack
 
 | Component | Role | Version |
-|-----------|------|---------|
-| **Proxmox VE** | Type-1 hypervisor · bridge host | 9.1 |
-| **pfSense CE** | Edge firewall · router · VPN | CE AMD64 |
-| **Suricata** | Inline IDS/IPS via pfSense package | Latest |
-| **Wazuh** | SIEM · XDR · log aggregation | 4.x |
-| **Windows Server 2022** | Active Directory · DNS · AD CS | Eval |
-| **Windows 10 Pro** | Domain endpoints — IT · Finance | Eval |
-| **Kali Linux** | Red Team · penetration testing | Latest |
+|-----------|------|:-------:|
+| <img src="https://img.shields.io/badge/Proxmox_VE-E57000?style=flat-square&logo=proxmox&logoColor=white"/> | Type-1 hypervisor · bridge VLAN host | `9.1` |
+| <img src="https://img.shields.io/badge/pfSense_CE-212121?style=flat-square&logo=pfsense&logoColor=white"/> | Edge firewall · router · VPN gateway | CE AMD64 |
+| <img src="https://img.shields.io/badge/Suricata-EF6C00?style=flat-square&logoColor=white"/> | Inline IDS/IPS via pfSense package | Latest |
+| <img src="https://img.shields.io/badge/Wazuh-6B4CFF?style=flat-square&logoColor=white"/> | SIEM · XDR · log aggregation · alerting | `4.x` |
+| <img src="https://img.shields.io/badge/Windows_Server_2022-0078D4?style=flat-square&logo=microsoft&logoColor=white"/> | Active Directory · DNS · AD CS | Eval |
+| <img src="https://img.shields.io/badge/Windows_10_Pro-0078D4?style=flat-square&logo=microsoft&logoColor=white"/> | Domain endpoints — IT · Finance | Eval |
+| <img src="https://img.shields.io/badge/Kali_Linux-557C94?style=flat-square&logo=kali-linux&logoColor=white"/> | Red Team · penetration testing | Latest |
 
 ---
 
 ## 🗓️ Roadmap
 
-### ▸ Phase 1 — Infrastructure & Perimeter Initialization
-> Establishing the hypervisor environment and securing the network edge.
+<br>
+
+<div align="center">
+
+```
+  PHASE 1          PHASE 2          PHASE 3          PHASE 4
+Infrastructure  ──►  Identity    ──►  Telemetry   ──►  Hardening
+  & Perimeter     & Segmentation  & Detection      & Validation
+  [ COMPLETE ]     [ ACTIVE ]       [ PENDING ]      [ PENDING ]
+```
+
+</div>
+
+<br>
+
+### ◆ Phase 1 — Infrastructure & Perimeter Initialization
+
+> *Establishing the hypervisor environment and securing the network edge.*
 
 | # | Task | Status |
-|---|------|:------:|
-| `[01]` | Project Architecture & Introduction | ✅ |
-| `[02]` | Proxmox Hypervisor Deployment & Bridge VLAN Engineering | ✅ |
-| `[03]` | pfSense Edge Firewall Installation & Baseline Setup | ✅ |
-| `[04]` | Advanced Firewall Routing & Network Configuration | ✅ |
+|:---:|------|:------:|
+| `[01]` | Project Architecture & Introduction | `✅` |
+| `[02]` | Proxmox Hypervisor Deployment & Bridge VLAN Engineering | `✅` |
+| `[03]` | pfSense Edge Firewall Installation & Baseline Setup | `✅` |
+| `[04]` | Advanced Firewall Routing & Network Configuration | `✅` |
 
-### ▸ Phase 2 — Enterprise Identity & Network Segmentation
-> Building the corporate network, managing identities, isolating services.
+<br>
 
-| # | Task | Status |
-|---|------|:------:|
-| `[05]` | Domain Controller Provisioning & Network Integration | ⬜ |
-| `[06]` | Active Directory Domain Installation & Configuration | ⬜ |
-| `[07]` | DMZ Architecture Setup | ⬜ |
-| `[08]` | LAN/DMZ Traffic Isolation & Secure Local DNS Mapping | ⬜ |
+### ◆ Phase 2 — Enterprise Identity & Network Segmentation
 
-### ▸ Phase 3 — SOC Telemetry & Traffic Analysis
-> Deploying the eyes and ears of the network.
+> *Building the corporate network, managing identities, and isolating services.*
 
 | # | Task | Status |
-|---|------|:------:|
-| `[09]` | Suricata IDS/IPS Configuration | ⬜ |
-| `[10]` | Wazuh SIEM Installation · Syslog Ingestion · Agent Rollout | ⬜ |
+|:---:|------|:------:|
+| `[05]` | Domain Controller Provisioning & Network Integration | `🔄` |
+| `[06]` | Active Directory Domain Installation & Configuration | `⬜` |
+| `[07]` | DMZ Architecture Setup | `⬜` |
+| `[08]` | LAN/DMZ Traffic Isolation & Secure Local DNS Mapping | `⬜` |
 
-### ▸ Phase 4 — Endpoint Defense, Hardening & Validation
-> Locking down endpoints and validating detection capability.
+<br>
+
+### ◆ Phase 3 — SOC Telemetry & Traffic Analysis
+
+> *Deploying the eyes and ears of the network.*
 
 | # | Task | Status |
-|---|------|:------:|
-| `[11]` | Antivirus Integration & SIEM Efficiency Testing | ⬜ |
-| `[12]` | Infrastructure Auditing via CIS Benchmarks | ⬜ |
-| `[13]` | Kaspersky Security Center (EDR/AV) Enterprise Setup | ⬜ |
-| `[14]` | Final Security Review & Operations Wrap-Up | ⬜ |
+|:---:|------|:------:|
+| `[09]` | Suricata IDS/IPS Configuration | `⬜` |
+| `[10]` | Wazuh SIEM Installation · Syslog Ingestion · Agent Rollout | `⬜` |
 
-> ✅ Complete · 🔄 In Progress · ⬜ Pending
+<br>
+
+### ◆ Phase 4 — Endpoint Defense, Hardening & Validation
+
+> *Locking down endpoints and validating detection capability.*
+
+| # | Task | Status |
+|:---:|------|:------:|
+| `[11]` | Antivirus Integration & SIEM Efficiency Testing | `⬜` |
+| `[12]` | Infrastructure Auditing via CIS Benchmarks | `⬜` |
+| `[13]` | Kaspersky Security Center (EDR/AV) Enterprise Setup | `⬜` |
+| `[14]` | Final Security Review & Operations Wrap-Up | `⬜` |
+
+<br>
+
+<div align="center">
+
+`✅` Complete &nbsp;·&nbsp; `🔄` In Progress &nbsp;·&nbsp; `⬜` Pending
+
+</div>
 
 ---
 
 ## 📂 Deployment Docs
 
+> Click any phase card below to expand the full step-by-step deployment guide.
+
 ---
 
 <details>
 <summary><b>📘 Phase 1 · [02] — Proxmox Hypervisor Deployment & Bridge VLAN Configuration</b></summary>
+<a name="phase-1--02"></a>
 
 <br>
 
@@ -203,17 +259,17 @@ Project Mursad is a fully virtualized, enterprise-grade Security Operations Cent
 [ VMware Workstation Pro 17 ]
         └── VM: "Project Mursad"  (50 GB · 4 GB RAM · 2 vCPUs)
                 └── Proxmox VE 9.1  —  node: mursad
-                        ├── vmbr0  →  Management / NAT    192.168.140.129/24
-                        ├── vmbr1  →  Workstation Segment  10.22.0.1/24
-                        ├── vmbr2  →  Servers Segment      10.22.7.1/24
-                        └── vmbr3  →  DMZ Zone             192.168.50.1/24
+                        ├── vmbr0  →  Management / NAT     192.168.140.129/24
+                        ├── vmbr1  →  Workstation Segment   10.22.0.1/24
+                        ├── vmbr2  →  Servers Segment       10.22.7.1/24
+                        └── vmbr3  →  DMZ Zone              192.168.50.1/24
 ```
 
 | Part | Section | Description |
-|------|---------|-------------|
-| A | VM Preparation | Define the VMware virtual hardware container |
-| B | Proxmox OS Install | Deploy the hypervisor operating system |
-| C | Web GUI & Network | Engineer the internal SOC bridge network |
+|:----:|---------|-------------|
+| **A** | VM Preparation | Define the VMware virtual hardware container |
+| **B** | Proxmox OS Install | Deploy the hypervisor operating system |
+| **C** | Web GUI & Network | Engineer the internal SOC bridge network |
 
 ---
 
@@ -290,7 +346,7 @@ proxmox-ve_9.1-1.iso
 Review the summary and click **Finish**:
 
 | Resource | Minimum |
-|----------|---------|
+|----------|:-------:|
 | RAM | 4 GB (4096 MB) |
 | CPU Cores | 2 |
 | Disk | 50 GB |
@@ -316,7 +372,7 @@ Install Proxmox VE (Graphical)
 >
 > <img width="1478" height="931" alt="kvm-warning" src="https://github.com/user-attachments/assets/3c189837-43ed-440d-aa27-60ad447042ad" />
 >
-> If you receive a *"No support for hardware-accelerated KVM"* error, verify **"Virtualize AMD-V/RVI"** is enabled under VMware Processor settings. If the issue persists, see the troubleshooting section for the VBS/Credential Guard fix.
+> If you receive a *"No support for hardware-accelerated KVM"* error, verify **"Virtualize AMD-V/RVI"** is enabled under VMware Processor settings. If the issue persists on Windows 11, Credential Guard / VBS may be blocking AMD-V passthrough — run Microsoft's `DG_Readiness_Tool_v3.6.ps1 -Disable` and reboot.
 
 ---
 
@@ -356,7 +412,7 @@ Select:
 
 <img width="1274" height="799" alt="proxmox-password" src="https://github.com/user-attachments/assets/f138431e-6bd9-4fae-be67-b7737c5d0c6c" />
 
-Set a strong root password and provide an email for system alerts.
+Set a strong password for the `root` account and provide an email for system alerts.
 
 ---
 
@@ -380,7 +436,7 @@ Set a strong root password and provide an email for system alerts.
 
 Check **"Automatically reboot after successful installation"** → click **Install**.
 
-After reboot the console displays:
+After reboot, the CLI console displays:
 
 ```
 https://192.168.140.129:8006/
@@ -417,7 +473,7 @@ Navigate to **mursad → System → Network → Create → Linux Bridge**.
 Repeat for each bridge below:
 
 | Bridge | CIDR | Autostart | Comment | Role |
-|--------|------|:---------:|---------|------|
+|:------:|------|:---------:|---------|------|
 | `vmbr0` | `192.168.140.129/24` | ✅ | — | Management / NAT uplink via `nic0` |
 | `vmbr1` | `10.22.0.1/24` | ✅ | `Workstation` | Workstation VLAN segment |
 | `vmbr2` | `10.22.7.1/24` | ✅ | `Servers` | Internal servers segment |
@@ -425,7 +481,7 @@ Repeat for each bridge below:
 
 > ⚠️ `vmbr2` and `vmbr3` will show **Active: No** until a VM is attached — this is expected.
 
-Click **"Apply Configuration"**. The pending diff confirms the changes written to `/etc/network/interfaces`:
+Click **"Apply Configuration"**. The pending diff confirms changes written to `/etc/network/interfaces`:
 
 ```diff
 +auto vmbr2
@@ -451,7 +507,7 @@ Click **"Apply Configuration"**. The pending diff confirms the changes written t
 <img width="1610" height="698" alt="bridges-verify2" src="https://github.com/user-attachments/assets/2b9c6b02-c07e-48db-a001-3a26f7a0ccf3" />
 
 | Bridge | Type | Active | Autostart | CIDR | Comment |
-|--------|------|:------:|:---------:|------|---------|
+|:------:|------|:------:|:---------:|------|---------|
 | `nic0` | Network Device | ✅ | — | — | Physical uplink `enp2s1` |
 | `vmbr0` | Linux Bridge | ✅ | ✅ | `192.168.140.129/24` | Management / NAT |
 | `vmbr1` | Linux Bridge | ✅ | ✅ | `10.22.0.1/24` | Workstation |
@@ -483,7 +539,7 @@ Proxmox Node: mursad
 
 **🟢 Phase Complete**
 
-`[01] Project Architecture` ◄ **You are here: `[02] Proxmox Deployment`** ► `[03] pfSense Edge Firewall`
+`[01] Project Architecture` ◄── **`[02] Proxmox Deployment`** ──► `[03] pfSense Edge Firewall`
 
 <br></div>
 
@@ -493,6 +549,7 @@ Proxmox Node: mursad
 
 <details>
 <summary><b>📗 Phase 1 · [03] — pfSense Edge Firewall Installation & Baseline Setup</b></summary>
+<a name="phase-1--03"></a>
 
 <br>
 
@@ -512,10 +569,10 @@ Proxmox Node: mursad
 ```
 
 | Part | Section | Description |
-|------|---------|-------------|
-| A | VM Provisioning | Create the VM, upload ISO, attach all NICs before first boot |
-| B | OS Installation | Install pfSense CE onto the virtual disk |
-| C | Interface & Routing | Map bridges, assign IPs, enable DHCP |
+|:----:|---------|-------------|
+| **A** | VM Provisioning | Create the VM, upload ISO, attach all NICs before first boot |
+| **B** | OS Installation | Install pfSense CE onto the virtual disk |
+| **C** | Interface & Routing | Map bridges, assign IPs, enable DHCP |
 
 ---
 
@@ -533,7 +590,7 @@ Navigate to [pfsense.org/download](https://www.pfsense.org/download/) and select
 | Architecture | AMD64 (64-bit) |
 | Image Type | **AMD64 ISO IPMI/Virtual Machines** |
 
-> ⚠️ Download arrives as `.gz`. Extract to get the `.iso` before uploading to Proxmox.
+> ⚠️ Download arrives as `.gz`. Extract to obtain the `.iso` before uploading to Proxmox.
 
 ---
 
@@ -647,7 +704,7 @@ Click **"Create VM"** in the top-right corner.
 | Model | `VirtIO (paravirtualized)` |
 | Firewall | Unchecked |
 
-> WAN interface only. Remaining bridges added in Step 12 before first boot.
+> WAN interface only. Remaining bridges are added in Step 12 — **before first boot**.
 
 ---
 
@@ -661,17 +718,15 @@ Review and click **Finish**. Do **not** check "Start after created".
 
 #### Step 12 — Add Remaining Network Interfaces
 
-> ⚠️ **Complete this before first boot.**
->
-> Navigate to **VM 100 → Hardware → Add → Network Device**:
+> ⚠️ **Complete this before first boot.** All four NICs must exist when pfSense first boots so FreeBSD can detect and enumerate them during setup.
+
+Navigate to **VM 100 → Hardware → Add → Network Device**:
 
 | NIC | Bridge | Model |
-|-----|--------|-------|
+|:---:|:------:|:-----:|
 | net1 | `vmbr1` | VirtIO |
 | net2 | `vmbr2` | VirtIO |
 | net3 | `vmbr3` | VirtIO |
-
-All four interfaces must be present before pfSense boots so they are detected and assignable during setup.
 
 ---
 
@@ -706,7 +761,7 @@ Select **Install pfSense** from the welcome menu.
 
 <img width="1812" height="1009" alt="pfsense-zfs" src="https://github.com/user-attachments/assets/a9cf0420-c040-4159-8c74-597dd4eaaf26" />
 
-Select **Auto (ZFS)**. Provides data integrity, snapshot support, and is ideal for firewall appliances. Accept defaults and select the virtual disk when prompted.
+Select **Auto (ZFS)** — provides data integrity, snapshot support, and is ideal for firewall appliances. Accept defaults and select the virtual disk when prompted.
 
 ---
 
@@ -720,7 +775,7 @@ Select **Auto (ZFS)**. Provides data integrity, snapshot support, and is ideal f
 Should VLANs be set up now? [y/n]  →  n
 ```
 
-Segmentation is handled by separate Proxmox bridges — VLANs not required.
+Segmentation is handled by separate Proxmox bridges — VLANs are not required.
 
 ---
 
@@ -732,7 +787,7 @@ Segmentation is handled by separate Proxmox bridges — VLANs not required.
 <img width="1832" height="1005" alt="pfsense-assign4" src="https://github.com/user-attachments/assets/c4499423-f730-413b-853a-7d0d643d47d1" />
 
 | Prompt | Input | Maps To |
-|--------|-------|---------|
+|--------|:-----:|---------|
 | WAN interface | `vtnet0` | `vmbr0` — Internet |
 | LAN interface | `vtnet1` | `vmbr1` — Workstation |
 | OPT1 interface | `vtnet2` | `vmbr2` — Servers |
@@ -823,7 +878,7 @@ https://10.22.0.1
 ### Interface Summary
 
 | pfSense | vtnet | Bridge | IP | Zone |
-|---------|-------|--------|----|------|
+|:-------:|:-----:|:------:|:--:|:----:|
 | WAN | vtnet0 | vmbr0 | DHCP `192.168.140.x` | Internet |
 | LAN | vtnet1 | vmbr1 | `10.22.0.1/24` | Workstation |
 | OPT1 | vtnet2 | vmbr2 | `10.22.7.1/24` | Servers *(configured in `[04]`)* |
@@ -834,7 +889,7 @@ https://10.22.0.1
 ### ✅ Phase Checklist
 
 - [ ] pfSense CE ISO uploaded to Proxmox local storage
-- [ ] VM 100 created — CPU type set to `host`, machine `i440fx`
+- [ ] VM 100 created — CPU type `host`, machine `i440fx`
 - [ ] All 4 NICs attached (vmbr0–vmbr3) **before first boot**
 - [ ] pfSense installed with Auto (ZFS) partitioning
 - [ ] Interfaces assigned: vtnet0=WAN · vtnet1=LAN · vtnet2=OPT1 · vtnet3=OPT2
@@ -847,7 +902,7 @@ https://10.22.0.1
 
 **🟢 Phase Complete**
 
-`[02] Proxmox Deployment` ◄ **You are here: `[03] pfSense Installation`** ► `[04] Advanced Firewall Routing`
+`[02] Proxmox Deployment` ◄── **`[03] pfSense Installation`** ──► `[04] Advanced Firewall Routing`
 
 <br></div>
 
@@ -857,10 +912,11 @@ https://10.22.0.1
 
 <details>
 <summary><b>📙 Phase 1 · [04] — Advanced Firewall Routing & Network Configuration</b></summary>
+<a name="phase-1--04"></a>
 
 <br>
 
-> **Scope:** Accessing the pfSense WebConfigurator for the first time, completing the setup wizard, provisioning the **Servers** and **DMZ** interfaces, and laying down the baseline firewall ruleset that allows inter-zone routing across the Mursad SOC network.
+> **Scope:** Accessing the pfSense WebConfigurator for the first time, completing the setup wizard, provisioning the **Servers** and **DMZ** interfaces, and establishing the baseline firewall ruleset that enables inter-zone routing across the Mursad SOC network.
 
 ---
 
@@ -873,53 +929,47 @@ pfSense WebConfigurator  ·  https://10.22.0.1
 │               Hostname · DNS · Timezone · WAN config · Admin password
 │
 ├── Part B  ─►  Interface Provisioning
-│               OPT1 → SERVERS  (10.22.7.1/24)
-│               OPT2 → DMZ      (192.168.50.1/24)
+│               OPT1  ──►  SERVERS   10.22.7.1/24
+│               OPT2  ──►  DMZ       192.168.50.1/24
 │
 └── Part C  ─►  Baseline Firewall Rules
-                LAN     → Any  (pre-existing default)
-                SERVERS → Any  (new outbound pass rule)
-                DMZ     → Any  (new outbound pass rule)
+                LAN     → Any   (pre-existing default)
+                SERVERS → Any   (new outbound pass rule)
+                DMZ     → Any   (new outbound pass rule)
 ```
 
 | Part | Section | Description |
-|------|---------|-------------|
-| A | Setup Wizard | Configure hostname, timezone, WAN, and admin credentials |
-| B | Interface Provisioning | Activate and address the Servers and DMZ interfaces |
-| C | Baseline Firewall Rules | Allow outbound traffic from each zone |
+|:----:|---------|-------------|
+| **A** | Setup Wizard | Configure hostname, timezone, WAN, and admin credentials |
+| **B** | Interface Provisioning | Activate and address the Servers and DMZ interfaces |
+| **C** | Baseline Firewall Rules | Allow outbound traffic from each zone |
 
 ---
 
 ### Part A — pfSense Initial Setup Wizard
 
-> *Completing the first-boot configuration from a machine on the Workstation LAN (`10.22.0.0/24`).*
-
 #### Step 1 — Access the WebConfigurator
 
-<img width="1448" height="406" alt="1" src="https://github.com/user-attachments/assets/59e419b0-4878-4c6d-bba2-178135d104d8" />
+**🖼️ [ Image 1 ]**
 
-
-From a machine on the Workstation segment, open a browser and navigate to:
+From a machine on the Workstation segment, navigate to:
 
 ```
 https://10.22.0.1
 ```
-
-Log in with the default credentials:
 
 | Field | Value |
 |-------|-------|
 | Username | `admin` |
 | Password | `pfsense` |
 
-> ⚠️ Accept the self-signed certificate warning — HTTPS is required and the cert has not yet been replaced.
+> ⚠️ Accept the self-signed certificate warning — HTTPS is required and no cert has been issued yet.
 
 ---
 
 #### Step 2 — Welcome to the Setup Wizard
 
-<img width="1237" height="631" alt="2" src="https://github.com/user-attachments/assets/62599dc7-dc3d-4ae9-a034-8a58c31023b4" />
-
+**🖼️ [ Image 2 ]**
 
 The pfSense Setup Wizard launches automatically on first login. Click **Next** to begin.
 
@@ -927,24 +977,22 @@ The pfSense Setup Wizard launches automatically on first login. Click **Next** t
 
 #### Step 3 — Netgate Global Support
 
-<img width="647" height="287" alt="3" src="https://github.com/user-attachments/assets/b6d7ce8b-539b-4aaa-84b2-94f4c82ce337" />
+**🖼️ [ Image 3 ]**
 
-
-Acknowledge the Netgate Global Support information screen. Click **Next** to continue.
+Acknowledge the Netgate Global Support information screen. Click **Next**.
 
 ---
 
 #### Step 4 — General Information
 
-<img width="1008" height="438" alt="4" src="https://github.com/user-attachments/assets/fb73aae2-97e8-4dde-b0dc-388456447d3f" />
-
+**🖼️ [ Image 4 ]**
 
 | Field | Value |
 |-------|-------|
 | Hostname | `firewall` |
 | Domain | `mursad.me` |
-| Primary DNS | `1.1.1.1` *(or leave blank to inherit from WAN gateway)* |
-| Secondary DNS | `8.8.8.8` *(optional)* |
+| Primary DNS | `1.1.1.1` |
+| Secondary DNS | `8.8.8.8` |
 | Override DNS | ✅ Checked |
 
 Click **Next**.
@@ -953,15 +1001,14 @@ Click **Next**.
 
 #### Step 5 — Time Server
 
-<img width="1912" height="936" alt="5" src="https://github.com/user-attachments/assets/f684ab28-3196-4ff3-a4bb-1d7178d8dfc4" />
-
+**🖼️ [ Image 5 ]**
 
 | Field | Value |
 |-------|-------|
 | Time Server | `0.pfsense.pool.ntp.org` *(default)* |
 | Timezone | `Asia/Bahrain` |
 
-> ⚠️ Accurate timezone is critical — all Wazuh SIEM alerts, Suricata logs, and firewall events will be timestamped from this setting. Misaligned clocks cause correlation failures.
+> ⚠️ **Critical for SIEM accuracy.** All Wazuh alerts, Suricata events, and firewall logs will be timestamped from this setting. Misaligned clocks break log correlation across hosts.
 
 Click **Next**.
 
@@ -969,16 +1016,15 @@ Click **Next**.
 
 #### Step 6 — Configure WAN Interface
 
-<img width="1171" height="570" alt="6" src="https://github.com/user-attachments/assets/a1c8bdd0-4c7d-491d-a38e-28746213b12a" />
-
+**🖼️ [ Image 6 ]**
 
 | Field | Value |
 |-------|-------|
-| SelectedType | DHCP *(leave as-is)* |
-| Block RFC1918 Private Networks | ❌ **Uncheck this** |
+| Selected Type | DHCP *(leave as-is)* |
+| **Block RFC1918 Private Networks** | ❌ **Uncheck this** |
 | Block Bogon Networks | ✅ Leave checked |
 
-> ⚠️ **Critical:** You must uncheck **"Block RFC1918 Private Networks"**. Since the WAN interface is receiving a private IP from the Proxmox NAT (`192.168.140.x`), leaving this enabled will drop all upstream traffic — the firewall will appear to have no internet access.
+> ⚠️ **Critical:** You must uncheck **"Block RFC1918 Private Networks"**. The WAN interface is receiving a private IP from the Proxmox NAT (`192.168.140.x`). With this option enabled, pfSense drops all upstream traffic and the firewall will appear to have no internet access.
 
 Click **Next**.
 
@@ -986,9 +1032,9 @@ Click **Next**.
 
 #### Step 7 — Configure LAN Interface
 
-<img width="1167" height="917" alt="7" src="https://github.com/user-attachments/assets/b1359320-fc95-44c6-83e6-2e192ca7e579" />
+**🖼️ [ Image 7 ]**
 
-Verify the LAN parameters are correct — no changes should be needed:
+Verify — no changes required:
 
 | Field | Value |
 |-------|-------|
@@ -1001,12 +1047,11 @@ Click **Next**.
 
 #### Step 8 — Set Admin Password
 
-<img width="1209" height="595" alt="8" src="https://github.com/user-attachments/assets/06eed94f-2984-4c72-ab4f-c0338d036f56" />
+**🖼️ [ Image 8 ]**
 
+Replace the default `pfsense` password with a strong, unique credential for the `admin` account.
 
-Replace the default `pfsense` password with a strong, unique password for the `admin` account.
-
-> 🔐 Store this securely — it controls full firewall access. Do not reuse it across other lab machines.
+> 🔐 This controls full firewall access. Store it securely and do not reuse it across other lab machines.
 
 Click **Next**.
 
@@ -1014,53 +1059,48 @@ Click **Next**.
 
 #### Step 9 — Reload & Apply
 
-<img width="1203" height="580" alt="9" src="https://github.com/user-attachments/assets/4ce887df-4363-4e1a-b4fa-dfac363100f8" />
+**🖼️ [ Image 9 ]**
 
-
-Click **Reload** to apply the new configuration and restart the WebConfigurator service. The browser will reconnect automatically within a few seconds.
+Click **Reload** to apply the new configuration and restart the WebConfigurator service. The browser will reconnect within a few seconds.
 
 ---
 
 #### Step 10 — Wizard Complete
 
-<img width="1216" height="665" alt="10" src="https://github.com/user-attachments/assets/4755e993-466f-475f-b34a-8ceb93739bf3" />
+**🖼️ [ Image 10 ]**
 
-
-Click **Finish** to close the wizard and land on the pfSense Dashboard. Acknowledge any copyright or telemetry screens that appear.
+Click **Finish** to land on the pfSense Dashboard. Acknowledge any copyright or telemetry screens.
 
 ```
-Dashboard  →  Services are running  ✅
-WAN        →  192.168.140.x/24      ✅
-LAN        →  10.22.0.1/24          ✅
+Dashboard  →  All services running   ✅
+WAN        →  192.168.140.x/24       ✅
+LAN        →  10.22.0.1/24           ✅
 ```
 
 ---
 
 ### Part B — Interface Provisioning (Servers & DMZ)
 
-> *OPT1 and OPT2 exist as raw ports — they must be enabled and addressed before pfSense will route any traffic through them.*
+> *OPT1 and OPT2 exist as detected ports but are unconfigured — they must be enabled and assigned static IPs before pfSense will route any traffic through them.*
 
 #### Step 11 — Open Interface Assignments
 
+**🖼️ [ Image 11 ]**
 
-<img width="1184" height="652" alt="11" src="https://github.com/user-attachments/assets/504929c0-1ec1-4be5-abe8-8306e68fee35" />
-
-
-Navigate to **Interfaces → Assignments** from the top navigation bar. You will see all four detected ports listed:
+Navigate to **Interfaces → Assignments**. Current state:
 
 ```
-WAN    →  vtnet0   (active)
-LAN    →  vtnet1   (active)
-OPT1   →  vtnet2   (unconfigured)
-OPT2   →  vtnet3   (unconfigured)
+WAN    →  vtnet0   ✅ Active
+LAN    →  vtnet1   ✅ Active
+OPT1   →  vtnet2   ⚠️  Unconfigured
+OPT2   →  vtnet3   ⚠️  Unconfigured
 ```
 
 ---
 
 #### Step 12 — Open OPT1
 
-<img width="1175" height="685" alt="12" src="https://github.com/user-attachments/assets/59f27fb5-6d05-458e-a88b-a736cfa38f48" />
-
+**🖼️ [ Image 12 ]**
 
 Click **OPT1** to open its configuration page.
 
@@ -1068,8 +1108,7 @@ Click **OPT1** to open its configuration page.
 
 #### Step 13 — Enable & Describe OPT1
 
-<img width="1178" height="805" alt="13" src="https://github.com/user-attachments/assets/3092694d-b02c-4462-8cee-fddb4146c6c6" />
-
+**🖼️ [ Image 13 ]**
 
 | Field | Value |
 |-------|-------|
@@ -1081,8 +1120,7 @@ Click **OPT1** to open its configuration page.
 
 #### Step 14 — Assign Servers IP
 
-<img width="1196" height="386" alt="14" src="https://github.com/user-attachments/assets/212ded78-3904-4307-98ba-26999d7e7ea6" />
-
+**🖼️ [ Image 14 ]**
 
 Scroll to **Static IPv4 Configuration**:
 
@@ -1101,8 +1139,7 @@ SERVERS (vtnet2)  →  10.22.7.1/24  ✅
 
 #### Step 15 — Open OPT2
 
-<img width="1155" height="243" alt="15" src="https://github.com/user-attachments/assets/5fee7404-f4c4-4cf6-a37b-7f3c281d921e" />
-
+**🖼️ [ Image 15 ]**
 
 Navigate back to **Interfaces → Assignments** and click **OPT2**.
 
@@ -1110,7 +1147,7 @@ Navigate back to **Interfaces → Assignments** and click **OPT2**.
 
 #### Step 16 — Enable & Describe OPT2
 
-<img width="1164" height="289" alt="16" src="https://github.com/user-attachments/assets/c22d988a-afa6-4333-a2c6-3be94e0fe2d7" />
+**🖼️ [ Image 16 ]**
 
 | Field | Value |
 |-------|-------|
@@ -1122,7 +1159,7 @@ Navigate back to **Interfaces → Assignments** and click **OPT2**.
 
 #### Step 17 — Assign DMZ IP
 
-<img width="1183" height="937" alt="17" src="https://github.com/user-attachments/assets/ebd9aca2-0f78-492b-b70d-95424ec145e9" />
+**🖼️ [ Image 17 ]**
 
 Scroll to **Static IPv4 Configuration**:
 
@@ -1144,7 +1181,7 @@ DMZ (vtnet3)  →  192.168.50.1/24  ✅
 All four pfSense interfaces are now fully provisioned:
 
 | Interface | vtnet | Bridge | IP | Status |
-|-----------|-------|--------|----|--------|
+|:---------:|:-----:|:------:|:--:|:------:|
 | WAN | vtnet0 | vmbr0 | DHCP `192.168.140.x` | ✅ Active |
 | LAN | vtnet1 | vmbr1 | `10.22.0.1/24` | ✅ Active |
 | SERVERS | vtnet2 | vmbr2 | `10.22.7.1/24` | ✅ Active |
@@ -1154,34 +1191,32 @@ All four pfSense interfaces are now fully provisioned:
 
 ### Part C — Baseline Firewall Rules
 
-> *By default pfSense blocks all inbound traffic on new interfaces. These rules open outbound access from each zone so VMs can reach the internet and receive updates. Strict inter-zone isolation will be enforced in `[08]`.*
+> *By default, pfSense blocks all traffic on new interfaces. These rules open outbound internet access from each zone so VMs can receive updates and reach external resources. Strict inter-zone isolation is deferred to `[08]`.*
 
 #### Step 18 — Inspect LAN Rules
 
-<img width="1174" height="544" alt="18" src="https://github.com/user-attachments/assets/6a055503-06cb-4a34-b751-f989c9f5041d" />
+**🖼️ [ Image 18 ]**
 
-Navigate to **Firewall → Rules → LAN**.
-
-pfSense ships with two default rules on LAN — no changes required:
+Navigate to **Firewall → Rules → LAN**. No changes required — pfSense ships with:
 
 | Rule | Purpose |
 |------|---------|
-| Anti-Lockout Rule | Ensures the admin can always reach the WebConfigurator |
+| Anti-Lockout Rule | Guarantees admin can always reach the WebConfigurator |
 | Allow LAN to any | Permits all outbound traffic from the Workstation segment |
 
 ---
 
 #### Step 19 — Open SERVERS Rules Tab
 
-<img width="1166" height="676" alt="19" src="https://github.com/user-attachments/assets/9ba644cc-c5ac-4e1d-aa11-ba356ad39e7d" />
+**🖼️ [ Image 19 ]**
 
-Click the **SERVERS** tab. The ruleset is empty — all traffic from this zone is currently blocked. Click **Add ↑** (add at top) to create a new rule.
+Click the **SERVERS** tab. Ruleset is empty — all zone traffic currently blocked. Click **Add ↑** (add at top).
 
 ---
 
 #### Step 20 — Create SERVERS Outbound Rule
 
-<img width="1197" height="756" alt="20" src="https://github.com/user-attachments/assets/09caaa58-2bc7-4060-977f-b83aaeff5a60" />
+**🖼️ [ Image 20 ]**
 
 | Field | Value |
 |-------|-------|
@@ -1199,15 +1234,15 @@ Click **Save**.
 
 #### Step 21 — Open DMZ Rules Tab
 
-<img width="1158" height="786" alt="21" src="https://github.com/user-attachments/assets/30f6762f-a450-4dbb-891e-9a78432ea4c9" />
+**🖼️ [ Image 21 ]**
 
-Click the **DMZ** tab — also empty by default. Click **Add ↑** to create a new rule.
+Click the **DMZ** tab — also empty. Click **Add ↑** to create a new rule.
 
 ---
 
 #### Step 22 — Create DMZ Outbound Rule & Apply
 
-<img width="1908" height="931" alt="22" src="https://github.com/user-attachments/assets/f70f0eec-505b-4e9e-b738-b3b7567f9c29" />
+**🖼️ [ Image 22 ]**
 
 | Field | Value |
 |-------|-------|
@@ -1219,22 +1254,22 @@ Click the **DMZ** tab — also empty by default. Click **Add ↑** to create a n
 | Destination | Any |
 | Description | `Allow DMZ outbound` |
 
-Click **Save** → click the green **Apply Changes** banner at the top to commit the full firewall state.
+Click **Save** → click the green **Apply Changes** banner to commit the full firewall state.
 
 ---
 
 #### Final Firewall Rule Summary
 
 | Zone | Rule | Direction | Result |
-|------|------|-----------|--------|
+|:----:|------|:---------:|:------:|
 | LAN | Allow LAN → any | Outbound | ✅ Internet access |
 | SERVERS | Allow SERVERS → any | Outbound | ✅ Internet access |
 | DMZ | Allow DMZ → any | Outbound | ✅ Internet access |
-| LAN ↔ SERVERS | *(none yet)* | Inter-zone | 🔒 Blocked — configured in `[08]` |
-| LAN ↔ DMZ | *(none yet)* | Inter-zone | 🔒 Blocked — configured in `[08]` |
-| SERVERS ↔ DMZ | *(none yet)* | Inter-zone | 🔒 Blocked — configured in `[08]` |
+| LAN ↔ SERVERS | *(none yet)* | Inter-zone | 🔒 Blocked |
+| LAN ↔ DMZ | *(none yet)* | Inter-zone | 🔒 Blocked |
+| SERVERS ↔ DMZ | *(none yet)* | Inter-zone | 🔒 Blocked |
 
-> ℹ️ Inter-zone rules are intentionally deferred to `[08] LAN/DMZ Traffic Isolation`. Zones can reach the internet but cannot reach each other — this is the correct security baseline.
+> ℹ️ Inter-zone rules are intentionally deferred to `[08] LAN/DMZ Traffic Isolation`. Each zone can reach the internet but not each other — this is the correct security baseline before identity and segmentation is built in Phase 2.
 
 ---
 
@@ -1242,20 +1277,20 @@ Click **Save** → click the green **Apply Changes** banner at the top to commit
 
 - [ ] Setup Wizard completed — hostname `firewall`, domain `mursad.me`
 - [ ] Timezone set to `Asia/Bahrain`
-- [ ] WAN RFC1918 blocking **unchecked** — upstream traffic flows correctly
+- [ ] WAN RFC1918 blocking **unchecked** — upstream traffic flows
 - [ ] Admin password changed from default
 - [ ] OPT1 enabled as `SERVERS` — `10.22.7.1/24`
 - [ ] OPT2 enabled as `DMZ` — `192.168.50.1/24`
 - [ ] SERVERS outbound pass rule created and applied
 - [ ] DMZ outbound pass rule created and applied
-- [ ] All four zones can reach the internet
-- [ ] Inter-zone traffic remains blocked pending `[08]`
+- [ ] All four zones reach the internet
+- [ ] Inter-zone traffic blocked pending `[08]`
 
 <div align="center"><br>
 
 **🟢 Phase 1 Complete**
 
-`[03] pfSense Installation` ◄ **You are here: `[04] Advanced Firewall Routing`** ► `[05] Domain Controller Provisioning`
+`[03] pfSense Installation` ◄── **`[04] Advanced Firewall Routing`** ──► `[05] Domain Controller Provisioning`
 
 <br></div>
 
@@ -1268,22 +1303,22 @@ Click **Save** → click the green **Apply Changes** banner at the top to commit
 ```
 Project-Mursad/
 │
-├── 📂 assets/                  # Screenshots, diagrams, topology SVG
+├── 📂 assets/                   # Screenshots, diagrams, topology SVG
 │   ├── mursad-topology.svg
-│   └── phase1-*/
+│   └── phase*/
 │
-├── 📂 configs/                 # Exported configs and rule sets
+├── 📂 configs/                  # Exported configs and rule sets
 │   ├── pfsense-config.xml
 │   ├── suricata-rules/
 │   └── wazuh-rules/
 │
-├── 📂 docs/                    # Phase-by-phase deployment guides
+├── 📂 docs/                     # Phase-by-phase deployment guides
 │   ├── phase1-02-proxmox.md
 │   ├── phase1-03-pfsense.md
 │   ├── phase1-04-routing.md
 │   └── ...
 │
-├── 📂 scripts/                 # Automation scripts
+├── 📂 scripts/                  # Automation scripts
 │   ├── ad-provisioning.ps1
 │   ├── wazuh-agent-deploy.sh
 │   └── cis-audit.sh
@@ -1302,18 +1337,6 @@ This project is built strictly for **educational purposes** and authorized secur
 
 <div align="center">
 
-<br>
-
-*Built to understand the attack. Designed to defend against it.*
-
-<br>
-
-[![GitHub](https://img.shields.io/badge/github-0xcgz%2FProject--Mursad-181717?style=for-the-badge&logo=github)](https://github.com/0xcgz/Project-Mursad)
-
-<br>
-
-```
-[ ! ] DEPLOYMENT IN PROGRESS...
-```
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0f3460,50:16213e,100:1a1a2e&height=120&section=footer&text=Built%20to%20understand%20the%20attack.%20Designed%20to%20defend%20against%20it.&fontSize=14&fontColor=a8b2d8&fontAlignY=65&animation=fadeIn" width="100%"/>
 
 </div>
