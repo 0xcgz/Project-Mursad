@@ -21,8 +21,8 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Status-DEPLOYMENT%20IN%20PROGRESS-orange?style=flat-square"/>
-  <img src="https://img.shields.io/badge/Phase-1%20of%204-blue?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Status-Phase%201%20Complete-brightgreen?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Next-Phase%202%20%C2%B7%20Identity%20%26%20Segmentation-blue?style=flat-square"/>
   <img src="https://img.shields.io/badge/Platform-Proxmox%20VE%209.1-E57000?style=flat-square"/>
   <img src="https://img.shields.io/badge/Domain-mursad.local-grey?style=flat-square"/>
 </p>
@@ -150,7 +150,7 @@ Project Mursad is a fully virtualized, enterprise-grade Security Operations Cent
 | `[01]` | Project Architecture & Introduction | ✅ |
 | `[02]` | Proxmox Hypervisor Deployment & Bridge VLAN Engineering | ✅ |
 | `[03]` | pfSense Edge Firewall Installation & Baseline Setup | ✅ |
-| `[04]` | Advanced Firewall Routing & Network Configuration | 🔄 |
+| `[04]` | Advanced Firewall Routing & Network Configuration | ✅ |
 
 ### ▸ Phase 2 — Enterprise Identity & Network Segmentation
 > Building the corporate network, managing identities, isolating services.
@@ -848,6 +848,414 @@ https://10.22.0.1
 **🟢 Phase Complete**
 
 `[02] Proxmox Deployment` ◄ **You are here: `[03] pfSense Installation`** ► `[04] Advanced Firewall Routing`
+
+<br></div>
+
+</details>
+
+---
+
+<details>
+<summary><b>📙 Phase 1 · [04] — Advanced Firewall Routing & Network Configuration</b></summary>
+
+<br>
+
+> **Scope:** Accessing the pfSense WebConfigurator for the first time, completing the setup wizard, provisioning the **Servers** and **DMZ** interfaces, and laying down the baseline firewall ruleset that allows inter-zone routing across the Mursad SOC network.
+
+---
+
+### Overview
+
+```
+pfSense WebConfigurator  ·  https://10.22.0.1
+│
+├── Part A  ─►  Initial Setup Wizard
+│               Hostname · DNS · Timezone · WAN config · Admin password
+│
+├── Part B  ─►  Interface Provisioning
+│               OPT1 → SERVERS  (10.22.7.1/24)
+│               OPT2 → DMZ      (192.168.50.1/24)
+│
+└── Part C  ─►  Baseline Firewall Rules
+                LAN     → Any  (pre-existing default)
+                SERVERS → Any  (new outbound pass rule)
+                DMZ     → Any  (new outbound pass rule)
+```
+
+| Part | Section | Description |
+|------|---------|-------------|
+| A | Setup Wizard | Configure hostname, timezone, WAN, and admin credentials |
+| B | Interface Provisioning | Activate and address the Servers and DMZ interfaces |
+| C | Baseline Firewall Rules | Allow outbound traffic from each zone |
+
+---
+
+### Part A — pfSense Initial Setup Wizard
+
+> *Completing the first-boot configuration from a machine on the Workstation LAN (`10.22.0.0/24`).*
+
+#### Step 1 — Access the WebConfigurator
+
+<img width="1448" height="406" alt="1" src="https://github.com/user-attachments/assets/59e419b0-4878-4c6d-bba2-178135d104d8" />
+
+
+From a machine on the Workstation segment, open a browser and navigate to:
+
+```
+https://10.22.0.1
+```
+
+Log in with the default credentials:
+
+| Field | Value |
+|-------|-------|
+| Username | `admin` |
+| Password | `pfsense` |
+
+> ⚠️ Accept the self-signed certificate warning — HTTPS is required and the cert has not yet been replaced.
+
+---
+
+#### Step 2 — Welcome to the Setup Wizard
+
+<img width="1237" height="631" alt="2" src="https://github.com/user-attachments/assets/62599dc7-dc3d-4ae9-a034-8a58c31023b4" />
+
+
+The pfSense Setup Wizard launches automatically on first login. Click **Next** to begin.
+
+---
+
+#### Step 3 — Netgate Global Support
+
+<img width="647" height="287" alt="3" src="https://github.com/user-attachments/assets/b6d7ce8b-539b-4aaa-84b2-94f4c82ce337" />
+
+
+Acknowledge the Netgate Global Support information screen. Click **Next** to continue.
+
+---
+
+#### Step 4 — General Information
+
+<img width="1008" height="438" alt="4" src="https://github.com/user-attachments/assets/fb73aae2-97e8-4dde-b0dc-388456447d3f" />
+
+
+| Field | Value |
+|-------|-------|
+| Hostname | `firewall` |
+| Domain | `mursad.me` |
+| Primary DNS | `1.1.1.1` *(or leave blank to inherit from WAN gateway)* |
+| Secondary DNS | `8.8.8.8` *(optional)* |
+| Override DNS | ✅ Checked |
+
+Click **Next**.
+
+---
+
+#### Step 5 — Time Server
+
+<img width="1912" height="936" alt="5" src="https://github.com/user-attachments/assets/f684ab28-3196-4ff3-a4bb-1d7178d8dfc4" />
+
+
+| Field | Value |
+|-------|-------|
+| Time Server | `0.pfsense.pool.ntp.org` *(default)* |
+| Timezone | `Asia/Bahrain` |
+
+> ⚠️ Accurate timezone is critical — all Wazuh SIEM alerts, Suricata logs, and firewall events will be timestamped from this setting. Misaligned clocks cause correlation failures.
+
+Click **Next**.
+
+---
+
+#### Step 6 — Configure WAN Interface
+
+<img width="1171" height="570" alt="6" src="https://github.com/user-attachments/assets/a1c8bdd0-4c7d-491d-a38e-28746213b12a" />
+
+
+| Field | Value |
+|-------|-------|
+| SelectedType | DHCP *(leave as-is)* |
+| Block RFC1918 Private Networks | ❌ **Uncheck this** |
+| Block Bogon Networks | ✅ Leave checked |
+
+> ⚠️ **Critical:** You must uncheck **"Block RFC1918 Private Networks"**. Since the WAN interface is receiving a private IP from the Proxmox NAT (`192.168.140.x`), leaving this enabled will drop all upstream traffic — the firewall will appear to have no internet access.
+
+Click **Next**.
+
+---
+
+#### Step 7 — Configure LAN Interface
+
+<img width="1167" height="917" alt="7" src="https://github.com/user-attachments/assets/b1359320-fc95-44c6-83e6-2e192ca7e579" />
+
+Verify the LAN parameters are correct — no changes should be needed:
+
+| Field | Value |
+|-------|-------|
+| LAN IP Address | `10.22.0.1` |
+| Subnet Mask | `24` |
+
+Click **Next**.
+
+---
+
+#### Step 8 — Set Admin Password
+
+<img width="1209" height="595" alt="8" src="https://github.com/user-attachments/assets/06eed94f-2984-4c72-ab4f-c0338d036f56" />
+
+
+Replace the default `pfsense` password with a strong, unique password for the `admin` account.
+
+> 🔐 Store this securely — it controls full firewall access. Do not reuse it across other lab machines.
+
+Click **Next**.
+
+---
+
+#### Step 9 — Reload & Apply
+
+<img width="1203" height="580" alt="9" src="https://github.com/user-attachments/assets/4ce887df-4363-4e1a-b4fa-dfac363100f8" />
+
+
+Click **Reload** to apply the new configuration and restart the WebConfigurator service. The browser will reconnect automatically within a few seconds.
+
+---
+
+#### Step 10 — Wizard Complete
+
+<img width="1216" height="665" alt="10" src="https://github.com/user-attachments/assets/4755e993-466f-475f-b34a-8ceb93739bf3" />
+
+
+Click **Finish** to close the wizard and land on the pfSense Dashboard. Acknowledge any copyright or telemetry screens that appear.
+
+```
+Dashboard  →  Services are running  ✅
+WAN        →  192.168.140.x/24      ✅
+LAN        →  10.22.0.1/24          ✅
+```
+
+---
+
+### Part B — Interface Provisioning (Servers & DMZ)
+
+> *OPT1 and OPT2 exist as raw ports — they must be enabled and addressed before pfSense will route any traffic through them.*
+
+#### Step 11 — Open Interface Assignments
+
+
+<img width="1184" height="652" alt="11" src="https://github.com/user-attachments/assets/504929c0-1ec1-4be5-abe8-8306e68fee35" />
+
+
+Navigate to **Interfaces → Assignments** from the top navigation bar. You will see all four detected ports listed:
+
+```
+WAN    →  vtnet0   (active)
+LAN    →  vtnet1   (active)
+OPT1   →  vtnet2   (unconfigured)
+OPT2   →  vtnet3   (unconfigured)
+```
+
+---
+
+#### Step 12 — Open OPT1
+
+<img width="1175" height="685" alt="12" src="https://github.com/user-attachments/assets/59f27fb5-6d05-458e-a88b-a736cfa38f48" />
+
+
+Click **OPT1** to open its configuration page.
+
+---
+
+#### Step 13 — Enable & Describe OPT1
+
+<img width="1178" height="805" alt="13" src="https://github.com/user-attachments/assets/3092694d-b02c-4462-8cee-fddb4146c6c6" />
+
+
+| Field | Value |
+|-------|-------|
+| Enable Interface | ✅ Checked |
+| Description | `SERVERS` |
+| IPv4 Configuration Type | Static IPv4 |
+
+---
+
+#### Step 14 — Assign Servers IP
+
+<img width="1196" height="386" alt="14" src="https://github.com/user-attachments/assets/212ded78-3904-4307-98ba-26999d7e7ea6" />
+
+
+Scroll to **Static IPv4 Configuration**:
+
+| Field | Value |
+|-------|-------|
+| IPv4 Address | `10.22.7.1` |
+| Subnet | `/24` |
+
+Click **Save** → **Apply Changes**.
+
+```
+SERVERS (vtnet2)  →  10.22.7.1/24  ✅
+```
+
+---
+
+#### Step 15 — Open OPT2
+
+<img width="1155" height="243" alt="15" src="https://github.com/user-attachments/assets/5fee7404-f4c4-4cf6-a37b-7f3c281d921e" />
+
+
+Navigate back to **Interfaces → Assignments** and click **OPT2**.
+
+---
+
+#### Step 16 — Enable & Describe OPT2
+
+<img width="1164" height="289" alt="16" src="https://github.com/user-attachments/assets/c22d988a-afa6-4333-a2c6-3be94e0fe2d7" />
+
+| Field | Value |
+|-------|-------|
+| Enable Interface | ✅ Checked |
+| Description | `DMZ` |
+| IPv4 Configuration Type | Static IPv4 |
+
+---
+
+#### Step 17 — Assign DMZ IP
+
+<img width="1183" height="937" alt="17" src="https://github.com/user-attachments/assets/ebd9aca2-0f78-492b-b70d-95424ec145e9" />
+
+Scroll to **Static IPv4 Configuration**:
+
+| Field | Value |
+|-------|-------|
+| IPv4 Address | `192.168.50.1` |
+| Subnet | `/24` |
+
+Click **Save** → **Apply Changes**.
+
+```
+DMZ (vtnet3)  →  192.168.50.1/24  ✅
+```
+
+---
+
+#### Active Interface State
+
+All four pfSense interfaces are now fully provisioned:
+
+| Interface | vtnet | Bridge | IP | Status |
+|-----------|-------|--------|----|--------|
+| WAN | vtnet0 | vmbr0 | DHCP `192.168.140.x` | ✅ Active |
+| LAN | vtnet1 | vmbr1 | `10.22.0.1/24` | ✅ Active |
+| SERVERS | vtnet2 | vmbr2 | `10.22.7.1/24` | ✅ Active |
+| DMZ | vtnet3 | vmbr3 | `192.168.50.1/24` | ✅ Active |
+
+---
+
+### Part C — Baseline Firewall Rules
+
+> *By default pfSense blocks all inbound traffic on new interfaces. These rules open outbound access from each zone so VMs can reach the internet and receive updates. Strict inter-zone isolation will be enforced in `[08]`.*
+
+#### Step 18 — Inspect LAN Rules
+
+<img width="1174" height="544" alt="18" src="https://github.com/user-attachments/assets/6a055503-06cb-4a34-b751-f989c9f5041d" />
+
+Navigate to **Firewall → Rules → LAN**.
+
+pfSense ships with two default rules on LAN — no changes required:
+
+| Rule | Purpose |
+|------|---------|
+| Anti-Lockout Rule | Ensures the admin can always reach the WebConfigurator |
+| Allow LAN to any | Permits all outbound traffic from the Workstation segment |
+
+---
+
+#### Step 19 — Open SERVERS Rules Tab
+
+<img width="1166" height="676" alt="19" src="https://github.com/user-attachments/assets/9ba644cc-c5ac-4e1d-aa11-ba356ad39e7d" />
+
+Click the **SERVERS** tab. The ruleset is empty — all traffic from this zone is currently blocked. Click **Add ↑** (add at top) to create a new rule.
+
+---
+
+#### Step 20 — Create SERVERS Outbound Rule
+
+<img width="1197" height="756" alt="20" src="https://github.com/user-attachments/assets/09caaa58-2bc7-4060-977f-b83aaeff5a60" />
+
+| Field | Value |
+|-------|-------|
+| Action | Pass |
+| Interface | SERVERS |
+| Address Family | IPv4 |
+| Protocol | Any |
+| Source | SERVERS net |
+| Destination | Any |
+| Description | `Allow SERVERS outbound` |
+
+Click **Save**.
+
+---
+
+#### Step 21 — Open DMZ Rules Tab
+
+<img width="1158" height="786" alt="21" src="https://github.com/user-attachments/assets/30f6762f-a450-4dbb-891e-9a78432ea4c9" />
+
+Click the **DMZ** tab — also empty by default. Click **Add ↑** to create a new rule.
+
+---
+
+#### Step 22 — Create DMZ Outbound Rule & Apply
+
+<img width="1908" height="931" alt="22" src="https://github.com/user-attachments/assets/f70f0eec-505b-4e9e-b738-b3b7567f9c29" />
+
+| Field | Value |
+|-------|-------|
+| Action | Pass |
+| Interface | DMZ |
+| Address Family | IPv4 |
+| Protocol | Any |
+| Source | DMZ net |
+| Destination | Any |
+| Description | `Allow DMZ outbound` |
+
+Click **Save** → click the green **Apply Changes** banner at the top to commit the full firewall state.
+
+---
+
+#### Final Firewall Rule Summary
+
+| Zone | Rule | Direction | Result |
+|------|------|-----------|--------|
+| LAN | Allow LAN → any | Outbound | ✅ Internet access |
+| SERVERS | Allow SERVERS → any | Outbound | ✅ Internet access |
+| DMZ | Allow DMZ → any | Outbound | ✅ Internet access |
+| LAN ↔ SERVERS | *(none yet)* | Inter-zone | 🔒 Blocked — configured in `[08]` |
+| LAN ↔ DMZ | *(none yet)* | Inter-zone | 🔒 Blocked — configured in `[08]` |
+| SERVERS ↔ DMZ | *(none yet)* | Inter-zone | 🔒 Blocked — configured in `[08]` |
+
+> ℹ️ Inter-zone rules are intentionally deferred to `[08] LAN/DMZ Traffic Isolation`. Zones can reach the internet but cannot reach each other — this is the correct security baseline.
+
+---
+
+### ✅ Phase Checklist
+
+- [ ] Setup Wizard completed — hostname `firewall`, domain `mursad.me`
+- [ ] Timezone set to `Asia/Bahrain`
+- [ ] WAN RFC1918 blocking **unchecked** — upstream traffic flows correctly
+- [ ] Admin password changed from default
+- [ ] OPT1 enabled as `SERVERS` — `10.22.7.1/24`
+- [ ] OPT2 enabled as `DMZ` — `192.168.50.1/24`
+- [ ] SERVERS outbound pass rule created and applied
+- [ ] DMZ outbound pass rule created and applied
+- [ ] All four zones can reach the internet
+- [ ] Inter-zone traffic remains blocked pending `[08]`
+
+<div align="center"><br>
+
+**🟢 Phase 1 Complete**
+
+`[03] pfSense Installation` ◄ **You are here: `[04] Advanced Firewall Routing`** ► `[05] Domain Controller Provisioning`
 
 <br></div>
 
