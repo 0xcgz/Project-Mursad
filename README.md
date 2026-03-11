@@ -1,6 +1,9 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:1a1a2e,50:16213e,100:0f3460&height=200&section=header&text=PROJECT%20MURSAD&fontSize=52&fontColor=e94560&fontAlignY=38&desc=Enterprise%20Security%20Architecture%20%26%20SOC%20Telemetry%20Lab&descAlignY=58&descColor=a8b2d8&animation=fadeIn" width="100%"/>
+<br>
+
+<h1>👁️ PROJECT MURSAD</h1>
+<h3>Enterprise Security Architecture & SOC Telemetry Lab</h3>
 
 <br>
 
@@ -9,23 +12,21 @@
   <img src="https://img.shields.io/badge/pfSense_CE-212121?style=for-the-badge&logo=pfsense&logoColor=white"/>
   <img src="https://img.shields.io/badge/Active_Directory-0078D4?style=for-the-badge&logo=microsoft&logoColor=white"/>
   <img src="https://img.shields.io/badge/Wazuh_SIEM-6B4CFF?style=for-the-badge&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Suricata_IDS/IPS-EF6C00?style=for-the-badge&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Suricata_IDS%2FIPS-EF6C00?style=for-the-badge&logoColor=white"/>
   <img src="https://img.shields.io/badge/Kali_Linux-557C94?style=for-the-badge&logo=kali-linux&logoColor=white"/>
 </p>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/─────────────────────────────────────────-1a1a2e?style=flat-square"/>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░-1a1a2e?style=flat-square&label=Phase%201%20Complete%20%7C%2040%25&labelColor=0f3460&color=e94560"/>
-</p>
+<br>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Phase_1-COMPLETE-2ecc71?style=flat-square&labelColor=1a1a2e"/>
   <img src="https://img.shields.io/badge/Phase_2-IN_PROGRESS-e94560?style=flat-square&labelColor=1a1a2e"/>
-  <img src="https://img.shields.io/badge/Phase_3-PENDING-555?style=flat-square&labelColor=1a1a2e"/>
-  <img src="https://img.shields.io/badge/Phase_4-PENDING-555?style=flat-square&labelColor=1a1a2e"/>
+  <img src="https://img.shields.io/badge/Phase_3-PENDING-555555?style=flat-square&labelColor=1a1a2e"/>
+  <img src="https://img.shields.io/badge/Phase_4-PENDING-555555?style=flat-square&labelColor=1a1a2e"/>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Progress-Phase%201%20Complete%20%7C%2040%25-e94560?style=flat-square&labelColor=1a1a2e"/>
 </p>
 
 <p align="center">
@@ -83,38 +84,37 @@ Project Mursad is a fully virtualized, enterprise-grade Security Operations Cent
 ## 🗺️ Architecture
 
 ```
-╔════════════════════════════════════════════════════════════════════════════╗
-║                  VMware Workstation Pro 17  ·  Windows 11 Host             ║
-║  ┌─────────────────────────────────────────────────────────────────────┐   ║
-║  │                     Proxmox VE 9.1  —  node: mursad                 │   ║
-║  │                                                                      │   ║
-║  │         [ INTERNET ]                                                 │   ║
-║  │              │                                                       │   ║
-║  │         vmbr0 · 192.168.140.x/24  ◄── NAT via VMware                │   ║
-║  │              │                                                       │   ║
-║  │   ┌──────────▼──────────────────────────────────────────────────┐   │   ║
-║  │   │               VM 100  ·  pfSense CE  ·  Firewall             │   │   ║
-║  │   │          ┌──────────────────────────────────────┐            │   │   ║
-║  │   │          │        Suricata IDS/IPS (inline)      │            │   │   ║
-║  │   │          └──────────────────────────────────────┘            │   │   ║
-║  │   │    vtnet0     vtnet1          vtnet2        vtnet3            │   │   ║
-║  │   │     WAN        LAN            OPT1          OPT2             │   │   ║
-║  │   └──────┼──────────┼──────────────┼─────────────┼───────────────┘   │   ║
-║  │          │          │              │             │                    │   ║
-║  │      [ignored]  vmbr1           vmbr2          vmbr3                 │   ║
-║  │               10.22.0.0/24   10.22.7.0/24   192.168.50.0/24          │   ║
-║  │               WORKSTATION      SERVERS           DMZ                 │   ║
-║  │                   │               │               │                  │   ║
-║  │          ┌────────┴──────┐   ┌────┴─────┐   ┌────┴──────┐           │   ║
-║  │          │  DC  10.22.0.2│   │  Wazuh   │   │DMZ Server │           │   ║
-║  │          │  mursad.local │   │  SIEM    │   │192.168.   │           │   ║
-║  │          │  IT  10.22.0.3│   │10.22.7.2 │   │  50.10    │           │   ║
-║  │          │  FIN 10.22.0.4│   └──────────┘   └───────────┘           │   ║
-║  │          └───────────────┘                                           │   ║
-║  │                                                                      │   ║
-║  │   [ Kali Linux ]  ──  WAN/DHCP  ──  External Red Team Attacker      │   ║
-║  └─────────────────────────────────────────────────────────────────────┘   ║
-╚════════════════════════════════════════════════════════════════════════════╝
+╔══════════════════════════════════════════════════════════════════════════════════╗
+║               VMware Workstation Pro 17  ·  Windows 11 Host                     ║
+║  ┌───────────────────────────────────────────────────────────────────────────┐   ║
+║  │                      Proxmox VE 9.1  —  node: mursad                      │   ║
+║  │                                                                             │   ║
+║  │          [ INTERNET ]                                                       │   ║
+║  │               │                                                             │   ║
+║  │          vmbr0 · 192.168.140.x/24  ◄── NAT via VMware                      │   ║
+║  │               │                                                             │   ║
+║  │  ┌────────────▼────────────────────────────────────────────────────────┐   │   ║
+║  │  │                  VM 100  ·  pfSense CE  ·  Firewall                  │   │   ║
+║  │  │           ┌──────────────────────────────────────┐                   │   │   ║
+║  │  │           │         Suricata IDS/IPS (inline)     │                   │   │   ║
+║  │  │           └──────────────────────────────────────┘                   │   │   ║
+║  │  │  vtnet0   vtnet1    vtnet2    vtnet3    vtnet4    vtnet5              │   │   ║
+║  │  │   WAN      LAN      OPT1      OPT2      OPT3      OPT4               │   │   ║
+║  │  └────┼────────┼─────────┼─────────┼─────────┼─────────┼───────────────┘   │   ║
+║  │       │        │         │         │         │         │                    │   ║
+║  │  [ignored]  vmbr1      vmbr2     vmbr3     vmbr4     vmbr5                 │   ║
+║  │            10.22.0/24 10.22.1/24 10.22.2/24 192.168.50/24 10.22.7/24      │   ║
+║  │               HR         IT        OPs        DMZ       SERVERS            │   ║
+║  │               │          │          │           │           │               │   ║
+║  │         ┌─────┴───┐  ┌───┴──┐  ┌───┴──┐  ┌────┴────┐  ┌───┴─────┐         │   ║
+║  │         │DC .0.2  │  │IT WS │  │Ops WS│  │DMZ Srvr │  │  Wazuh  │         │   ║
+║  │         │mursad   │  │.1.x  │  │.2.x  │  │.50.10   │  │  SIEM   │         │   ║
+║  │         │.local   │  └──────┘  └──────┘  └─────────┘  │ .7.2    │         │   ║
+║  │         └─────────┘                                    └─────────┘         │   ║
+║  │                                                                             │   ║
+║  │   [ Kali Linux ]  ──  WAN/DHCP  ──  External Red Team Attacker             │   ║
+║  └───────────────────────────────────────────────────────────────────────────┘   ║
+╚══════════════════════════════════════════════════════════════════════════════════╝
 ```
 
 ---
@@ -124,9 +124,11 @@ Project Mursad is a fully virtualized, enterprise-grade Security Operations Cent
 | Zone | Bridge | Subnet | Gateway | Purpose |
 |------|:------:|--------|:-------:|---------|
 | 🌍 WAN / Management | `vmbr0` | `192.168.140.0/24` | `192.168.140.2` | NAT uplink · Proxmox host access |
-| 💻 Workstation | `vmbr1` | `10.22.0.0/24` | `10.22.0.1` | Domain-joined endpoints (IT · Finance · DC) |
-| 🖥️ Servers | `vmbr2` | `10.22.7.0/24` | `10.22.7.1` | Internal services · Wazuh SIEM |
-| 🔶 DMZ | `vmbr3` | `192.168.50.0/24` | `192.168.50.1` | Isolated public-facing services |
+| 💻 HR Workstation | `vmbr1` | `10.22.0.0/24` | `10.22.0.1` | HR domain-joined endpoints · DC |
+| 💻 IT Workstation | `vmbr2` | `10.22.1.0/24` | `10.22.1.1` | IT department endpoints |
+| 💻 OPs Workstation | `vmbr3` | `10.22.2.0/24` | `10.22.2.1` | Operations department endpoints |
+| 🔶 DMZ | `vmbr4` | `192.168.50.0/24` | `192.168.50.1` | Isolated public-facing services |
+| 🖥️ Servers | `vmbr5` | `10.22.7.0/24` | `10.22.7.1` | Internal services · Wazuh SIEM |
 
 ---
 
@@ -136,12 +138,14 @@ Project Mursad is a fully virtualized, enterprise-grade Security Operations Cent
 |------|:----------:|:----:|------|
 | Proxmox Node | `192.168.140.129` | Management | Hypervisor — Web UI `:8006` |
 | pfSense — WAN | `192.168.140.x` (DHCP) | WAN | Internet uplink |
-| pfSense — LAN | `10.22.0.1` | Workstation | Default gateway |
-| pfSense — SERVERS | `10.22.7.1` | Servers | Servers gateway |
+| pfSense — HR | `10.22.0.1` | HR Workstation | HR segment gateway |
+| pfSense — IT | `10.22.1.1` | IT Workstation | IT segment gateway |
+| pfSense — OPs | `10.22.2.1` | OPs Workstation | Operations segment gateway |
 | pfSense — DMZ | `192.168.50.1` | DMZ | DMZ gateway |
-| Windows Server DC | `10.22.0.2` | Workstation | AD · DNS · `mursad.local` |
-| IT Workstation | `10.22.0.3` | Workstation | Domain-joined · Wazuh agent |
-| Finance Workstation | `10.22.0.4` | Workstation | Domain-joined · Wazuh agent |
+| pfSense — SERVERS | `10.22.7.1` | Servers | Servers gateway |
+| Windows Server DC | `10.22.0.2` | HR Workstation | AD · DNS · `mursad.local` |
+| IT Workstation | `10.22.1.x` | IT Workstation | Domain-joined · Wazuh agent |
+| OPs Workstation | `10.22.2.x` | OPs Workstation | Domain-joined · Wazuh agent |
 | Wazuh SIEM | `10.22.7.2` | Servers | Log aggregation · alerting |
 | DMZ Server | `192.168.50.10` | DMZ | Public-facing services |
 | Kali Linux | WAN DHCP | WAN | External Red Team attacker |
@@ -259,10 +263,12 @@ Infrastructure  ──►  Identity    ──►  Telemetry   ──►  Hardeni
 [ VMware Workstation Pro 17 ]
         └── VM: "Project Mursad"  (50 GB · 4 GB RAM · 2 vCPUs)
                 └── Proxmox VE 9.1  —  node: mursad
-                        ├── vmbr0  →  Management / NAT     192.168.140.129/24
-                        ├── vmbr1  →  Workstation Segment   10.22.0.1/24
-                        ├── vmbr2  →  Servers Segment       10.22.7.1/24
-                        └── vmbr3  →  DMZ Zone              192.168.50.1/24
+                        ├── vmbr0  →  Management / NAT       192.168.140.129/24
+                        ├── vmbr1  →  HR Workstation          10.22.0.1/24
+                        ├── vmbr2  →  IT Workstation          10.22.1.1/24
+                        ├── vmbr3  →  OPs Workstation         10.22.2.1/24
+                        ├── vmbr4  →  DMZ Zone                192.168.50.1/24
+                        └── vmbr5  →  Servers Segment         10.22.7.1/24
 ```
 
 | Part | Section | Description |
@@ -727,6 +733,8 @@ Navigate to **VM 100 → Hardware → Add → Network Device**:
 | net1 | `vmbr1` | VirtIO |
 | net2 | `vmbr2` | VirtIO |
 | net3 | `vmbr3` | VirtIO |
+| net4 | `vmbr4` | VirtIO |
+| net5 | `vmbr5` | VirtIO |
 
 ---
 
@@ -789,9 +797,11 @@ Segmentation is handled by separate Proxmox bridges — VLANs are not required.
 | Prompt | Input | Maps To |
 |--------|:-----:|---------|
 | WAN interface | `vtnet0` | `vmbr0` — Internet |
-| LAN interface | `vtnet1` | `vmbr1` — Workstation |
-| OPT1 interface | `vtnet2` | `vmbr2` — Servers |
-| OPT2 interface | `vtnet3` | `vmbr3` — DMZ |
+| LAN interface | `vtnet1` | `vmbr1` — HR Workstation |
+| OPT1 interface | `vtnet2` | `vmbr2` — IT Workstation |
+| OPT2 interface | `vtnet3` | `vmbr3` — OPs Workstation |
+| OPT3 interface | `vtnet4` | `vmbr4` — DMZ |
+| OPT4 interface | `vtnet5` | `vmbr5` — Servers |
 
 Type `y` → Enter to confirm.
 
@@ -880,9 +890,11 @@ https://10.22.0.1
 | pfSense | vtnet | Bridge | IP | Zone |
 |:-------:|:-----:|:------:|:--:|:----:|
 | WAN | vtnet0 | vmbr0 | DHCP `192.168.140.x` | Internet |
-| LAN | vtnet1 | vmbr1 | `10.22.0.1/24` | Workstation |
-| OPT1 | vtnet2 | vmbr2 | `10.22.7.1/24` | Servers *(configured in `[04]`)* |
-| OPT2 | vtnet3 | vmbr3 | `192.168.50.1/24` | DMZ *(configured in `[04]`)* |
+| LAN | vtnet1 | vmbr1 | `10.22.0.1/24` | HR Workstation |
+| OPT1 | vtnet2 | vmbr2 | `10.22.1.1/24` | IT Workstation *(configured in `[04]`)* |
+| OPT2 | vtnet3 | vmbr3 | `10.22.2.1/24` | OPs Workstation *(configured in `[04]`)* |
+| OPT3 | vtnet4 | vmbr4 | `192.168.50.1/24` | DMZ *(configured in `[04]`)* |
+| OPT4 | vtnet5 | vmbr5 | `10.22.7.1/24` | Servers *(configured in `[04]`)* |
 
 ---
 
@@ -890,7 +902,7 @@ https://10.22.0.1
 
 - [ ] pfSense CE ISO uploaded to Proxmox local storage
 - [ ] VM 100 created — CPU type `host`, machine `i440fx`
-- [ ] All 4 NICs attached (vmbr0–vmbr3) **before first boot**
+- [ ] All 6 NICs attached (vmbr0–vmbr5) **before first boot**
 - [ ] pfSense installed with Auto (ZFS) partitioning
 - [ ] Interfaces assigned: vtnet0=WAN · vtnet1=LAN · vtnet2=OPT1 · vtnet3=OPT2
 - [ ] WAN acquiring DHCP from host network
@@ -916,375 +928,404 @@ https://10.22.0.1
 
 <br>
 
-> **Scope:** Accessing the pfSense WebConfigurator for the first time, completing the setup wizard, provisioning the **Servers** and **DMZ** interfaces, and establishing the baseline firewall ruleset that enables inter-zone routing across the Mursad SOC network.
+> **Scope:** Attaching all five VLAN bridges to the pfSense VM, provisioning and naming every interface (HR · IT · OPs · DMZ · SERVERS), configuring Hybrid Outbound NAT, and establishing the baseline WAN firewall rule that brings the full Mursad SOC network online.
 
 ---
 
 ### Overview
 
 ```
-pfSense WebConfigurator  ·  https://10.22.0.1
-│
-├── Part A  ─►  Initial Setup Wizard
-│               Hostname · DNS · Timezone · WAN config · Admin password
-│
-├── Part B  ─►  Interface Provisioning
-│               OPT1  ──►  SERVERS   10.22.7.1/24
-│               OPT2  ──►  DMZ       192.168.50.1/24
-│
-└── Part C  ─►  Baseline Firewall Rules
-                LAN     → Any   (pre-existing default)
-                SERVERS → Any   (new outbound pass rule)
-                DMZ     → Any   (new outbound pass rule)
+Proxmox Node: mursad
+└── VM 100  —  Firewall  (pfSense CE)
+        ├── vtnet0  →  vmbr0  →  WAN      192.168.140.x/24  (DHCP)
+        ├── vtnet1  →  vmbr1  →  HR       10.22.0.1/24
+        ├── vtnet2  →  vmbr2  →  IT       10.22.1.1/24
+        ├── vtnet3  →  vmbr3  →  OPs      10.22.2.1/24
+        ├── vtnet4  →  vmbr4  →  DMZ      192.168.50.1/24
+        └── vtnet5  →  vmbr5  →  SERVERS  10.22.7.1/24
 ```
 
 | Part | Section | Description |
 |:----:|---------|-------------|
-| **A** | Setup Wizard | Configure hostname, timezone, WAN, and admin credentials |
-| **B** | Interface Provisioning | Activate and address the Servers and DMZ interfaces |
-| **C** | Baseline Firewall Rules | Allow outbound traffic from each zone |
+| **A** | VM Network Provisioning | Attach all VLAN bridges to the Firewall VM in Proxmox |
+| **B** | Firewall Rules | WAN baseline rule for management access |
+| **C** | Outbound NAT | Switch to Hybrid mode, add manual mappings per zone |
+| **D** | Interface Assignment | Enable, name, and address all OPT interfaces in pfSense |
 
 ---
 
-### Part A — pfSense Initial Setup Wizard
+### Part A — Virtual Machine Network Provisioning
 
-#### Step 1 — Access the WebConfigurator
+> *Before touching pfSense, all bridges must exist as virtual NICs on the Firewall VM so FreeBSD can enumerate them on boot.*
 
-**🖼️ [ Image 1 ]**
+#### Step 1 — Review Proxmox Network Bridges
 
-From a machine on the Workstation segment, navigate to:
+<img width="1448" height="406" alt="1" src="https://github.com/user-attachments/assets/79a53dca-d936-4bef-8485-b94ddabf875c" />
+
+Confirm all five internal bridges are present on the **mursad** node before proceeding:
+
+| Bridge | Zone | Subnet |
+|:------:|------|--------|
+| `vmbr1` | HR Workstation | `10.22.0.0/24` |
+| `vmbr2` | IT Workstation | `10.22.1.0/24` |
+| `vmbr3` | OPs Workstation | `10.22.2.0/24` |
+| `vmbr4` | DMZ | `192.168.50.0/24` |
+| `vmbr5` | Servers | `10.22.7.0/24` |
+
+---
+
+#### Step 2 — Add Network Devices to Firewall VM
+
+
+<img width="1237" height="631" alt="2" src="https://github.com/user-attachments/assets/935bbc5e-6e3f-41d6-ac35-6cd053913779" />
+
+
+Navigate to **VM 100 (Firewall) → Hardware → Add → Network Device**.
+
+---
+
+#### Step 3 — Assign All Bridges to Firewall
+
+<img width="647" height="287" alt="3" src="https://github.com/user-attachments/assets/848bfd3b-462b-4510-8453-9c54bcb0e616" />
+
+
+Add one **VirtIO** Network Device per bridge:
+
+| NIC | Bridge | Model |
+|:---:|:------:|:-----:|
+| net1 | `vmbr1` | VirtIO |
+| net2 | `vmbr2` | VirtIO |
+| net3 | `vmbr3` | VirtIO |
+| net4 | `vmbr4` | VirtIO |
+| net5 | `vmbr5` | VirtIO |
+
+> ⚠️ All NICs must be added **before** booting the VM. If pfSense is already running, shut it down first, add all devices, then start it again.
+
+---
+
+#### Step 4 — Verify Firewall Hardware
+
+<img width="1008" height="438" alt="4" src="https://github.com/user-attachments/assets/231b245c-5a4d-422c-9c0f-50aa714802ac" />
+
+
+Open **VM 100 → Hardware** and confirm the full NIC list:
 
 ```
-https://10.22.0.1
-```
-
-| Field | Value |
-|-------|-------|
-| Username | `admin` |
-| Password | `pfsense` |
-
-> ⚠️ Accept the self-signed certificate warning — HTTPS is required and no cert has been issued yet.
-
----
-
-#### Step 2 — Welcome to the Setup Wizard
-
-**🖼️ [ Image 2 ]**
-
-The pfSense Setup Wizard launches automatically on first login. Click **Next** to begin.
-
----
-
-#### Step 3 — Netgate Global Support
-
-**🖼️ [ Image 3 ]**
-
-Acknowledge the Netgate Global Support information screen. Click **Next**.
-
----
-
-#### Step 4 — General Information
-
-**🖼️ [ Image 4 ]**
-
-| Field | Value |
-|-------|-------|
-| Hostname | `firewall` |
-| Domain | `mursad.me` |
-| Primary DNS | `1.1.1.1` |
-| Secondary DNS | `8.8.8.8` |
-| Override DNS | ✅ Checked |
-
-Click **Next**.
-
----
-
-#### Step 5 — Time Server
-
-**🖼️ [ Image 5 ]**
-
-| Field | Value |
-|-------|-------|
-| Time Server | `0.pfsense.pool.ntp.org` *(default)* |
-| Timezone | `Asia/Bahrain` |
-
-> ⚠️ **Critical for SIEM accuracy.** All Wazuh alerts, Suricata events, and firewall logs will be timestamped from this setting. Misaligned clocks break log correlation across hosts.
-
-Click **Next**.
-
----
-
-#### Step 6 — Configure WAN Interface
-
-**🖼️ [ Image 6 ]**
-
-| Field | Value |
-|-------|-------|
-| Selected Type | DHCP *(leave as-is)* |
-| **Block RFC1918 Private Networks** | ❌ **Uncheck this** |
-| Block Bogon Networks | ✅ Leave checked |
-
-> ⚠️ **Critical:** You must uncheck **"Block RFC1918 Private Networks"**. The WAN interface is receiving a private IP from the Proxmox NAT (`192.168.140.x`). With this option enabled, pfSense drops all upstream traffic and the firewall will appear to have no internet access.
-
-Click **Next**.
-
----
-
-#### Step 7 — Configure LAN Interface
-
-**🖼️ [ Image 7 ]**
-
-Verify — no changes required:
-
-| Field | Value |
-|-------|-------|
-| LAN IP Address | `10.22.0.1` |
-| Subnet Mask | `24` |
-
-Click **Next**.
-
----
-
-#### Step 8 — Set Admin Password
-
-**🖼️ [ Image 8 ]**
-
-Replace the default `pfsense` password with a strong, unique credential for the `admin` account.
-
-> 🔐 This controls full firewall access. Store it securely and do not reuse it across other lab machines.
-
-Click **Next**.
-
----
-
-#### Step 9 — Reload & Apply
-
-**🖼️ [ Image 9 ]**
-
-Click **Reload** to apply the new configuration and restart the WebConfigurator service. The browser will reconnect within a few seconds.
-
----
-
-#### Step 10 — Wizard Complete
-
-**🖼️ [ Image 10 ]**
-
-Click **Finish** to land on the pfSense Dashboard. Acknowledge any copyright or telemetry screens.
-
-```
-Dashboard  →  All services running   ✅
-WAN        →  192.168.140.x/24       ✅
-LAN        →  10.22.0.1/24           ✅
+net0  →  vmbr0   WAN
+net1  →  vmbr1   HR
+net2  →  vmbr2   IT
+net3  →  vmbr3   OPs
+net4  →  vmbr4   DMZ
+net5  →  vmbr5   SERVERS
 ```
 
 ---
 
-### Part B — Interface Provisioning (Servers & DMZ)
+### Part B — pfSense Firewall Rules
 
-> *OPT1 and OPT2 exist as detected ports but are unconfigured — they must be enabled and assigned static IPs before pfSense will route any traffic through them.*
+> *pfSense blocks all traffic by default on new interfaces. The WAN rule below enables management access to the firewall itself from the upstream network.*
 
-#### Step 11 — Open Interface Assignments
+#### Step 5 — Navigate to Firewall Rules
 
-**🖼️ [ Image 11 ]**
+<img width="1912" height="936" alt="5" src="https://github.com/user-attachments/assets/4b8208c4-9cfd-4aad-ac4f-044105a94d40" />
 
-Navigate to **Interfaces → Assignments**. Current state:
 
-```
-WAN    →  vtnet0   ✅ Active
-LAN    →  vtnet1   ✅ Active
-OPT1   →  vtnet2   ⚠️  Unconfigured
-OPT2   →  vtnet3   ⚠️  Unconfigured
-```
+Log into the pfSense WebConfigurator at `https://10.22.0.1` and navigate to **Firewall → Rules**.
 
 ---
 
-#### Step 12 — Open OPT1
+#### Step 6 — Add WAN Firewall Rule
 
-**🖼️ [ Image 12 ]**
+<img width="1171" height="570" alt="6" src="https://github.com/user-attachments/assets/5c5f0b73-8a0d-4628-9f88-aff4b2693c6b" />
 
-Click **OPT1** to open its configuration page.
 
----
-
-#### Step 13 — Enable & Describe OPT1
-
-**🖼️ [ Image 13 ]**
-
-| Field | Value |
-|-------|-------|
-| Enable Interface | ✅ Checked |
-| Description | `SERVERS` |
-| IPv4 Configuration Type | Static IPv4 |
+Select the **WAN** tab. Click **Add ↑** to insert a new rule at the top of the list.
 
 ---
 
-#### Step 14 — Assign Servers IP
+#### Step 7 — Configure WAN Rule Parameters
 
-**🖼️ [ Image 14 ]**
+<img width="1167" height="917" alt="7" src="https://github.com/user-attachments/assets/85dd7330-3c39-41ad-920f-47c341e9414b" />
 
-Scroll to **Static IPv4 Configuration**:
-
-| Field | Value |
-|-------|-------|
-| IPv4 Address | `10.22.7.1` |
-| Subnet | `/24` |
-
-Click **Save** → **Apply Changes**.
-
-```
-SERVERS (vtnet2)  →  10.22.7.1/24  ✅
-```
-
----
-
-#### Step 15 — Open OPT2
-
-**🖼️ [ Image 15 ]**
-
-Navigate back to **Interfaces → Assignments** and click **OPT2**.
-
----
-
-#### Step 16 — Enable & Describe OPT2
-
-**🖼️ [ Image 16 ]**
-
-| Field | Value |
-|-------|-------|
-| Enable Interface | ✅ Checked |
-| Description | `DMZ` |
-| IPv4 Configuration Type | Static IPv4 |
-
----
-
-#### Step 17 — Assign DMZ IP
-
-**🖼️ [ Image 17 ]**
-
-Scroll to **Static IPv4 Configuration**:
-
-| Field | Value |
-|-------|-------|
-| IPv4 Address | `192.168.50.1` |
-| Subnet | `/24` |
-
-Click **Save** → **Apply Changes**.
-
-```
-DMZ (vtnet3)  →  192.168.50.1/24  ✅
-```
-
----
-
-#### Active Interface State
-
-All four pfSense interfaces are now fully provisioned:
-
-| Interface | vtnet | Bridge | IP | Status |
-|:---------:|:-----:|:------:|:--:|:------:|
-| WAN | vtnet0 | vmbr0 | DHCP `192.168.140.x` | ✅ Active |
-| LAN | vtnet1 | vmbr1 | `10.22.0.1/24` | ✅ Active |
-| SERVERS | vtnet2 | vmbr2 | `10.22.7.1/24` | ✅ Active |
-| DMZ | vtnet3 | vmbr3 | `192.168.50.1/24` | ✅ Active |
-
----
-
-### Part C — Baseline Firewall Rules
-
-> *By default, pfSense blocks all traffic on new interfaces. These rules open outbound internet access from each zone so VMs can receive updates and reach external resources. Strict inter-zone isolation is deferred to `[08]`.*
-
-#### Step 18 — Inspect LAN Rules
-
-**🖼️ [ Image 18 ]**
-
-Navigate to **Firewall → Rules → LAN**. No changes required — pfSense ships with:
-
-| Rule | Purpose |
-|------|---------|
-| Anti-Lockout Rule | Guarantees admin can always reach the WebConfigurator |
-| Allow LAN to any | Permits all outbound traffic from the Workstation segment |
-
----
-
-#### Step 19 — Open SERVERS Rules Tab
-
-**🖼️ [ Image 19 ]**
-
-Click the **SERVERS** tab. Ruleset is empty — all zone traffic currently blocked. Click **Add ↑** (add at top).
-
----
-
-#### Step 20 — Create SERVERS Outbound Rule
-
-**🖼️ [ Image 20 ]**
 
 | Field | Value |
 |-------|-------|
 | Action | Pass |
-| Interface | SERVERS |
+| Interface | WAN |
 | Address Family | IPv4 |
 | Protocol | Any |
-| Source | SERVERS net |
-| Destination | Any |
-| Description | `Allow SERVERS outbound` |
+| Source | WAN subnets |
+| Destination | This Firewall (self) |
+| Description | `Allow Management and Services to Firewall` |
 
 Click **Save**.
 
 ---
 
-#### Step 21 — Open DMZ Rules Tab
+#### Step 8 — Apply WAN Rule
 
-**🖼️ [ Image 21 ]**
+<img width="1209" height="595" alt="8" src="https://github.com/user-attachments/assets/65da654e-8ade-4cb0-ab67-e55986c8495c" />
 
-Click the **DMZ** tab — also empty. Click **Add ↑** to create a new rule.
+
+The new rule appears in the WAN tab. Click **Apply Changes** to activate it.
 
 ---
 
-#### Step 22 — Create DMZ Outbound Rule & Apply
+### Part C — Outbound NAT Configuration
 
-**🖼️ [ Image 22 ]**
+> *Automatic NAT works for basic setups but gives no per-zone control. Switching to **Hybrid** mode keeps the automatic rules intact while letting us add manual mappings for each subnet.*
+
+#### Step 9 — Navigate to Outbound NAT
+
+<img width="1203" height="580" alt="9" src="https://github.com/user-attachments/assets/e91faaf1-f89a-4cfb-bb04-7c962e351528" />
+
+
+Navigate to **Firewall → NAT → Outbound**.
+
+---
+
+#### Step 10 — Enable Hybrid Outbound NAT
+
+<img width="1216" height="665" alt="10" src="https://github.com/user-attachments/assets/c87dd688-e179-4008-9a99-eeda1dfc95ab" />
+
+
+Under **Outbound NAT Mode**, select **Hybrid Outbound NAT rule generation**.
+
+> ℹ️ Hybrid keeps automatic rules for internet access while allowing custom mappings per zone. This is the correct mode for a segmented lab — pure Manual mode would break internet access until every subnet is manually mapped.
+
+Click **Save**.
+
+---
+
+#### Step 11 — Add HR Workstation NAT Mapping
+
+<img width="1184" height="652" alt="11" src="https://github.com/user-attachments/assets/d7a44a09-c4b0-4665-9a80-e5d23eb127b9" />
+
+
+Click **Add ↑** to create the first manual mapping.
 
 | Field | Value |
 |-------|-------|
-| Action | Pass |
-| Interface | DMZ |
+| Interface | WAN |
 | Address Family | IPv4 |
 | Protocol | Any |
-| Source | DMZ net |
+| Source | Network or Alias |
+| Source Network | `10.22.0.0` / `24` |
 | Destination | Any |
-| Description | `Allow DMZ outbound` |
+| Description | `Manual NAT — HR Workstation` |
 
-Click **Save** → click the green **Apply Changes** banner to commit the full firewall state.
+Click **Save**.
 
 ---
 
-#### Final Firewall Rule Summary
+#### Step 12 — Add SERVERS NAT Mapping
 
-| Zone | Rule | Direction | Result |
-|:----:|------|:---------:|:------:|
-| LAN | Allow LAN → any | Outbound | ✅ Internet access |
-| SERVERS | Allow SERVERS → any | Outbound | ✅ Internet access |
-| DMZ | Allow DMZ → any | Outbound | ✅ Internet access |
-| LAN ↔ SERVERS | *(none yet)* | Inter-zone | 🔒 Blocked |
-| LAN ↔ DMZ | *(none yet)* | Inter-zone | 🔒 Blocked |
-| SERVERS ↔ DMZ | *(none yet)* | Inter-zone | 🔒 Blocked |
 
-> ℹ️ Inter-zone rules are intentionally deferred to `[08] LAN/DMZ Traffic Isolation`. Each zone can reach the internet but not each other — this is the correct security baseline before identity and segmentation is built in Phase 2.
+<img width="1175" height="685" alt="12" src="https://github.com/user-attachments/assets/0c56f1ee-9ae1-471b-872d-edae3b01707d" />
+
+
+| Field | Value |
+|-------|-------|
+| Interface | WAN |
+| Address Family | IPv4 |
+| Protocol | Any |
+| Source | Network or Alias |
+| Source Network | `10.22.7.0` / `24` |
+| Destination | Any |
+| Description | `Manual NAT — SERVERS` |
+
+Click **Save**.
+
+---
+
+#### Step 13 — Add DMZ NAT Mapping
+
+<img width="1178" height="805" alt="13" src="https://github.com/user-attachments/assets/706da33c-17d1-482a-bd93-bd1ca0df8079" />
+
+
+DMZ is restricted to TCP/UDP only — not raw IP or ICMP:
+
+| Field | Value |
+|-------|-------|
+| Interface | WAN |
+| Address Family | IPv4 |
+| Protocol | **TCP/UDP** |
+| Source | Network or Alias |
+| Source Network | `192.168.50.0` / `24` |
+| Destination | Any |
+| Description | `Manual NAT — DMZ` |
+
+Click **Save**.
+
+---
+
+#### Step 14 — Review & Apply NAT Mappings
+
+<img width="1196" height="386" alt="14" src="https://github.com/user-attachments/assets/9f783a64-5251-45ce-a3c6-ad695d83c788" />
+
+
+Confirm three manual mappings appear at the top of the list:
+
+```
+[MANUAL]  10.22.0.0/24    →  WAN  (Any)       Manual NAT — HR Workstation
+[MANUAL]  10.22.7.0/24    →  WAN  (Any)       Manual NAT — SERVERS
+[MANUAL]  192.168.50.0/24 →  WAN  (TCP/UDP)   Manual NAT — DMZ
+──────────────────────────────────────────────────────────────────────
+[AUTO]    ...automatic rules below...
+```
+
+Click **Apply Changes**.
+
+---
+
+### Part D — Interface Assignment
+
+> *The OPT interfaces exist as raw detected ports — each must be enabled, named, and given a static IP before pfSense routes any traffic through them.*
+
+#### Step 15 — Navigate to Interface Assignments
+
+<img width="1155" height="243" alt="15" src="https://github.com/user-attachments/assets/bea7d50d-9ad1-4f11-a5ea-1addcca3548f" />
+
+
+Navigate to **Interfaces → Assignments**.
+
+---
+
+#### Step 16 — Configure HR Interface (OPT1)
+
+<img width="1164" height="289" alt="16" src="https://github.com/user-attachments/assets/9503ea2e-0529-47af-915d-3e13c26062dc" />
+
+
+Click **OPT1** and configure:
+
+| Field | Value |
+|-------|-------|
+| Enable | ✅ Checked |
+| Description | `HR` |
+| IPv4 Configuration Type | Static IPv4 |
+| IPv4 Address | `10.22.0.1` / `24` |
+
+Click **Save** → **Apply Changes**.
+
+---
+
+#### Step 17 — Configure IT Interface (OPT2)
+
+<img width="1183" height="937" alt="17" src="https://github.com/user-attachments/assets/5550c802-da20-419e-b2cd-60342c7a985e" />
+
+
+| Field | Value |
+|-------|-------|
+| Enable | ✅ Checked |
+| Description | `IT` |
+| IPv4 Configuration Type | Static IPv4 |
+| IPv4 Address | `10.22.1.1` / `24` |
+
+Click **Save** → **Apply Changes**.
+
+---
+
+#### Step 18 — Configure OPs Interface (OPT3)
+
+<img width="1174" height="544" alt="18" src="https://github.com/user-attachments/assets/17493441-dd4b-403b-8698-e936ad8bbd39" />
+
+
+| Field | Value |
+|-------|-------|
+| Enable | ✅ Checked |
+| Description | `OPs` |
+| IPv4 Configuration Type | Static IPv4 |
+| IPv4 Address | `10.22.2.1` / `24` |
+
+Click **Save** → **Apply Changes**.
+
+---
+
+#### Step 19 — Configure DMZ Interface (OPT4)
+
+<img width="1166" height="676" alt="19" src="https://github.com/user-attachments/assets/c75ef365-6623-4919-98d6-4b96fa14326c" />
+
+
+| Field | Value |
+|-------|-------|
+| Enable | ✅ Checked |
+| Description | `DMZ` |
+| IPv4 Configuration Type | Static IPv4 |
+| IPv4 Address | `192.168.50.1` / `24` |
+
+Click **Save** → **Apply Changes**.
+
+---
+
+#### Step 20 — Configure SERVERS Interface (OPT5)
+
+
+<img width="1197" height="756" alt="20" src="https://github.com/user-attachments/assets/07a17413-37b3-4b86-a4bf-57e5a8d0a87d" />
+
+
+| Field | Value |
+|-------|-------|
+| Enable | ✅ Checked |
+| Description | `SERVERS` |
+| IPv4 Configuration Type | Static IPv4 |
+| IPv4 Address | `10.22.7.1` / `24` |
+
+Click **Save** → **Apply Changes**.
+
+---
+
+#### Step 21 — Verify Complete Interface Table
+
+<img width="1158" height="786" alt="21" src="https://github.com/user-attachments/assets/548fc934-c9b2-4907-874e-ada079721918" />
+
+
+Navigate to **Interfaces → Assignments** and confirm:
+
+| Interface | vtnet | Bridge | Description | IPv4 Address |
+|:---------:|:-----:|:------:|-------------|:------------:|
+| WAN | vtnet0 | vmbr0 | INTERNET | DHCP |
+| LAN | vtnet1 | vmbr1 | HR | `10.22.0.1/24` |
+| OPT1 | vtnet2 | vmbr2 | IT | `10.22.1.1/24` |
+| OPT2 | vtnet3 | vmbr3 | OPs | `10.22.2.1/24` |
+| OPT3 | vtnet4 | vmbr4 | DMZ | `192.168.50.1/24` |
+| OPT4 | vtnet5 | vmbr5 | SERVERS | `10.22.7.1/24` |
+
+---
+
+#### Step 22 — Review pfSense Dashboard
+
+<img width="1908" height="931" alt="22" src="https://github.com/user-attachments/assets/cef2f0bf-4ec0-4076-a112-4c267b57eadb" />
+
+
+Click the pfSense logo to return to the dashboard. The **Interfaces** widget confirms all six zones active:
+
+```
+WAN      →  192.168.140.x/24   ✅
+HR       →  10.22.0.1/24       ✅
+IT       →  10.22.1.1/24       ✅
+OPs      →  10.22.2.1/24       ✅
+DMZ      →  192.168.50.1/24    ✅
+SERVERS  →  10.22.7.1/24       ✅
+```
 
 ---
 
 ### ✅ Phase Checklist
 
-- [ ] Setup Wizard completed — hostname `firewall`, domain `mursad.me`
-- [ ] Timezone set to `Asia/Bahrain`
-- [ ] WAN RFC1918 blocking **unchecked** — upstream traffic flows
-- [ ] Admin password changed from default
-- [ ] OPT1 enabled as `SERVERS` — `10.22.7.1/24`
-- [ ] OPT2 enabled as `DMZ` — `192.168.50.1/24`
-- [ ] SERVERS outbound pass rule created and applied
-- [ ] DMZ outbound pass rule created and applied
-- [ ] All four zones reach the internet
-- [ ] Inter-zone traffic blocked pending `[08]`
+- [ ] All 5 Proxmox bridges verified before VM modification
+- [ ] `net1` through `net5` added to Firewall VM (all VirtIO)
+- [ ] WAN pass rule created — source: WAN subnets · destination: This Firewall
+- [ ] Outbound NAT switched to **Hybrid** mode
+- [ ] Manual NAT mapping created for HR `10.22.0.0/24` (Any)
+- [ ] Manual NAT mapping created for SERVERS `10.22.7.0/24` (Any)
+- [ ] Manual NAT mapping created for DMZ `192.168.50.0/24` (TCP/UDP)
+- [ ] All NAT mappings applied
+- [ ] OPT1 enabled as `HR` — `10.22.0.1/24`
+- [ ] OPT2 enabled as `IT` — `10.22.1.1/24`
+- [ ] OPT3 enabled as `OPs` — `10.22.2.1/24`
+- [ ] OPT4 enabled as `DMZ` — `192.168.50.1/24`
+- [ ] OPT5 enabled as `SERVERS` — `10.22.7.1/24`
+- [ ] Dashboard shows all 6 interfaces active with correct IPs
 
 <div align="center"><br>
 
@@ -1303,22 +1344,32 @@ Click **Save** → click the green **Apply Changes** banner to commit the full f
 ```
 Project-Mursad/
 │
-├── 📂 assets/                   # Screenshots, diagrams, topology SVG
-│   ├── mursad-topology.svg
-│   └── phase*/
+├── 📂 assets/                        # Screenshots, diagrams, topology SVG
+│   ├── diagrams/
+│   │   └── mursad-topology.svg
+│   ├── phase-1/
+│   │   ├── 01-project-architecture/
+│   │   ├── 02-proxmox-deployment/
+│   │   ├── 03-pfsense-installation/
+│   │   └── 04-firewall-routing/
+│   └── phase-2/  phase-3/  phase-4/  ...
 │
-├── 📂 configs/                  # Exported configs and rule sets
-│   ├── pfsense-config.xml
-│   ├── suricata-rules/
-│   └── wazuh-rules/
+├── 📂 configs/                       # Exported configs and rule sets
+│   ├── pfsense/
+│   ├── suricata/
+│   ├── wazuh/
+│   ├── active-directory/
+│   └── windows/
 │
-├── 📂 docs/                     # Phase-by-phase deployment guides
-│   ├── phase1-02-proxmox.md
-│   ├── phase1-03-pfsense.md
-│   ├── phase1-04-routing.md
-│   └── ...
+├── 📂 docs/                          # Phase-by-phase deployment guides
+│   ├── phase-1/
+│   │   ├── 01-project-architecture.md
+│   │   ├── 02-proxmox-deployment.md
+│   │   ├── 03-pfsense-installation.md
+│   │   └── 04-firewall-routing.md
+│   └── phase-2/  phase-3/  phase-4/  ...
 │
-├── 📂 scripts/                  # Automation scripts
+├── 📂 scripts/                       # Automation scripts
 │   ├── ad-provisioning.ps1
 │   ├── wazuh-agent-deploy.sh
 │   └── cis-audit.sh
