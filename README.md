@@ -26,7 +26,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Progress-Phase%201%20Complete%20%7C%2040%25-e94560?style=flat-square&labelColor=1a1a2e"/>
+  <img src="https://img.shields.io/badge/Progress-Phase%202%20In%20Progress%20%7C%2050%25-e94560?style=flat-square&labelColor=1a1a2e"/>
 </p>
 
 <p align="center">
@@ -59,6 +59,7 @@
   - [Phase 1 · 02 — Proxmox Deployment](#phase-1--02)
   - [Phase 1 · 03 — pfSense Installation](#phase-1--03)
   - [Phase 1 · 04 — Advanced Firewall Routing](#phase-1--04)
+  - [Phase 2 · 05 — Domain Controller Provisioning](#phase-2--05)
 - [Repository Structure](#-repository-structure)
 - [Disclaimer](#-disclaimer)
 
@@ -160,8 +161,8 @@ Project Mursad is a fully virtualized, enterprise-grade Security Operations Cent
 | <img src="https://img.shields.io/badge/pfSense_CE-212121?style=flat-square&logo=pfsense&logoColor=white"/> | Edge firewall · router · VPN gateway | CE AMD64 |
 | <img src="https://img.shields.io/badge/Suricata-EF6C00?style=flat-square&logoColor=white"/> | Inline IDS/IPS via pfSense package | Latest |
 | <img src="https://img.shields.io/badge/Wazuh-6B4CFF?style=flat-square&logoColor=white"/> | SIEM · XDR · log aggregation · alerting | `4.x` |
-| <img src="https://img.shields.io/badge/Windows_Server_2022-0078D4?style=flat-square&logo=microsoft&logoColor=white"/> | Active Directory · DNS · AD CS | Eval |
-| <img src="https://img.shields.io/badge/Windows_10_Pro-0078D4?style=flat-square&logo=microsoft&logoColor=white"/> | Domain endpoints — IT · Finance | Eval |
+| <img src="https://img.shields.io/badge/Windows_Server_2019-0078D4?style=flat-square&logo=microsoft&logoColor=white"/> | Active Directory · DNS · AD CS | Eval |
+| <img src="https://img.shields.io/badge/Windows_10_Pro-0078D4?style=flat-square&logo=microsoft&logoColor=white"/> | Domain endpoints — IT · OPs | Eval |
 | <img src="https://img.shields.io/badge/Kali_Linux-557C94?style=flat-square&logo=kali-linux&logoColor=white"/> | Red Team · penetration testing | Latest |
 
 ---
@@ -202,8 +203,8 @@ Infrastructure  ──►  Identity    ──►  Telemetry   ──►  Hardeni
 
 | # | Task | Status |
 |:---:|------|:------:|
-| `[05]` | Domain Controller Provisioning & Network Integration | `🔄` |
-| `[06]` | Active Directory Domain Installation & Configuration | `⬜` |
+| `[05]` | Domain Controller Provisioning & Network Integration | `✅` |
+| `[06]` | Active Directory Domain Installation & Configuration | `🔄` |
 | `[07]` | DMZ Architecture Setup | `⬜` |
 | `[08]` | LAN/DMZ Traffic Isolation & Secure Local DNS Mapping | `⬜` |
 
@@ -481,25 +482,48 @@ Repeat for each bridge below:
 | Bridge | CIDR | Autostart | Comment | Role |
 |:------:|------|:---------:|---------|------|
 | `vmbr0` | `192.168.140.129/24` | ✅ | — | Management / NAT uplink via `nic0` |
-| `vmbr1` | `10.22.0.1/24` | ✅ | `Workstation` | Workstation VLAN segment |
-| `vmbr2` | `10.22.7.1/24` | ✅ | `Servers` | Internal servers segment |
-| `vmbr3` | `192.168.50.1/24` | ✅ | `DMZ` | Demilitarized Zone |
+| `vmbr1` | `10.22.0.1/24` | ✅ | `HR` | HR Workstation segment |
+| `vmbr2` | `10.22.1.1/24` | ✅ | `IT` | IT Workstation segment |
+| `vmbr3` | `10.22.2.1/24` | ✅ | `OPs` | OPs Workstation segment |
+| `vmbr4` | `192.168.50.1/24` | ✅ | `DMZ` | Demilitarized Zone |
+| `vmbr5` | `10.22.7.1/24` | ✅ | `Servers` | Internal servers segment |
 
-> ⚠️ `vmbr2` and `vmbr3` will show **Active: No** until a VM is attached — this is expected.
+> ⚠️ `vmbr2` through `vmbr5` will show **Active: No** until a VM is attached — this is expected.
 
 Click **"Apply Configuration"**. The pending diff confirms changes written to `/etc/network/interfaces`:
 
 ```diff
++auto vmbr1
++iface vmbr1 inet static
++    address 10.22.0.1/24
++    bridge-ports none
++    bridge-stp off
++    bridge-fd 0
++
 +auto vmbr2
 +iface vmbr2 inet static
-+    address 10.22.7.1/24
++    address 10.22.1.1/24
 +    bridge-ports none
 +    bridge-stp off
 +    bridge-fd 0
 +
 +auto vmbr3
 +iface vmbr3 inet static
++    address 10.22.2.1/24
++    bridge-ports none
++    bridge-stp off
++    bridge-fd 0
++
++auto vmbr4
++iface vmbr4 inet static
 +    address 192.168.50.1/24
++    bridge-ports none
++    bridge-stp off
++    bridge-fd 0
++
++auto vmbr5
++iface vmbr5 inet static
++    address 10.22.7.1/24
 +    bridge-ports none
 +    bridge-stp off
 +    bridge-fd 0
@@ -516,17 +540,21 @@ Click **"Apply Configuration"**. The pending diff confirms changes written to `/
 |:------:|------|:------:|:---------:|------|---------|
 | `nic0` | Network Device | ✅ | — | — | Physical uplink `enp2s1` |
 | `vmbr0` | Linux Bridge | ✅ | ✅ | `192.168.140.129/24` | Management / NAT |
-| `vmbr1` | Linux Bridge | ✅ | ✅ | `10.22.0.1/24` | Workstation |
-| `vmbr2` | Linux Bridge | — | ✅ | `10.22.7.1/24` | Servers |
-| `vmbr3` | Linux Bridge | — | ✅ | `192.168.50.1/24` | DMZ |
+| `vmbr1` | Linux Bridge | ✅ | ✅ | `10.22.0.1/24` | HR Workstation |
+| `vmbr2` | Linux Bridge | — | ✅ | `10.22.1.1/24` | IT Workstation |
+| `vmbr3` | Linux Bridge | — | ✅ | `10.22.2.1/24` | OPs Workstation |
+| `vmbr4` | Linux Bridge | — | ✅ | `192.168.50.1/24` | DMZ |
+| `vmbr5` | Linux Bridge | — | ✅ | `10.22.7.1/24` | Servers |
 
 ```
 Proxmox Node: mursad
 │
 ├── vmbr0  ──►  Management / NAT     192.168.140.129/24   (nic0 uplink)
-├── vmbr1  ──►  Workstation Segment  10.22.0.1/24
-├── vmbr2  ──►  Servers Segment      10.22.7.1/24
-└── vmbr3  ──►  DMZ Zone             192.168.50.1/24
+├── vmbr1  ──►  HR Workstation       10.22.0.1/24
+├── vmbr2  ──►  IT Workstation       10.22.1.1/24
+├── vmbr3  ──►  OPs Workstation      10.22.2.1/24
+├── vmbr4  ──►  DMZ Zone             192.168.50.1/24
+└── vmbr5  ──►  Servers Segment      10.22.7.1/24
 ```
 
 ---
@@ -536,9 +564,11 @@ Proxmox Node: mursad
 - [ ] Proxmox VE 9.1 installed and booting correctly
 - [ ] Web GUI accessible at `https://192.168.140.129:8006/`
 - [ ] `vmbr0` active — IP `192.168.140.129/24`, gateway `192.168.140.2`
-- [ ] `vmbr1` created — `10.22.0.1/24`, comment `Workstation`, Autostart ✅
-- [ ] `vmbr2` created — `10.22.7.1/24`, comment `Servers`, Autostart ✅
-- [ ] `vmbr3` created — `192.168.50.1/24`, comment `DMZ`, Autostart ✅
+- [ ] `vmbr1` created — `10.22.0.1/24`, comment `HR`, Autostart ✅
+- [ ] `vmbr2` created — `10.22.1.1/24`, comment `IT`, Autostart ✅
+- [ ] `vmbr3` created — `10.22.2.1/24`, comment `OPs`, Autostart ✅
+- [ ] `vmbr4` created — `192.168.50.1/24`, comment `DMZ`, Autostart ✅
+- [ ] `vmbr5` created — `10.22.7.1/24`, comment `Servers`, Autostart ✅
 - [ ] **"Apply Configuration"** clicked — no pending changes remaining
 
 <div align="center"><br>
@@ -569,9 +599,11 @@ Proxmox Node: mursad
 Proxmox Node: mursad
 └── VM 100  —  Firewall  (pfSense CE)
         ├── vtnet0  →  vmbr0  →  WAN    192.168.140.x/24  (DHCP from host)
-        ├── vtnet1  →  vmbr1  →  LAN    10.22.0.1/24      (Workstation)
-        ├── vtnet2  →  vmbr2  →  OPT1   10.22.7.1/24      (Servers)
-        └── vtnet3  →  vmbr3  →  OPT2   192.168.50.1/24   (DMZ)
+        ├── vtnet1  →  vmbr1  →  LAN    10.22.0.1/24      (HR Workstation)
+        ├── vtnet2  →  vmbr2  →  OPT1   10.22.1.1/24      (IT Workstation)
+        ├── vtnet3  →  vmbr3  →  OPT2   10.22.2.1/24      (OPs Workstation)
+        ├── vtnet4  →  vmbr4  →  OPT3   192.168.50.1/24   (DMZ)
+        └── vtnet5  →  vmbr5  →  OPT4   10.22.7.1/24      (Servers)
 ```
 
 | Part | Section | Description |
@@ -724,17 +756,17 @@ Review and click **Finish**. Do **not** check "Start after created".
 
 #### Step 12 — Add Remaining Network Interfaces
 
-> ⚠️ **Complete this before first boot.** All four NICs must exist when pfSense first boots so FreeBSD can detect and enumerate them during setup.
+> ⚠️ **Complete this before first boot.** All six NICs must exist when pfSense first boots so FreeBSD can detect and enumerate them during setup.
 
 Navigate to **VM 100 → Hardware → Add → Network Device**:
 
-| NIC | Bridge | Model |
-|:---:|:------:|:-----:|
-| net1 | `vmbr1` | VirtIO |
-| net2 | `vmbr2` | VirtIO |
-| net3 | `vmbr3` | VirtIO |
-| net4 | `vmbr4` | VirtIO |
-| net5 | `vmbr5` | VirtIO |
+| NIC | Bridge | Model | Zone |
+|:---:|:------:|:-----:|------|
+| net1 | `vmbr1` | VirtIO | HR Workstation |
+| net2 | `vmbr2` | VirtIO | IT Workstation |
+| net3 | `vmbr3` | VirtIO | OPs Workstation |
+| net4 | `vmbr4` | VirtIO | DMZ |
+| net5 | `vmbr5` | VirtIO | Servers |
 
 ---
 
@@ -870,7 +902,7 @@ Revert to HTTP: `n` — keep HTTPS.
 LAN (vtnet1) →  10.22.0.1/24  ✅
 ```
 
-Access the WebConfigurator from any Workstation-segment machine:
+Access the WebConfigurator from any HR-segment machine:
 
 ```
 https://10.22.0.1
@@ -904,7 +936,7 @@ https://10.22.0.1
 - [ ] VM 100 created — CPU type `host`, machine `i440fx`
 - [ ] All 6 NICs attached (vmbr0–vmbr5) **before first boot**
 - [ ] pfSense installed with Auto (ZFS) partitioning
-- [ ] Interfaces assigned: vtnet0=WAN · vtnet1=LAN · vtnet2=OPT1 · vtnet3=OPT2
+- [ ] Interfaces assigned: vtnet0=WAN · vtnet1=LAN · vtnet2=OPT1 · vtnet3=OPT2 · vtnet4=OPT3 · vtnet5=OPT4
 - [ ] WAN acquiring DHCP from host network
 - [ ] LAN configured at `10.22.0.1/24` with DHCP pool `100–200`
 - [ ] WebConfigurator accessible at `https://10.22.0.1`
@@ -976,9 +1008,7 @@ Confirm all five internal bridges are present on the **mursad** node before proc
 
 #### Step 2 — Add Network Devices to Firewall VM
 
-
 <img width="1237" height="631" alt="2" src="https://github.com/user-attachments/assets/935bbc5e-6e3f-41d6-ac35-6cd053913779" />
-
 
 Navigate to **VM 100 (Firewall) → Hardware → Add → Network Device**.
 
@@ -987,7 +1017,6 @@ Navigate to **VM 100 (Firewall) → Hardware → Add → Network Device**.
 #### Step 3 — Assign All Bridges to Firewall
 
 <img width="647" height="287" alt="3" src="https://github.com/user-attachments/assets/848bfd3b-462b-4510-8453-9c54bcb0e616" />
-
 
 Add one **VirtIO** Network Device per bridge:
 
@@ -1006,7 +1035,6 @@ Add one **VirtIO** Network Device per bridge:
 #### Step 4 — Verify Firewall Hardware
 
 <img width="1008" height="438" alt="4" src="https://github.com/user-attachments/assets/231b245c-5a4d-422c-9c0f-50aa714802ac" />
-
 
 Open **VM 100 → Hardware** and confirm the full NIC list:
 
@@ -1029,7 +1057,6 @@ net5  →  vmbr5   SERVERS
 
 <img width="1912" height="936" alt="5" src="https://github.com/user-attachments/assets/4b8208c4-9cfd-4aad-ac4f-044105a94d40" />
 
-
 Log into the pfSense WebConfigurator at `https://10.22.0.1` and navigate to **Firewall → Rules**.
 
 ---
@@ -1038,7 +1065,6 @@ Log into the pfSense WebConfigurator at `https://10.22.0.1` and navigate to **Fi
 
 <img width="1171" height="570" alt="6" src="https://github.com/user-attachments/assets/5c5f0b73-8a0d-4628-9f88-aff4b2693c6b" />
 
-
 Select the **WAN** tab. Click **Add ↑** to insert a new rule at the top of the list.
 
 ---
@@ -1046,7 +1072,6 @@ Select the **WAN** tab. Click **Add ↑** to insert a new rule at the top of the
 #### Step 7 — Configure WAN Rule Parameters
 
 <img width="1167" height="917" alt="7" src="https://github.com/user-attachments/assets/85dd7330-3c39-41ad-920f-47c341e9414b" />
-
 
 | Field | Value |
 |-------|-------|
@@ -1066,7 +1091,6 @@ Click **Save**.
 
 <img width="1209" height="595" alt="8" src="https://github.com/user-attachments/assets/65da654e-8ade-4cb0-ab67-e55986c8495c" />
 
-
 The new rule appears in the WAN tab. Click **Apply Changes** to activate it.
 
 ---
@@ -1079,7 +1103,6 @@ The new rule appears in the WAN tab. Click **Apply Changes** to activate it.
 
 <img width="1203" height="580" alt="9" src="https://github.com/user-attachments/assets/e91faaf1-f89a-4cfb-bb04-7c962e351528" />
 
-
 Navigate to **Firewall → NAT → Outbound**.
 
 ---
@@ -1087,7 +1110,6 @@ Navigate to **Firewall → NAT → Outbound**.
 #### Step 10 — Enable Hybrid Outbound NAT
 
 <img width="1216" height="665" alt="10" src="https://github.com/user-attachments/assets/c87dd688-e179-4008-9a99-eeda1dfc95ab" />
-
 
 Under **Outbound NAT Mode**, select **Hybrid Outbound NAT rule generation**.
 
@@ -1100,7 +1122,6 @@ Click **Save**.
 #### Step 11 — Add HR Workstation NAT Mapping
 
 <img width="1184" height="652" alt="11" src="https://github.com/user-attachments/assets/d7a44a09-c4b0-4665-9a80-e5d23eb127b9" />
-
 
 Click **Add ↑** to create the first manual mapping.
 
@@ -1120,9 +1141,7 @@ Click **Save**.
 
 #### Step 12 — Add SERVERS NAT Mapping
 
-
 <img width="1175" height="685" alt="12" src="https://github.com/user-attachments/assets/0c56f1ee-9ae1-471b-872d-edae3b01707d" />
-
 
 | Field | Value |
 |-------|-------|
@@ -1141,7 +1160,6 @@ Click **Save**.
 #### Step 13 — Add DMZ NAT Mapping
 
 <img width="1178" height="805" alt="13" src="https://github.com/user-attachments/assets/706da33c-17d1-482a-bd93-bd1ca0df8079" />
-
 
 DMZ is restricted to TCP/UDP only — not raw IP or ICMP:
 
@@ -1162,7 +1180,6 @@ Click **Save**.
 #### Step 14 — Review & Apply NAT Mappings
 
 <img width="1196" height="386" alt="14" src="https://github.com/user-attachments/assets/9f783a64-5251-45ce-a3c6-ad695d83c788" />
-
 
 Confirm three manual mappings appear at the top of the list:
 
@@ -1186,7 +1203,6 @@ Click **Apply Changes**.
 
 <img width="1155" height="243" alt="15" src="https://github.com/user-attachments/assets/bea7d50d-9ad1-4f11-a5ea-1addcca3548f" />
 
-
 Navigate to **Interfaces → Assignments**.
 
 ---
@@ -1194,7 +1210,6 @@ Navigate to **Interfaces → Assignments**.
 #### Step 16 — Configure HR Interface (OPT1)
 
 <img width="1164" height="289" alt="16" src="https://github.com/user-attachments/assets/9503ea2e-0529-47af-915d-3e13c26062dc" />
-
 
 Click **OPT1** and configure:
 
@@ -1213,7 +1228,6 @@ Click **Save** → **Apply Changes**.
 
 <img width="1183" height="937" alt="17" src="https://github.com/user-attachments/assets/5550c802-da20-419e-b2cd-60342c7a985e" />
 
-
 | Field | Value |
 |-------|-------|
 | Enable | ✅ Checked |
@@ -1228,7 +1242,6 @@ Click **Save** → **Apply Changes**.
 #### Step 18 — Configure OPs Interface (OPT3)
 
 <img width="1174" height="544" alt="18" src="https://github.com/user-attachments/assets/17493441-dd4b-403b-8698-e936ad8bbd39" />
-
 
 | Field | Value |
 |-------|-------|
@@ -1245,7 +1258,6 @@ Click **Save** → **Apply Changes**.
 
 <img width="1166" height="676" alt="19" src="https://github.com/user-attachments/assets/c75ef365-6623-4919-98d6-4b96fa14326c" />
 
-
 | Field | Value |
 |-------|-------|
 | Enable | ✅ Checked |
@@ -1259,9 +1271,7 @@ Click **Save** → **Apply Changes**.
 
 #### Step 20 — Configure SERVERS Interface (OPT5)
 
-
 <img width="1197" height="756" alt="20" src="https://github.com/user-attachments/assets/07a17413-37b3-4b86-a4bf-57e5a8d0a87d" />
-
 
 | Field | Value |
 |-------|-------|
@@ -1277,7 +1287,6 @@ Click **Save** → **Apply Changes**.
 #### Step 21 — Verify Complete Interface Table
 
 <img width="1158" height="786" alt="21" src="https://github.com/user-attachments/assets/548fc934-c9b2-4907-874e-ada079721918" />
-
 
 Navigate to **Interfaces → Assignments** and confirm:
 
@@ -1295,7 +1304,6 @@ Navigate to **Interfaces → Assignments** and confirm:
 #### Step 22 — Review pfSense Dashboard
 
 <img width="1908" height="931" alt="22" src="https://github.com/user-attachments/assets/cef2f0bf-4ec0-4076-a112-4c267b57eadb" />
-
 
 Click the pfSense logo to return to the dashboard. The **Interfaces** widget confirms all six zones active:
 
@@ -1339,6 +1347,386 @@ SERVERS  →  10.22.7.1/24       ✅
 
 ---
 
+<details>
+<summary><b>📘 Phase 2 · [05] — Domain Controller Provisioning & Network Integration</b></summary>
+<a name="phase-2--05"></a>
+
+<br>
+
+> **Scope:** Establishing the DHCP and DNS routing for the SERVERS zone in pfSense, provisioning the Windows Server Domain Controller (DC) virtual machine in Proxmox, installing the OS and VirtIO drivers, configuring the host identity, and verifying outbound internet connectivity through the firewall.
+
+---
+
+### Overview
+
+```text
+Proxmox Node: mursad
+└── VM 101  —  DC  (Windows Server 2019)
+        ├── Network: vmbr5 (SERVERS)
+        ├── Compute: 2 vCores · 8 GB RAM
+        └── Storage: 60 GB Disk · VirtIO Drivers
+
+pfSense WebConfigurator
+└── DHCP Server
+        ├── Interface: SERVERS
+        ├── Backend: Kea DHCP
+        └── Range: 10.22.7.3 – 10.22.7.50
+```
+
+| Part | Section | Description |
+|:----:|---------|-------------|
+| **A** | pfSense DHCP Configuration | Establish DHCP and DNS resolution for the SERVERS zone |
+| **B** | VM Hardware Provisioning | Create and allocate resources for the Domain Controller VM |
+| **C** | Windows Server Installation | Deploy Windows Server 2019 Desktop Experience |
+| **D** | Drivers & Hostname Configuration | Install VirtIO drivers and set the DC hostname |
+| **E** | Routing & Internet Verification | Configure pfSense gateways and rules to allow outbound traffic |
+
+---
+
+### Part A — pfSense DHCP Configuration
+
+#### Step 1 — Enable SERVERS DHCP Server
+
+Before booting our Domain Controller, the SERVERS network needs a DHCP pool so the VM can acquire an IP address dynamically during installation. Navigate to **Services → DHCP Server** and select the **SERVERS** tab.
+
+| Field | Value |
+|-------|-------|
+| Enable | ✅ Enable DHCP server on SERVERS interface |
+| Range From | `10.22.7.3` |
+| Range To | `10.22.7.50` |
+
+> **Note:** The range starts at `.3` to reserve `.1` for the gateway and `.2` for the future Wazuh SIEM server.
+
+Click **Save**.
+
+<img width="1169" height="936" alt="1" src="https://github.com/user-attachments/assets/e1c72fb1-6cc6-46be-9f05-679a8db4b7b1" />
+
+---
+
+#### Step 2 — Switch to Kea DHCP Backend
+
+Newer versions of pfSense display a deprecation warning for the legacy ISC DHCP server. To future-proof our SOC lab, we switch to the modern **Kea DHCP** engine. Navigate to **System → Advanced → Networking**, scroll to the **DHCP Backend** section, select **Kea DHCP**, and click **Save**.
+
+<img width="1188" height="830" alt="2" src="https://github.com/user-attachments/assets/430e3f8c-1544-4d96-a049-0eaa81fdde6e" />
+
+---
+
+#### Step 3 — Configure DHCP DNS Servers
+
+Navigate back to **Services → DHCP Server → SERVERS** and scroll down to the **Servers** section. Add the firewall's own IP (`10.22.7.1`) as the primary DNS server so machines in this zone can resolve internet hostnames before the Active Directory DNS role is installed.
+
+Click **Save**.
+
+<img width="1172" height="333" alt="3" src="https://github.com/user-attachments/assets/d66ea4da-1b6c-42b6-82fb-96f496f3a194" />
+
+---
+
+### Part B — Domain Controller VM Provisioning
+
+> ⚠️ **Prerequisite:** Ensure you have downloaded the **Windows Server ISO** and the **VirtIO Windows Drivers ISO** and uploaded both to your Proxmox local storage before proceeding.
+
+#### Step 4 — Create the DC Virtual Machine
+
+In the Proxmox web interface, click **Create VM** in the top-right corner. Set the **VM ID** to `101` and name the machine `DC`. Click **Next**.
+
+<img width="812" height="590" alt="4" src="https://github.com/user-attachments/assets/6933494a-cb94-4c1a-adcc-d2d2a43d5013" />
+
+---
+
+#### Step 5 — Select Guest OS
+
+Under the **OS** tab, select your Proxmox local storage and choose the **Windows Server ISO**. Set the **Guest OS Type** to `Microsoft Windows` and manually select the version matching your ISO (e.g., `2019` or `2022`).
+
+<img width="748" height="551" alt="5" src="https://github.com/user-attachments/assets/dfb357ad-56f0-4244-abd9-62e140d5261d" />
+
+---
+
+#### Step 6 — Disk Allocation
+
+Under the **Disks** tab, set the disk size to **60 GB** — sufficient for the Windows OS, future Active Directory databases (NTDS), and system logs. Set the bus/device to **VirtIO Block** for optimal I/O performance.
+
+<img width="750" height="549" alt="6" src="https://github.com/user-attachments/assets/d83792c9-56df-4e74-924f-b7a4761030ff" />
+
+---
+
+#### Step 7 — CPU Configuration
+
+Under the **CPU** tab, set **Cores** to `2`. Change the **CPU Type** to `host` to pass the hypervisor's processor flags directly into the VM, ensuring maximum compatibility with nested virtualization.
+
+> ⚠️ **Critical:** CPU type `host` passes the AMD Ryzen flags directly into the VM. Without this, Windows Server may fail to boot stably under nested virtualization.
+
+<img width="749" height="549" alt="7" src="https://github.com/user-attachments/assets/f40f0339-1000-4b1b-bfdb-142c01cc9133" />
+
+---
+
+#### Step 8 — Memory (RAM) Allocation
+
+Under the **Memory** tab, assign **8192 MiB (8 GB)** of RAM. This ensures the Windows GUI and Active Directory services run smoothly without bottlenecking.
+
+<img width="744" height="550" alt="8" src="https://github.com/user-attachments/assets/08fcf3a0-b27c-4ce8-9bd6-faf3b7b16e05" />
+
+---
+
+#### Step 9 — Network Configuration
+
+Under the **Network** tab, attach the VM to our segmented server network:
+
+| Field | Value |
+|-------|-------|
+| Bridge | `vmbr5` (SERVERS) |
+| Model | `VirtIO (paravirtualized)` |
+| Firewall | Unchecked |
+
+Review the summary and complete the VM creation. **Do not power it on yet.**
+
+<img width="733" height="545" alt="9" src="https://github.com/user-attachments/assets/3f745984-85d4-4bea-a9c8-1e95c39da3bd" />
+
+---
+
+#### Step 10 — Attach VirtIO Drivers CD/DVD
+
+Because we selected VirtIO for both the storage and network adapters, the Windows installer will not natively recognize either device. We must mount the drivers ISO before first boot.
+
+Navigate to **VM 101 (DC) → Hardware → Add → CD/DVD Drive**, choose your local storage, and select the `virtio-win` ISO.
+
+> ⚠️ **Note:** Make sure the VirtIO ISO is uploaded to Proxmox storage before this step.
+
+<img width="1913" height="716" alt="10" src="https://github.com/user-attachments/assets/4f77de02-a2e4-4374-85c7-0ba72e7b339e" />
+
+---
+
+### Part C — Windows Server Installation
+
+#### Step 11 — Power On and Start Setup
+
+With both ISOs mounted, start the VM and open the **Console**. Press any key when prompted to boot from the CD/DVD and wait for the Windows Setup screen to load.
+
+<img width="1088" height="810" alt="11" src="https://github.com/user-attachments/assets/a21a357c-0b44-40cc-818d-a838ed3c75c3" />
+
+---
+
+#### Step 12 — Install Now
+
+Confirm your language, time, and keyboard preferences, then click **Install now**.
+
+<img width="1090" height="805" alt="12" src="https://github.com/user-attachments/assets/36aac1cb-a7ef-4f04-a034-f24d739472b9" />
+
+---
+
+#### Step 13 — Select Desktop Experience
+
+When prompted to select the OS version, choose **Windows Server (Desktop Experience)**.
+
+> **Note:** Skipping the "Desktop Experience" option installs **Server Core** — a CLI-only environment with no GUI. Always select Desktop Experience for this lab.
+
+<img width="1090" height="810" alt="13" src="https://github.com/user-attachments/assets/b0f110a8-ee0b-454d-a5b7-2a6e15443505" />
+
+---
+
+#### Step 14 — Custom Installation
+
+Accept the license terms. When asked for the installation type, select **Custom: Install Windows only (advanced)**. We are performing a clean installation, not an upgrade.
+
+<img width="1089" height="814" alt="14" src="https://github.com/user-attachments/assets/aac7bd1c-d9d8-4bff-beb8-45e80574f6ff" />
+
+---
+
+#### Step 15 — Select the VirtIO Storage Drive
+
+You should see **Drive 0** with 60 GB of unallocated space. Select it and click **Next** to begin writing the OS to disk.
+
+> **Note:** If the drive does not appear, click **Load driver** and browse to the `viostor` folder on the mounted VirtIO CD.
+
+<img width="1082" height="808" alt="15" src="https://github.com/user-attachments/assets/d5711040-6d6c-4a7c-8a60-c95f62994466" />
+
+---
+
+#### Step 16 — Set Local Administrator Password
+
+After several automated reboots, Windows will prompt you to set a password. Enter a strong password for the built-in **Local Administrator** account and click **Finish**.
+
+<img width="1090" height="813" alt="16" src="https://github.com/user-attachments/assets/32c96d8b-25b6-4d98-91cd-1d1748bc5c89" />
+
+---
+
+#### Step 17 — Welcome to Windows Server
+
+Press **Ctrl+Alt+Delete** (via the Proxmox console flyout) to log in. You will land on the Windows Server desktop with **Server Manager** launching automatically.
+
+<img width="1081" height="813" alt="17" src="https://github.com/user-attachments/assets/bc4810d4-3fc0-4a84-a967-35e133cefeb0" />
+
+---
+
+### Part D — Drivers & Hostname Configuration
+
+#### Step 18 — Run the VirtIO Installer
+
+Because we used the VirtIO network adapter, the VM currently has no network connectivity. Open **File Explorer**, navigate to the `virtio-win` CD Drive (typically `E:`), and double-click **`virtio-win-gt-x64`** to launch the driver installer.
+
+<img width="1080" height="815" alt="18" src="https://github.com/user-attachments/assets/8ac08a49-c106-4cb4-aab6-f0c0adcc1131" />
+
+---
+
+#### Step 19 — Complete VirtIO Setup
+
+Click **Next** through the standard setup prompts to install all paravirtualized drivers. Once complete, click **Finish**. The network adapter will initialize immediately in the background.
+
+<img width="1090" height="816" alt="19" src="https://github.com/user-attachments/assets/4161063e-5034-4a45-b9d2-a6e0c43bc747" />
+
+---
+
+#### Step 20 — Verify DHCP Network Assignment
+
+Open **PowerShell** from the Start menu and run:
+
+```powershell
+ipconfig
+```
+
+The Ethernet adapter should now show a lease from our pfSense Kea DHCP server — the first address in our pool: `10.22.7.3`.
+
+<img width="1091" height="812" alt="20" src="https://github.com/user-attachments/assets/aee18131-69b3-4c13-8816-435004950e84" />
+
+---
+
+#### Step 21 — Access System Properties
+
+Before promoting this server to a Domain Controller, we need to replace its auto-generated hostname. Search for **Control Panel**, navigate to **System and Security → System**, and click **Change settings** under the computer name section.
+
+<img width="1088" height="812" alt="21" src="https://github.com/user-attachments/assets/11557706-1735-41f1-a6c0-9d3a32601f9f" />
+
+---
+
+#### Step 22 — Update Computer Description
+
+In the **System Properties** window, set the Computer description to `DC`. Then click the **Change...** button to modify the actual NetBIOS computer name.
+
+<img width="1083" height="814" alt="22" src="https://github.com/user-attachments/assets/55c7ec7c-55a3-4340-84c4-bcbdc3103b6a" />
+
+---
+
+#### Step 23 — Rename Computer to DC
+
+Type `DC` into the **Computer name** field and click **OK → Apply**. Windows will prompt for a restart to apply the changes — click **Restart Now**.
+
+<img width="1083" height="814" alt="23" src="https://github.com/user-attachments/assets/0e82c160-05ef-439b-a36d-e6864cad71ab" />
+
+---
+
+### Part E — Routing & Internet Verification
+
+#### Step 24 — Identify Connectivity Issue
+
+After the reboot, the network icon in the taskbar may show a yellow warning triangle (**No Internet Access**). DHCP is functioning correctly, but outbound traffic has no defined route to the WAN interface (`192.168.140.130`).
+
+<img width="1089" height="807" alt="24" src="https://github.com/user-attachments/assets/34d6a443-a8d7-40a6-a0bc-8da79e903e1a" />
+
+---
+
+#### Step 25 — Add WAN Gateway in pfSense
+
+Log back into the **pfSense WebConfigurator**. Navigate to **System → Routing → Gateways** and click the green **Add** button.
+
+<img width="1235" height="670" alt="25" src="https://github.com/user-attachments/assets/518bca0a-3bc4-4cba-9b99-54792fd31ff3" />
+
+---
+
+#### Step 26 — Configure External Gateway
+
+Set the **Default gateway IPv4** to point to your WAN interface. This tells pfSense where to forward all traffic that doesn't belong to the local `10.22.x.x` subnets.
+
+<img width="1177" height="524" alt="26" src="https://github.com/user-attachments/assets/cd92867b-a884-480a-b145-40ea411aae0a" />
+
+---
+
+#### Step 27 — Update SERVERS Firewall Rules
+
+Navigate to **Firewall → Rules → SERVERS** and create the following two rules:
+
+| Rule | Action | Protocol | Source | Destination | Port | Purpose |
+|------|--------|----------|--------|-------------|:----:|---------|
+| 1 — DNS | Pass | IPv4 UDP | SERVERS net | This Firewall (self) | `53` | Allow DNS queries to pfSense |
+| 2 — Outbound | Pass | IPv4 Any | SERVERS net | Any | Any | Allow outbound internet traffic |
+
+Click **Apply Changes**.
+
+<img width="1165" height="470" alt="27" src="https://github.com/user-attachments/assets/a5319eca-2b23-4b78-9b8d-459a8c6428bc" />
+
+---
+
+#### Step 28 — Restart Routing Services
+
+If the connection is still not resolving after applying the rules, navigate to **Status → Services** in pfSense and restart both the `dpinger` (Gateway Monitoring) and `kea-dhcp4` services to force the new routing configuration to take effect immediately.
+
+<img width="1183" height="477" alt="28" src="https://github.com/user-attachments/assets/e7e06cdb-b62a-4226-8182-df53679b8614" />
+
+---
+
+#### Step 29 — Ping Verification
+
+Back on the Domain Controller, open **PowerShell** and run:
+
+```powershell
+ping 8.8.8.8
+```
+
+Successful ICMP replies confirm that traffic is routing correctly: `DC → SERVERS VLAN → pfSense → WAN → Internet`.
+
+<img width="1084" height="816" alt="29" src="https://github.com/user-attachments/assets/154d5b80-fddd-4428-a271-1490a2952cc1" />
+
+---
+
+#### Step 30 — Browser Verification
+
+Open **Microsoft Edge** on the Domain Controller and navigate to `google.com`. The page should load without issue, confirming full end-to-end connectivity.
+
+The underlying infrastructure is now complete. The server is fully prepped to be promoted to an **Active Directory Domain Controller** in the next phase.
+
+<img width="1074" height="814" alt="30" src="https://github.com/user-attachments/assets/35ec7491-c54a-4939-bb81-244641e46958" />
+
+---
+
+### VM Summary
+
+| Component | vtnet | Bridge | IP | Zone |
+|:---------:|:-----:|:------:|:--:|:----:|
+| Windows Server DC | — | vmbr5 | `10.22.7.3` (DHCP) | SERVERS |
+| pfSense — SERVERS | vtnet5 | vmbr5 | `10.22.7.1/24` | SERVERS gateway |
+
+---
+
+### ✅ Phase Checklist
+
+- [ ] Windows Server ISO and VirtIO ISO uploaded to Proxmox local storage
+- [ ] SERVERS DHCP pool enabled — range `10.22.7.3` to `10.22.7.50`
+- [ ] DHCP backend switched from ISC to **Kea DHCP**
+- [ ] DNS server `10.22.7.1` configured on SERVERS DHCP scope
+- [ ] VM 101 created — `2 cores · 8 GB RAM · 60 GB VirtIO Block disk`
+- [ ] Network bridge set to `vmbr5` (SERVERS), model VirtIO, firewall unchecked
+- [ ] VirtIO drivers ISO attached as second CD/DVD drive before first boot
+- [ ] Windows Server 2019 **Desktop Experience** installed via Custom install
+- [ ] Local Administrator password set
+- [ ] VirtIO drivers installed — `virtio-win-gt-x64`
+- [ ] DHCP lease confirmed — `10.22.7.3` via `ipconfig`
+- [ ] Computer renamed to `DC` and restarted
+- [ ] WAN gateway added in pfSense — **System → Routing → Gateways**
+- [ ] SERVERS firewall rules created — DNS (`UDP/53`) + outbound (`Any`)
+- [ ] Routing services restarted if required — `dpinger` and `kea-dhcp4`
+- [ ] Ping to `8.8.8.8` successful from DC
+- [ ] Browser connectivity confirmed — `google.com` loads in Edge
+
+<div align="center"><br>
+
+**🟢 Phase Complete**
+
+`[04] Advanced Firewall Routing` ◄── **`[05] Domain Controller Provisioning`** ──► `[06] Active Directory Domain Installation`
+
+<br></div>
+
+</details>
+
+---
+
 ## 📁 Repository Structure
 
 ```
@@ -1348,7 +1736,6 @@ Project-Mursad/
 │   ├── diagrams/
 │   │   └── mursad-topology.svg
 │   ├── phase-1/
-│   │   ├── 01-project-architecture/
 │   │   ├── 02-proxmox-deployment/
 │   │   ├── 03-pfsense-installation/
 │   │   └── 04-firewall-routing/
@@ -1363,7 +1750,6 @@ Project-Mursad/
 │
 ├── 📂 docs/                          # Phase-by-phase deployment guides
 │   ├── phase-1/
-│   │   ├── 01-project-architecture.md
 │   │   ├── 02-proxmox-deployment.md
 │   │   ├── 03-pfsense-installation.md
 │   │   └── 04-firewall-routing.md
