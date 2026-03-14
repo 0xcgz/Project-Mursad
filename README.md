@@ -60,6 +60,7 @@
   - [Phase 1 · 03 — pfSense Installation](#phase-1--03)
   - [Phase 1 · 04 — Advanced Firewall Routing](#phase-1--04)
   - [Phase 2 · 05 — Domain Controller Provisioning](#phase-2--05)
+  - [Phase 2 · 06 — Active Directory Installation](#phase-2--06)
 - [Repository Structure](#-repository-structure)
 - [Disclaimer](#-disclaimer)
 
@@ -1720,6 +1721,443 @@ The underlying infrastructure is now complete. The server is fully prepped to be
 **🟢 Phase Complete**
 
 `[04] Advanced Firewall Routing` ◄── **`[05] Domain Controller Provisioning`** ──► `[06] Active Directory Domain Installation`
+
+<br></div>
+
+</details>
+
+---
+
+<details>
+<summary><b>📗 Phase 2 · [06] — Active Directory Domain Installation & Configuration</b></summary>
+<a name="phase-2--06"></a>
+
+<br>
+
+> **Scope:** Installing the **Active Directory Domain Services** and **DNS Server** roles on the Domain Controller, promoting the server to the forest root of `mursad.local`, creating domain user accounts, provisioning a Windows 10 Pro workstation, and joining it to the new domain.
+
+---
+
+### Overview
+
+```text
+Proxmox Node: mursad
+├── VM 101  —  DC  (Windows Server 2019)
+│       ├── Roles: AD DS · DNS Server
+│       ├── Forest Root: mursad.local
+│       ├── DC IP: 10.22.7.3  (static, post-promotion)
+│       └── Users: a.alaradi@mursad.local
+│
+└── VM 102  —  ITWS  (Windows 10 Pro)
+        ├── Network: vmbr2 (IT Workstation)
+        ├── DHCP: 10.22.1.x
+        └── Domain-joined: mursad.local
+```
+
+| Part | Section | Description |
+|:----:|---------|-------------|
+| **A** | Role Installation | Add AD DS and DNS Server roles via Server Manager |
+| **B** | Domain Promotion | Promote the server to a new forest root Domain Controller |
+| **C** | User Provisioning | Create domain user accounts in AD Users and Computers |
+| **D** | Workstation Setup | Provision a Windows 10 Pro VM with VirtIO drivers |
+| **E** | Network Preparation | Configure pfSense DHCP, NAT, and firewall rules for the IT zone |
+| **F** | Domain Join | Configure DNS on the workstation and join `mursad.local` |
+
+---
+
+### Part A — Role Installation
+
+#### Step 1 — Open Add Roles and Features
+
+<img width="1083" height="817" alt="1" src="https://github.com/user-attachments/assets/9e5c83fc-774d-435d-9848-b10351bbfdf6" />
+
+Open **Server Manager**, click the **"Manage"** menu in the top right corner, and select **"Add Roles and Features"** to launch the installation wizard.
+
+---
+
+#### Step 2 — Before You Begin
+
+<img width="1086" height="813" alt="2" src="https://github.com/user-attachments/assets/35ea9060-7950-4c3e-81b1-ff3e625ad0bd" />
+
+On the **"Before You Begin"** screen, click **Next**.
+
+---
+
+#### Step 3 — Select Installation Type
+
+<img width="1094" height="819" alt="3" src="https://github.com/user-attachments/assets/6a02b24e-c430-4543-a739-29dce4b1bcb9" />
+
+
+Select **"Role-based or feature-based installation"** and click **Next**.
+
+---
+
+#### Step 4 — Select Destination Server
+
+<img width="1083" height="817" alt="4" src="https://github.com/user-attachments/assets/6865ffb9-cc6f-489f-b914-17d05573f9d9" />
+
+Verify the local server is highlighted and confirm the hostname (`DC`), IP address (`10.22.7.3`), and OS version are correct. Click **Next**.
+
+---
+
+#### Step 5 — Select Server Roles
+
+<img width="1085" height="816" alt="5" src="https://github.com/user-attachments/assets/66d5e19b-536a-435c-9283-1e17b2d160d3" />
+
+
+Check the boxes for both:
+- **Active Directory Domain Services**
+- **DNS Server**
+
+Accept any prompts to add required features for these roles. Click **Next**.
+
+---
+
+#### Step 6 — Select Features
+
+<img width="1081" height="815" alt="6" src="https://github.com/user-attachments/assets/20d60b5b-5643-4db6-ab30-71ac9a4b86f7" />
+
+
+Additional features are optional at this stage. **Telnet Client** was selected here for future network troubleshooting. Click **Next**.
+
+---
+
+#### Step 7 — Confirm Installation
+
+<img width="1089" height="820" alt="7" src="https://github.com/user-attachments/assets/9c0ee7b9-074c-4b2d-9980-b57aedbd797b" />
+
+
+Review your selections on the confirmation screen and click **Install**. Wait for Windows Server to install the role binaries.
+
+---
+
+#### Step 8 — Installation Complete
+
+<img width="1084" height="819" alt="8" src="https://github.com/user-attachments/assets/562a36e7-7123-49d8-b482-e851215ad68e" />
+
+
+The initial role installation is complete. The AD DS and DNS binaries are now present on the system — the server must still be **promoted** to actually become a Domain Controller.
+
+---
+
+### Part B — Domain Promotion
+
+#### Step 9 — Promote the Server
+
+<img width="1085" height="815" alt="9" src="https://github.com/user-attachments/assets/aeaa1a30-8a78-4991-bccd-9f1c463cf94d" />
+
+
+Back in **Server Manager**, click the **yellow warning triangle** (Notifications) at the top and select **"Promote this server to a domain controller"**.
+
+---
+
+#### Step 10 — Add a New Forest
+
+<img width="1087" height="811" alt="10" src="https://github.com/user-attachments/assets/c62d03c5-0d96-408c-a617-83246f5b48c1" />
+
+
+In the **Deployment Configuration** wizard, select **"Add a new forest"** — this is the first Domain Controller in the environment. Set the **Root domain name** to:
+
+```
+mursad.local
+```
+
+---
+
+#### Step 11 — Domain Controller Options & DSRM Password
+
+<img width="1093" height="822" alt="11" src="https://github.com/user-attachments/assets/b1ef81a0-9b45-48da-b92e-f99d77a220f2" />
+
+
+Set a strong password for **Directory Services Restore Mode (DSRM)**. Store this securely — it is required if AD recovery is ever needed. Click **Next**.
+
+---
+
+#### Step 12 — Verify NetBIOS Name
+
+<img width="1087" height="817" alt="12" src="https://github.com/user-attachments/assets/1acf5b47-6f60-4b02-9186-379d28be9f11" />
+
+
+Confirm the **NetBIOS domain name** has auto-populated as `MURSAD` based on the root domain. Click **Next**.
+
+---
+
+#### Step 13 — AD DS Database Paths
+
+<img width="1081" height="819" alt="13" src="https://github.com/user-attachments/assets/31b30ef2-449c-457d-92a3-cc6fa560d076" />
+
+The wizard displays default paths for the AD DS database, log files, and SYSVOL folder. Leave these as default and click **Next**.
+
+---
+
+#### Step 14 — Prerequisites Check
+
+<img width="1086" height="816" alt="14" src="https://github.com/user-attachments/assets/690587e1-9b6d-4062-9639-259ad8137b47" />
+
+
+The wizard runs a prerequisites check. Once the green checkmark confirms all checks passed, click **Install** to begin the promotion.
+
+---
+
+#### Step 15 — Reboot to Apply DC Configuration
+
+<img width="1086" height="819" alt="15" src="https://github.com/user-attachments/assets/9da3f728-3a08-4d9d-9efe-7081c78727ea" />
+
+
+Once installation completes, the system will sign out and **automatically restart** to apply the Domain Controller configuration.
+
+---
+
+### Part C — User Provisioning
+
+#### Step 16 — Provision the IT Workstation VM in Proxmox
+
+<img width="1226" height="473" alt="16" src="https://github.com/user-attachments/assets/41569c79-3504-4062-8ba7-4b7b0c5c98e1" />
+
+
+While the DC reboots, go to **Proxmox** and create a new Windows 10 VM for the IT department. Allocate appropriate hardware resources as shown.
+
+---
+
+#### Step 17 — Install Windows 10 Pro
+
+<img width="1049" height="653" alt="17" src="https://github.com/user-attachments/assets/a99310e4-8874-4bd9-8b07-880b3c0f7761" />
+
+
+Install **Windows 10 Pro** on the workstation VM.
+
+> ⚠️ **Important:** Always select **Windows 10 Pro** — the Home edition cannot join an Active Directory domain.
+
+---
+
+#### Step 18 — Open Active Directory Users and Computers
+
+<img width="874" height="651" alt="18" src="https://github.com/user-attachments/assets/688c7c9f-e251-4796-961e-b814128080b8" />
+
+
+Back on the Domain Controller, open **Active Directory Users and Computers** from **Server Manager → Tools**. This is the primary interface for managing all domain identities.
+
+---
+
+#### Step 19 — Create a New User
+
+<img width="871" height="652" alt="19" src="https://github.com/user-attachments/assets/73d0d452-0c6c-4474-b740-d69378af3d54" />
+
+
+Right-click on the **"Users"** container (or your target Organizational Unit) and select **New → User**.
+
+---
+
+#### Step 20 — Enter User Details
+
+<img width="869" height="653" alt="20" src="https://github.com/user-attachments/assets/1633d994-b83c-4f5e-b5f3-c353d40e4e51" />
+
+
+Enter the name details and set the **User logon name** to:
+
+```
+a.alaradi@mursad.local
+```
+
+Click **Next** to proceed to password assignment.
+
+---
+
+#### Step 21 — Set User Password
+
+<img width="868" height="654" alt="21" src="https://github.com/user-attachments/assets/8eabcb7e-79a2-448e-be95-294e71444075" />
+
+
+Set a password for the new user. For this lab environment, **"Password never expires"** was selected to avoid lockouts during testing.
+
+> **Note:** In a production environment, password expiration policies should follow your organization's security policy.
+
+---
+
+#### Step 22 — Confirm User Settings
+
+<img width="865" height="653" alt="22" src="https://github.com/user-attachments/assets/8e844195-2b4c-49ed-9667-e39bf22935f2" />
+
+
+Review the confirmation screen: verify the full name, user logon name (`a.alaradi@mursad.local`), and password policy settings. Click **Finish**.
+
+---
+
+#### Step 23 — User Created Successfully
+
+<img width="869" height="652" alt="23" src="https://github.com/user-attachments/assets/2ff4aca8-b4b6-46d7-a0d7-778b1c8cf1a7" />
+
+
+The user account is now visible in the **Active Directory Users and Computers** directory, confirming successful creation.
+
+---
+
+### Part D — Workstation Driver Setup
+
+#### Step 24 — Mount VirtIO Drivers on the Workstation
+
+<img width="916" height="427" alt="24" src="https://github.com/user-attachments/assets/552719c3-365e-471d-961d-b2467464ee66" />
+
+
+Shut down the Windows 10 VM. In Proxmox, navigate to its **Hardware** settings and add the `virtio-win` ISO to the CD/DVD drive — same process as the Domain Controller in `[05]`.
+
+---
+
+#### Step 25 — Install VirtIO Drivers
+
+<img width="1044" height="651" alt="25" src="https://github.com/user-attachments/assets/002963be-7163-4fd6-aafa-7ffe24cd9a03" />
+
+
+Boot the Windows 10 VM, run the **VirtIO installer** from the mounted CD drive, and click **Finish** once complete. Restart the VM to allow the network drivers to fully initialize.
+
+---
+
+### Part E — Network Preparation
+
+#### Step 26 — Enable DHCP for the IT Workstation Interface
+
+<img width="1168" height="930" alt="26" src="https://github.com/user-attachments/assets/6137551d-1522-4df4-b9c4-0bf188cee1a7" />
+
+
+In the **pfSense WebConfigurator**, navigate to **Services → DHCP Server → ITWORKSTATION** and enable the DHCP server:
+
+| Field | Value |
+|-------|-------|
+| Address Pool From | `10.22.1.2` |
+| Address Pool To | `10.22.1.100` |
+| DNS Server | `10.22.1.1` |
+
+Click **Save**.
+
+---
+
+#### Step 27 — Add NAT Mapping for IT Subnet
+
+<img width="1174" height="840" alt="27" src="https://github.com/user-attachments/assets/2f401313-720c-4469-8762-a4839741b77c" />
+
+
+Navigate to **Firewall → NAT → Outbound** and add a new manual NAT mapping for the IT workstation subnet:
+
+| Field | Value |
+|-------|-------|
+| Source Network | `10.22.1.0` / `24` |
+| Description | `Manual NAT — IT Workstation` |
+
+Click **Save → Apply Changes**.
+
+---
+
+#### Step 28 — Add Firewall Rules for IT Workstation
+
+<img width="1168" height="477" alt="28" src="https://github.com/user-attachments/assets/6f104b65-b94e-4899-be3d-2fe8eb5c8f4b" />
+
+Navigate to **Firewall → Rules → ITWORKSTATION** and add the necessary pass rules to allow outbound traffic from the IT workstation subnet. Click **Apply Changes**.
+
+---
+
+#### Step 29 — Verify Connectivity from Workstation
+
+<img width="1311" height="824" alt="29" src="https://github.com/user-attachments/assets/14bdf043-4a0e-4d33-a43e-26bffecd61f9" />
+
+On the Windows 10 machine, open **Command Prompt** and verify connectivity:
+
+```cmd
+ping 10.22.7.3
+ping 10.22.1.1
+```
+
+Both the Active Directory server and the gateway should respond successfully.
+
+---
+
+#### Step 30 — Configure DNS on the Workstation
+
+<img width="1303" height="819" alt="30" src="https://github.com/user-attachments/assets/e9121768-719f-4213-9847-7754d6f06d60" />
+
+Navigate to **Network and Sharing Center → Ethernet → Properties → Internet Protocol Version 4 (TCP/IPv4)** and set:
+
+| Field | Value |
+|-------|-------|
+| Preferred DNS Server | `10.22.7.3` *(Domain Controller)* |
+| Alternate DNS Server | `10.22.1.1` *(pfSense gateway)* |
+
+> This step is critical — the workstation must use the DC for DNS resolution so it can locate the `mursad.local` domain during the join process.
+
+Click **OK**.
+
+---
+
+### Part F — Domain Join
+
+#### Step 31 — Initiate Domain Join
+
+<img width="1304" height="814" alt="31" src="https://github.com/user-attachments/assets/4428fa74-2b6e-400d-8d64-5f056b503224" />
+
+Navigate to **Settings → System → About → Advanced system settings**. Under the **"Computer Name"** tab, click **"Change..."**. Select the **"Domain"** radio button and enter:
+
+```
+mursad.local
+```
+
+Click **OK**.
+
+---
+
+#### Step 32 — Authenticate with Domain Admin Credentials
+
+<img width="1307" height="813" alt="32" src="https://github.com/user-attachments/assets/fbb814ca-52cb-4aab-8cac-ea70007d6bfd" />
+
+A **Windows Security** prompt will appear requesting credentials with domain-join privileges. Enter the credentials of the **Domain Admin** account and click **OK**.
+
+---
+
+#### Step 33 — Domain Join Successful
+
+<img width="1304" height="815" alt="33" src="https://github.com/user-attachments/assets/776ecc6e-2f7c-41a7-be19-e3967b49912f" />
+
+
+A welcome message confirms:
+
+```
+Welcome to the mursad.local domain.
+```
+
+The workstation has successfully authenticated with the Domain Controller and is now formally joined to the Active Directory environment. Restart the workstation to apply domain policies.
+
+---
+
+### VM Summary
+
+| VM | OS | Bridge | IP | Role |
+|:--:|:--:|:------:|:--:|------|
+| VM 101 — DC | Windows Server 2019 | vmbr5 | `10.22.7.3` | AD DS · DNS · Forest Root |
+| VM 102 — ITWS | Windows 10 Pro | vmbr2 | `10.22.1.x` (DHCP) | Domain-joined IT workstation |
+
+---
+
+### ✅ Phase Checklist
+
+- [ ] AD DS and DNS Server roles installed via Server Manager
+- [ ] Server promoted to Domain Controller — new forest `mursad.local`
+- [ ] DSRM password set and stored securely
+- [ ] NetBIOS name confirmed as `MURSAD`
+- [ ] DC restarted and AD DS fully operational
+- [ ] Domain user `a.alaradi@mursad.local` created in AD Users and Computers
+- [ ] Windows 10 Pro VM provisioned in Proxmox
+- [ ] VirtIO drivers installed on the workstation VM
+- [ ] pfSense DHCP enabled on ITWORKSTATION — pool `10.22.1.2`–`10.22.1.100`
+- [ ] Manual NAT mapping added for `10.22.1.0/24`
+- [ ] Firewall pass rules added for ITWORKSTATION interface
+- [ ] Workstation can ping DC (`10.22.7.3`) and gateway (`10.22.1.1`)
+- [ ] Workstation DNS set to `10.22.7.3` (primary) · `10.22.1.1` (alternate)
+- [ ] Workstation successfully joined to `mursad.local`
+- [ ] Workstation restarted to apply domain policies
+
+<div align="center"><br>
+
+**🟢 Phase Complete**
+
+`[05] Domain Controller Provisioning` ◄── **`[06] Active Directory Installation`** ──► `[07] DMZ Architecture Setup`
 
 <br></div>
 
