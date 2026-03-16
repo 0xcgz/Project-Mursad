@@ -26,7 +26,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Progress-Phase%202%20In%20Progress%20%7C%2050%25-e94560?style=flat-square&labelColor=1a1a2e"/>
+  <img src="https://img.shields.io/badge/Progress-Phase%202%20In%20Progress%20%7C%2075%25-e94560?style=flat-square&labelColor=1a1a2e"/>
 </p>
 
 <p align="center">
@@ -61,6 +61,7 @@
   - [Phase 1 · 04 — Advanced Firewall Routing](#phase-1--04)
   - [Phase 2 · 05 — Domain Controller Provisioning](#phase-2--05)
   - [Phase 2 · 06 — Active Directory Installation](#phase-2--06)
+  - [Phase 2 · 07 — DMZ Architecture Setup](#phase-2--07)
 - [Repository Structure](#-repository-structure)
 - [Disclaimer](#-disclaimer)
 
@@ -149,7 +150,7 @@ Project Mursad is a fully virtualized, enterprise-grade Security Operations Cent
 | IT Workstation | `10.22.1.x` | IT Workstation | Domain-joined · Wazuh agent |
 | OPs Workstation | `10.22.2.x` | OPs Workstation | Domain-joined · Wazuh agent |
 | Wazuh SIEM | `10.22.7.2` | Servers | Log aggregation · alerting |
-| DMZ Server | `192.168.50.10` | DMZ | Public-facing services |
+| DMZ Server | `192.168.50.10` | DMZ | Public-facing web server · XAMPP |
 | Kali Linux | WAN DHCP | WAN | External Red Team attacker |
 
 ---
@@ -205,8 +206,8 @@ Infrastructure  ──►  Identity    ──►  Telemetry   ──►  Hardeni
 | # | Task | Status |
 |:---:|------|:------:|
 | `[05]` | Domain Controller Provisioning & Network Integration | `✅` |
-| `[06]` | Active Directory Domain Installation & Configuration | `🔄` |
-| `[07]` | DMZ Architecture Setup | `⬜` |
+| `[06]` | Active Directory Domain Installation & Configuration | `✅` |
+| `[07]` | DMZ Architecture Setup | `🔄` |
 | `[08]` | LAN/DMZ Traffic Isolation & Secure Local DNS Mapping | `⬜` |
 
 <br>
@@ -642,11 +643,7 @@ Navigate to [pfsense.org/download](https://www.pfsense.org/download/) and select
 
 1. Navigate to **mursad → local (mursad) → ISO Images**
 2. Click **Upload → Select File** → browse to extracted `.iso`
-3. Wait for task log:
-
-```
-TASK OK
-```
+3. Wait for task log: `TASK OK`
 
 ---
 
@@ -802,7 +799,7 @@ Select **Install pfSense** from the welcome menu.
 
 <img width="1812" height="1009" alt="pfsense-zfs" src="https://github.com/user-attachments/assets/a9cf0420-c040-4159-8c74-597dd4eaaf26" />
 
-Select **Auto (ZFS)** — provides data integrity, snapshot support, and is ideal for firewall appliances. Accept defaults and select the virtual disk when prompted.
+Select **Auto (ZFS)** — provides data integrity, snapshot support, and is ideal for firewall appliances.
 
 ---
 
@@ -903,16 +900,7 @@ Revert to HTTP: `n` — keep HTTPS.
 LAN (vtnet1) →  10.22.0.1/24  ✅
 ```
 
-Access the WebConfigurator from any HR-segment machine:
-
-```
-https://10.22.0.1
-```
-
-| Field | Value |
-|-------|-------|
-| Username | `admin` |
-| Password | `pfsense` |
+Access the WebConfigurator: `https://10.22.0.1` · Username: `admin` · Password: `pfsense`
 
 > 🔐 **Change the default password immediately upon first login.**
 
@@ -989,13 +977,11 @@ Proxmox Node: mursad
 
 ### Part A — Virtual Machine Network Provisioning
 
-> *Before touching pfSense, all bridges must exist as virtual NICs on the Firewall VM so FreeBSD can enumerate them on boot.*
-
 #### Step 1 — Review Proxmox Network Bridges
 
 <img width="1448" height="406" alt="1" src="https://github.com/user-attachments/assets/79a53dca-d936-4bef-8485-b94ddabf875c" />
 
-Confirm all five internal bridges are present on the **mursad** node before proceeding:
+Confirm all five internal bridges are present on the **mursad** node before proceeding.
 
 | Bridge | Zone | Subnet |
 |:------:|------|--------|
@@ -1029,7 +1015,7 @@ Add one **VirtIO** Network Device per bridge:
 | net4 | `vmbr4` | VirtIO |
 | net5 | `vmbr5` | VirtIO |
 
-> ⚠️ All NICs must be added **before** booting the VM. If pfSense is already running, shut it down first, add all devices, then start it again.
+> ⚠️ All NICs must be added **before** booting the VM.
 
 ---
 
@@ -1051,8 +1037,6 @@ net5  →  vmbr5   SERVERS
 ---
 
 ### Part B — pfSense Firewall Rules
-
-> *pfSense blocks all traffic by default on new interfaces. The WAN rule below enables management access to the firewall itself from the upstream network.*
 
 #### Step 5 — Navigate to Firewall Rules
 
@@ -1092,13 +1076,11 @@ Click **Save**.
 
 <img width="1209" height="595" alt="8" src="https://github.com/user-attachments/assets/65da654e-8ade-4cb0-ab67-e55986c8495c" />
 
-The new rule appears in the WAN tab. Click **Apply Changes** to activate it.
+Click **Apply Changes** to activate the rule.
 
 ---
 
 ### Part C — Outbound NAT Configuration
-
-> *Automatic NAT works for basic setups but gives no per-zone control. Switching to **Hybrid** mode keeps the automatic rules intact while letting us add manual mappings for each subnet.*
 
 #### Step 9 — Navigate to Outbound NAT
 
@@ -1112,11 +1094,9 @@ Navigate to **Firewall → NAT → Outbound**.
 
 <img width="1216" height="665" alt="10" src="https://github.com/user-attachments/assets/c87dd688-e179-4008-9a99-eeda1dfc95ab" />
 
-Under **Outbound NAT Mode**, select **Hybrid Outbound NAT rule generation**.
+Select **Hybrid Outbound NAT rule generation** and click **Save**.
 
-> ℹ️ Hybrid keeps automatic rules for internet access while allowing custom mappings per zone. This is the correct mode for a segmented lab — pure Manual mode would break internet access until every subnet is manually mapped.
-
-Click **Save**.
+> ℹ️ Hybrid keeps automatic rules for internet access while allowing custom mappings per zone.
 
 ---
 
@@ -1124,19 +1104,10 @@ Click **Save**.
 
 <img width="1184" height="652" alt="11" src="https://github.com/user-attachments/assets/d7a44a09-c4b0-4665-9a80-e5d23eb127b9" />
 
-Click **Add ↑** to create the first manual mapping.
-
 | Field | Value |
 |-------|-------|
-| Interface | WAN |
-| Address Family | IPv4 |
-| Protocol | Any |
-| Source | Network or Alias |
 | Source Network | `10.22.0.0` / `24` |
-| Destination | Any |
 | Description | `Manual NAT — HR Workstation` |
-
-Click **Save**.
 
 ---
 
@@ -1146,15 +1117,8 @@ Click **Save**.
 
 | Field | Value |
 |-------|-------|
-| Interface | WAN |
-| Address Family | IPv4 |
-| Protocol | Any |
-| Source | Network or Alias |
 | Source Network | `10.22.7.0` / `24` |
-| Destination | Any |
 | Description | `Manual NAT — SERVERS` |
-
-Click **Save**.
 
 ---
 
@@ -1162,27 +1126,17 @@ Click **Save**.
 
 <img width="1178" height="805" alt="13" src="https://github.com/user-attachments/assets/706da33c-17d1-482a-bd93-bd1ca0df8079" />
 
-DMZ is restricted to TCP/UDP only — not raw IP or ICMP:
-
 | Field | Value |
 |-------|-------|
-| Interface | WAN |
-| Address Family | IPv4 |
 | Protocol | **TCP/UDP** |
-| Source | Network or Alias |
 | Source Network | `192.168.50.0` / `24` |
-| Destination | Any |
 | Description | `Manual NAT — DMZ` |
-
-Click **Save**.
 
 ---
 
 #### Step 14 — Review & Apply NAT Mappings
 
 <img width="1196" height="386" alt="14" src="https://github.com/user-attachments/assets/9f783a64-5251-45ce-a3c6-ad695d83c788" />
-
-Confirm three manual mappings appear at the top of the list:
 
 ```
 [MANUAL]  10.22.0.0/24    →  WAN  (Any)       Manual NAT — HR Workstation
@@ -1198,8 +1152,6 @@ Click **Apply Changes**.
 
 ### Part D — Interface Assignment
 
-> *The OPT interfaces exist as raw detected ports — each must be enabled, named, and given a static IP before pfSense routes any traffic through them.*
-
 #### Step 15 — Navigate to Interface Assignments
 
 <img width="1155" height="243" alt="15" src="https://github.com/user-attachments/assets/bea7d50d-9ad1-4f11-a5ea-1addcca3548f" />
@@ -1212,16 +1164,11 @@ Navigate to **Interfaces → Assignments**.
 
 <img width="1164" height="289" alt="16" src="https://github.com/user-attachments/assets/9503ea2e-0529-47af-915d-3e13c26062dc" />
 
-Click **OPT1** and configure:
-
 | Field | Value |
 |-------|-------|
 | Enable | ✅ Checked |
 | Description | `HR` |
-| IPv4 Configuration Type | Static IPv4 |
 | IPv4 Address | `10.22.0.1` / `24` |
-
-Click **Save** → **Apply Changes**.
 
 ---
 
@@ -1233,10 +1180,7 @@ Click **Save** → **Apply Changes**.
 |-------|-------|
 | Enable | ✅ Checked |
 | Description | `IT` |
-| IPv4 Configuration Type | Static IPv4 |
 | IPv4 Address | `10.22.1.1` / `24` |
-
-Click **Save** → **Apply Changes**.
 
 ---
 
@@ -1248,10 +1192,7 @@ Click **Save** → **Apply Changes**.
 |-------|-------|
 | Enable | ✅ Checked |
 | Description | `OPs` |
-| IPv4 Configuration Type | Static IPv4 |
 | IPv4 Address | `10.22.2.1` / `24` |
-
-Click **Save** → **Apply Changes**.
 
 ---
 
@@ -1263,10 +1204,7 @@ Click **Save** → **Apply Changes**.
 |-------|-------|
 | Enable | ✅ Checked |
 | Description | `DMZ` |
-| IPv4 Configuration Type | Static IPv4 |
 | IPv4 Address | `192.168.50.1` / `24` |
-
-Click **Save** → **Apply Changes**.
 
 ---
 
@@ -1278,18 +1216,13 @@ Click **Save** → **Apply Changes**.
 |-------|-------|
 | Enable | ✅ Checked |
 | Description | `SERVERS` |
-| IPv4 Configuration Type | Static IPv4 |
 | IPv4 Address | `10.22.7.1` / `24` |
-
-Click **Save** → **Apply Changes**.
 
 ---
 
 #### Step 21 — Verify Complete Interface Table
 
 <img width="1158" height="786" alt="21" src="https://github.com/user-attachments/assets/548fc934-c9b2-4907-874e-ada079721918" />
-
-Navigate to **Interfaces → Assignments** and confirm:
 
 | Interface | vtnet | Bridge | Description | IPv4 Address |
 |:---------:|:-----:|:------:|-------------|:------------:|
@@ -1305,8 +1238,6 @@ Navigate to **Interfaces → Assignments** and confirm:
 #### Step 22 — Review pfSense Dashboard
 
 <img width="1908" height="931" alt="22" src="https://github.com/user-attachments/assets/cef2f0bf-4ec0-4076-a112-4c267b57eadb" />
-
-Click the pfSense logo to return to the dashboard. The **Interfaces** widget confirms all six zones active:
 
 ```
 WAN      →  192.168.140.x/24   ✅
@@ -1388,7 +1319,7 @@ pfSense WebConfigurator
 
 #### Step 1 — Enable SERVERS DHCP Server
 
-Before booting our Domain Controller, the SERVERS network needs a DHCP pool so the VM can acquire an IP address dynamically during installation. Navigate to **Services → DHCP Server** and select the **SERVERS** tab.
+Navigate to **Services → DHCP Server → SERVERS** tab.
 
 | Field | Value |
 |-------|-------|
@@ -1398,15 +1329,13 @@ Before booting our Domain Controller, the SERVERS network needs a DHCP pool so t
 
 > **Note:** The range starts at `.3` to reserve `.1` for the gateway and `.2` for the future Wazuh SIEM server.
 
-Click **Save**.
-
 <img width="1169" height="936" alt="1" src="https://github.com/user-attachments/assets/e1c72fb1-6cc6-46be-9f05-679a8db4b7b1" />
 
 ---
 
 #### Step 2 — Switch to Kea DHCP Backend
 
-Newer versions of pfSense display a deprecation warning for the legacy ISC DHCP server. To future-proof our SOC lab, we switch to the modern **Kea DHCP** engine. Navigate to **System → Advanced → Networking**, scroll to the **DHCP Backend** section, select **Kea DHCP**, and click **Save**.
+Navigate to **System → Advanced → Networking → DHCP Backend**, select **Kea DHCP**, and click **Save**.
 
 <img width="1188" height="830" alt="2" src="https://github.com/user-attachments/assets/430e3f8c-1544-4d96-a049-0eaa81fdde6e" />
 
@@ -1414,9 +1343,7 @@ Newer versions of pfSense display a deprecation warning for the legacy ISC DHCP 
 
 #### Step 3 — Configure DHCP DNS Servers
 
-Navigate back to **Services → DHCP Server → SERVERS** and scroll down to the **Servers** section. Add the firewall's own IP (`10.22.7.1`) as the primary DNS server so machines in this zone can resolve internet hostnames before the Active Directory DNS role is installed.
-
-Click **Save**.
+Navigate back to **Services → DHCP Server → SERVERS → Servers** section. Add `10.22.7.1` as the primary DNS server.
 
 <img width="1172" height="333" alt="3" src="https://github.com/user-attachments/assets/d66ea4da-1b6c-42b6-82fb-96f496f3a194" />
 
@@ -1424,11 +1351,11 @@ Click **Save**.
 
 ### Part B — Domain Controller VM Provisioning
 
-> ⚠️ **Prerequisite:** Ensure you have downloaded the **Windows Server ISO** and the **VirtIO Windows Drivers ISO** and uploaded both to your Proxmox local storage before proceeding.
+> ⚠️ **Prerequisite:** Ensure the **Windows Server ISO** and **VirtIO Windows Drivers ISO** are uploaded to Proxmox local storage before proceeding.
 
 #### Step 4 — Create the DC Virtual Machine
 
-In the Proxmox web interface, click **Create VM** in the top-right corner. Set the **VM ID** to `101` and name the machine `DC`. Click **Next**.
+VM ID: `101` · Name: `DC`
 
 <img width="812" height="590" alt="4" src="https://github.com/user-attachments/assets/6933494a-cb94-4c1a-adcc-d2d2a43d5013" />
 
@@ -1436,7 +1363,7 @@ In the Proxmox web interface, click **Create VM** in the top-right corner. Set t
 
 #### Step 5 — Select Guest OS
 
-Under the **OS** tab, select your Proxmox local storage and choose the **Windows Server ISO**. Set the **Guest OS Type** to `Microsoft Windows` and manually select the version matching your ISO (e.g., `2019` or `2022`).
+Guest OS Type: `Microsoft Windows` · ISO: Windows Server
 
 <img width="748" height="551" alt="5" src="https://github.com/user-attachments/assets/dfb357ad-56f0-4244-abd9-62e140d5261d" />
 
@@ -1444,7 +1371,7 @@ Under the **OS** tab, select your Proxmox local storage and choose the **Windows
 
 #### Step 6 — Disk Allocation
 
-Under the **Disks** tab, set the disk size to **60 GB** — sufficient for the Windows OS, future Active Directory databases (NTDS), and system logs. Set the bus/device to **VirtIO Block** for optimal I/O performance.
+Bus/Device: **VirtIO Block** · Disk Size: **60 GB**
 
 <img width="750" height="549" alt="6" src="https://github.com/user-attachments/assets/d83792c9-56df-4e74-924f-b7a4761030ff" />
 
@@ -1452,9 +1379,9 @@ Under the **Disks** tab, set the disk size to **60 GB** — sufficient for the W
 
 #### Step 7 — CPU Configuration
 
-Under the **CPU** tab, set **Cores** to `2`. Change the **CPU Type** to `host` to pass the hypervisor's processor flags directly into the VM, ensuring maximum compatibility with nested virtualization.
+Cores: `2` · Type: `host`
 
-> ⚠️ **Critical:** CPU type `host` passes the AMD Ryzen flags directly into the VM. Without this, Windows Server may fail to boot stably under nested virtualization.
+> ⚠️ **Critical:** CPU type `host` is required for nested virtualization stability.
 
 <img width="749" height="549" alt="7" src="https://github.com/user-attachments/assets/f40f0339-1000-4b1b-bfdb-142c01cc9133" />
 
@@ -1462,7 +1389,7 @@ Under the **CPU** tab, set **Cores** to `2`. Change the **CPU Type** to `host` t
 
 #### Step 8 — Memory (RAM) Allocation
 
-Under the **Memory** tab, assign **8192 MiB (8 GB)** of RAM. This ensures the Windows GUI and Active Directory services run smoothly without bottlenecking.
+Memory: **8192 MiB (8 GB)**
 
 <img width="744" height="550" alt="8" src="https://github.com/user-attachments/assets/08fcf3a0-b27c-4ce8-9bd6-faf3b7b16e05" />
 
@@ -1470,15 +1397,7 @@ Under the **Memory** tab, assign **8192 MiB (8 GB)** of RAM. This ensures the Wi
 
 #### Step 9 — Network Configuration
 
-Under the **Network** tab, attach the VM to our segmented server network:
-
-| Field | Value |
-|-------|-------|
-| Bridge | `vmbr5` (SERVERS) |
-| Model | `VirtIO (paravirtualized)` |
-| Firewall | Unchecked |
-
-Review the summary and complete the VM creation. **Do not power it on yet.**
+Bridge: `vmbr5` (SERVERS) · Model: `VirtIO` · Firewall: Unchecked
 
 <img width="733" height="545" alt="9" src="https://github.com/user-attachments/assets/3f745984-85d4-4bea-a9c8-1e95c39da3bd" />
 
@@ -1486,11 +1405,7 @@ Review the summary and complete the VM creation. **Do not power it on yet.**
 
 #### Step 10 — Attach VirtIO Drivers CD/DVD
 
-Because we selected VirtIO for both the storage and network adapters, the Windows installer will not natively recognize either device. We must mount the drivers ISO before first boot.
-
-Navigate to **VM 101 (DC) → Hardware → Add → CD/DVD Drive**, choose your local storage, and select the `virtio-win` ISO.
-
-> ⚠️ **Note:** Make sure the VirtIO ISO is uploaded to Proxmox storage before this step.
+Navigate to **VM 101 → Hardware → Add → CD/DVD Drive** and select the `virtio-win` ISO.
 
 <img width="1913" height="716" alt="10" src="https://github.com/user-attachments/assets/4f77de02-a2e4-4374-85c7-0ba72e7b339e" />
 
@@ -1500,15 +1415,11 @@ Navigate to **VM 101 (DC) → Hardware → Add → CD/DVD Drive**, choose your l
 
 #### Step 11 — Power On and Start Setup
 
-With both ISOs mounted, start the VM and open the **Console**. Press any key when prompted to boot from the CD/DVD and wait for the Windows Setup screen to load.
-
 <img width="1088" height="810" alt="11" src="https://github.com/user-attachments/assets/a21a357c-0b44-40cc-818d-a838ed3c75c3" />
 
 ---
 
 #### Step 12 — Install Now
-
-Confirm your language, time, and keyboard preferences, then click **Install now**.
 
 <img width="1090" height="805" alt="12" src="https://github.com/user-attachments/assets/36aac1cb-a7ef-4f04-a034-f24d739472b9" />
 
@@ -1516,9 +1427,7 @@ Confirm your language, time, and keyboard preferences, then click **Install now*
 
 #### Step 13 — Select Desktop Experience
 
-When prompted to select the OS version, choose **Windows Server (Desktop Experience)**.
-
-> **Note:** Skipping the "Desktop Experience" option installs **Server Core** — a CLI-only environment with no GUI. Always select Desktop Experience for this lab.
+Choose **Windows Server (Desktop Experience)** — Server Core has no GUI.
 
 <img width="1090" height="810" alt="13" src="https://github.com/user-attachments/assets/b0f110a8-ee0b-454d-a5b7-2a6e15443505" />
 
@@ -1526,7 +1435,7 @@ When prompted to select the OS version, choose **Windows Server (Desktop Experie
 
 #### Step 14 — Custom Installation
 
-Accept the license terms. When asked for the installation type, select **Custom: Install Windows only (advanced)**. We are performing a clean installation, not an upgrade.
+Select **Custom: Install Windows only (advanced)**.
 
 <img width="1089" height="814" alt="14" src="https://github.com/user-attachments/assets/aac7bd1c-d9d8-4bff-beb8-45e80574f6ff" />
 
@@ -1534,9 +1443,7 @@ Accept the license terms. When asked for the installation type, select **Custom:
 
 #### Step 15 — Select the VirtIO Storage Drive
 
-You should see **Drive 0** with 60 GB of unallocated space. Select it and click **Next** to begin writing the OS to disk.
-
-> **Note:** If the drive does not appear, click **Load driver** and browse to the `viostor` folder on the mounted VirtIO CD.
+Select **Drive 0** (60 GB). If it doesn't appear, load the `viostor` driver from the VirtIO CD.
 
 <img width="1082" height="808" alt="15" src="https://github.com/user-attachments/assets/d5711040-6d6c-4a7c-8a60-c95f62994466" />
 
@@ -1544,15 +1451,11 @@ You should see **Drive 0** with 60 GB of unallocated space. Select it and click 
 
 #### Step 16 — Set Local Administrator Password
 
-After several automated reboots, Windows will prompt you to set a password. Enter a strong password for the built-in **Local Administrator** account and click **Finish**.
-
 <img width="1090" height="813" alt="16" src="https://github.com/user-attachments/assets/32c96d8b-25b6-4d98-91cd-1d1748bc5c89" />
 
 ---
 
 #### Step 17 — Welcome to Windows Server
-
-Press **Ctrl+Alt+Delete** (via the Proxmox console flyout) to log in. You will land on the Windows Server desktop with **Server Manager** launching automatically.
 
 <img width="1081" height="813" alt="17" src="https://github.com/user-attachments/assets/bc4810d4-3fc0-4a84-a967-35e133cefeb0" />
 
@@ -1562,7 +1465,7 @@ Press **Ctrl+Alt+Delete** (via the Proxmox console flyout) to log in. You will l
 
 #### Step 18 — Run the VirtIO Installer
 
-Because we used the VirtIO network adapter, the VM currently has no network connectivity. Open **File Explorer**, navigate to the `virtio-win` CD Drive (typically `E:`), and double-click **`virtio-win-gt-x64`** to launch the driver installer.
+Navigate to the `virtio-win` CD Drive and run **`virtio-win-gt-x64`**.
 
 <img width="1080" height="815" alt="18" src="https://github.com/user-attachments/assets/8ac08a49-c106-4cb4-aab6-f0c0adcc1131" />
 
@@ -1570,21 +1473,17 @@ Because we used the VirtIO network adapter, the VM currently has no network conn
 
 #### Step 19 — Complete VirtIO Setup
 
-Click **Next** through the standard setup prompts to install all paravirtualized drivers. Once complete, click **Finish**. The network adapter will initialize immediately in the background.
-
 <img width="1090" height="816" alt="19" src="https://github.com/user-attachments/assets/4161063e-5034-4a45-b9d2-a6e0c43bc747" />
 
 ---
 
 #### Step 20 — Verify DHCP Network Assignment
 
-Open **PowerShell** from the Start menu and run:
-
 ```powershell
 ipconfig
 ```
 
-The Ethernet adapter should now show a lease from our pfSense Kea DHCP server — the first address in our pool: `10.22.7.3`.
+Expected lease: `10.22.7.3`
 
 <img width="1091" height="812" alt="20" src="https://github.com/user-attachments/assets/aee18131-69b3-4c13-8816-435004950e84" />
 
@@ -1592,7 +1491,7 @@ The Ethernet adapter should now show a lease from our pfSense Kea DHCP server �
 
 #### Step 21 — Access System Properties
 
-Before promoting this server to a Domain Controller, we need to replace its auto-generated hostname. Search for **Control Panel**, navigate to **System and Security → System**, and click **Change settings** under the computer name section.
+**Control Panel → System and Security → System → Change settings**
 
 <img width="1088" height="812" alt="21" src="https://github.com/user-attachments/assets/11557706-1735-41f1-a6c0-9d3a32601f9f" />
 
@@ -1600,15 +1499,13 @@ Before promoting this server to a Domain Controller, we need to replace its auto
 
 #### Step 22 — Update Computer Description
 
-In the **System Properties** window, set the Computer description to `DC`. Then click the **Change...** button to modify the actual NetBIOS computer name.
+Set description to `DC`, then click **Change...** to modify the hostname.
 
 <img width="1083" height="814" alt="22" src="https://github.com/user-attachments/assets/55c7ec7c-55a3-4340-84c4-bcbdc3103b6a" />
 
 ---
 
 #### Step 23 — Rename Computer to DC
-
-Type `DC` into the **Computer name** field and click **OK → Apply**. Windows will prompt for a restart to apply the changes — click **Restart Now**.
 
 <img width="1083" height="814" alt="23" src="https://github.com/user-attachments/assets/0e82c160-05ef-439b-a36d-e6864cad71ab" />
 
@@ -1618,7 +1515,7 @@ Type `DC` into the **Computer name** field and click **OK → Apply**. Windows w
 
 #### Step 24 — Identify Connectivity Issue
 
-After the reboot, the network icon in the taskbar may show a yellow warning triangle (**No Internet Access**). DHCP is functioning correctly, but outbound traffic has no defined route to the WAN interface (`192.168.140.130`).
+Yellow warning triangle on the network icon — outbound route to WAN is not yet defined.
 
 <img width="1089" height="807" alt="24" src="https://github.com/user-attachments/assets/34d6a443-a8d7-40a6-a0bc-8da79e903e1a" />
 
@@ -1626,7 +1523,7 @@ After the reboot, the network icon in the taskbar may show a yellow warning tria
 
 #### Step 25 — Add WAN Gateway in pfSense
 
-Log back into the **pfSense WebConfigurator**. Navigate to **System → Routing → Gateways** and click the green **Add** button.
+**System → Routing → Gateways → Add**
 
 <img width="1235" height="670" alt="25" src="https://github.com/user-attachments/assets/518bca0a-3bc4-4cba-9b99-54792fd31ff3" />
 
@@ -1634,22 +1531,18 @@ Log back into the **pfSense WebConfigurator**. Navigate to **System → Routing 
 
 #### Step 26 — Configure External Gateway
 
-Set the **Default gateway IPv4** to point to your WAN interface. This tells pfSense where to forward all traffic that doesn't belong to the local `10.22.x.x` subnets.
-
 <img width="1177" height="524" alt="26" src="https://github.com/user-attachments/assets/cd92867b-a884-480a-b145-40ea411aae0a" />
 
 ---
 
 #### Step 27 — Update SERVERS Firewall Rules
 
-Navigate to **Firewall → Rules → SERVERS** and create the following two rules:
+**Firewall → Rules → SERVERS**
 
-| Rule | Action | Protocol | Source | Destination | Port | Purpose |
-|------|--------|----------|--------|-------------|:----:|---------|
-| 1 — DNS | Pass | IPv4 UDP | SERVERS net | This Firewall (self) | `53` | Allow DNS queries to pfSense |
-| 2 — Outbound | Pass | IPv4 Any | SERVERS net | Any | Any | Allow outbound internet traffic |
-
-Click **Apply Changes**.
+| Rule | Protocol | Source | Destination | Port | Purpose |
+|------|----------|--------|-------------|:----:|---------|
+| DNS | IPv4 UDP | SERVERS net | This Firewall | `53` | DNS queries to pfSense |
+| Outbound | IPv4 Any | SERVERS net | Any | Any | Internet access |
 
 <img width="1165" height="470" alt="27" src="https://github.com/user-attachments/assets/a5319eca-2b23-4b78-9b8d-459a8c6428bc" />
 
@@ -1657,7 +1550,7 @@ Click **Apply Changes**.
 
 #### Step 28 — Restart Routing Services
 
-If the connection is still not resolving after applying the rules, navigate to **Status → Services** in pfSense and restart both the `dpinger` (Gateway Monitoring) and `kea-dhcp4` services to force the new routing configuration to take effect immediately.
+**Status → Services** — restart `dpinger` and `kea-dhcp4`.
 
 <img width="1183" height="477" alt="28" src="https://github.com/user-attachments/assets/e7e06cdb-b62a-4226-8182-df53679b8614" />
 
@@ -1665,13 +1558,11 @@ If the connection is still not resolving after applying the rules, navigate to *
 
 #### Step 29 — Ping Verification
 
-Back on the Domain Controller, open **PowerShell** and run:
-
 ```powershell
 ping 8.8.8.8
 ```
 
-Successful ICMP replies confirm that traffic is routing correctly: `DC → SERVERS VLAN → pfSense → WAN → Internet`.
+`DC → SERVERS VLAN → pfSense → WAN → Internet` ✅
 
 <img width="1084" height="816" alt="29" src="https://github.com/user-attachments/assets/154d5b80-fddd-4428-a271-1490a2952cc1" />
 
@@ -1679,9 +1570,7 @@ Successful ICMP replies confirm that traffic is routing correctly: `DC → SERVE
 
 #### Step 30 — Browser Verification
 
-Open **Microsoft Edge** on the Domain Controller and navigate to `google.com`. The page should load without issue, confirming full end-to-end connectivity.
-
-The underlying infrastructure is now complete. The server is fully prepped to be promoted to an **Active Directory Domain Controller** in the next phase.
+Navigate to `google.com` in Edge — full connectivity confirmed.
 
 <img width="1074" height="814" alt="30" src="https://github.com/user-attachments/assets/35ec7491-c54a-4939-bb81-244641e46958" />
 
@@ -1689,10 +1578,10 @@ The underlying infrastructure is now complete. The server is fully prepped to be
 
 ### VM Summary
 
-| Component | vtnet | Bridge | IP | Zone |
-|:---------:|:-----:|:------:|:--:|:----:|
-| Windows Server DC | — | vmbr5 | `10.22.7.3` (DHCP) | SERVERS |
-| pfSense — SERVERS | vtnet5 | vmbr5 | `10.22.7.1/24` | SERVERS gateway |
+| Component | Bridge | IP | Zone |
+|:---------:|:------:|:--:|:----:|
+| Windows Server DC | vmbr5 | `10.22.7.3` (DHCP) | SERVERS |
+| pfSense — SERVERS | vmbr5 | `10.22.7.1/24` | SERVERS gateway |
 
 ---
 
@@ -1769,24 +1658,23 @@ Proxmox Node: mursad
 
 #### Step 1 — Open Add Roles and Features
 
-<img width="1083" height="817" alt="1" src="https://github.com/user-attachments/assets/9e5c83fc-774d-435d-9848-b10351bbfdf6" />
+![Image 1](../assets/phase-2/06/1.png)
 
-Open **Server Manager**, click the **"Manage"** menu in the top right corner, and select **"Add Roles and Features"** to launch the installation wizard.
+Open **Server Manager → Manage → Add Roles and Features**.
 
 ---
 
 #### Step 2 — Before You Begin
 
-<img width="1086" height="813" alt="2" src="https://github.com/user-attachments/assets/35ea9060-7950-4c3e-81b1-ff3e625ad0bd" />
+![Image 2](../assets/phase-2/06/2.png)
 
-On the **"Before You Begin"** screen, click **Next**.
+Click **Next**.
 
 ---
 
 #### Step 3 — Select Installation Type
 
-<img width="1094" height="819" alt="3" src="https://github.com/user-attachments/assets/6a02b24e-c430-4543-a739-29dce4b1bcb9" />
-
+![Image 3](../assets/phase-2/06/3.png)
 
 Select **"Role-based or feature-based installation"** and click **Next**.
 
@@ -1794,49 +1682,45 @@ Select **"Role-based or feature-based installation"** and click **Next**.
 
 #### Step 4 — Select Destination Server
 
-<img width="1083" height="817" alt="4" src="https://github.com/user-attachments/assets/6865ffb9-cc6f-489f-b914-17d05573f9d9" />
+![Image 4](../assets/phase-2/06/4.png)
 
-Verify the local server is highlighted and confirm the hostname (`DC`), IP address (`10.22.7.3`), and OS version are correct. Click **Next**.
+Verify the local server — hostname `DC`, IP `10.22.7.3`. Click **Next**.
 
 ---
 
 #### Step 5 — Select Server Roles
 
-<img width="1085" height="816" alt="5" src="https://github.com/user-attachments/assets/66d5e19b-536a-435c-9283-1e17b2d160d3" />
+![Image 5](../assets/phase-2/06/5.png)
 
-
-Check the boxes for both:
+Check both:
 - **Active Directory Domain Services**
 - **DNS Server**
 
-Accept any prompts to add required features for these roles. Click **Next**.
+Accept any prompts for required features. Click **Next**.
 
 ---
 
 #### Step 6 — Select Features
 
-<img width="1081" height="815" alt="6" src="https://github.com/user-attachments/assets/20d60b5b-5643-4db6-ab30-71ac9a4b86f7" />
+![Image 6](../assets/phase-2/06/6.png)
 
-
-Additional features are optional at this stage. **Telnet Client** was selected here for future network troubleshooting. Click **Next**.
+Optionally add **Telnet Client** for network troubleshooting. Click **Next**.
 
 ---
 
 #### Step 7 — Confirm Installation
 
-<img width="1089" height="820" alt="7" src="https://github.com/user-attachments/assets/9c0ee7b9-074c-4b2d-9980-b57aedbd797b" />
+![Image 7](../assets/phase-2/06/7.png)
 
-
-Review your selections on the confirmation screen and click **Install**. Wait for Windows Server to install the role binaries.
+Review selections and click **Install**.
 
 ---
 
 #### Step 8 — Installation Complete
 
-<img width="1084" height="819" alt="8" src="https://github.com/user-attachments/assets/562a36e7-7123-49d8-b482-e851215ad68e" />
+![Image 8](../assets/phase-2/06/8.png)
 
-
-The initial role installation is complete. The AD DS and DNS binaries are now present on the system — the server must still be **promoted** to actually become a Domain Controller.
+Role binaries installed. The server must now be **promoted** to become an actual Domain Controller.
 
 ---
 
@@ -1844,19 +1728,17 @@ The initial role installation is complete. The AD DS and DNS binaries are now pr
 
 #### Step 9 — Promote the Server
 
-<img width="1085" height="815" alt="9" src="https://github.com/user-attachments/assets/aeaa1a30-8a78-4991-bccd-9f1c463cf94d" />
+![Image 9](../assets/phase-2/06/9.png)
 
-
-Back in **Server Manager**, click the **yellow warning triangle** (Notifications) at the top and select **"Promote this server to a domain controller"**.
+In **Server Manager**, click the **yellow warning triangle** → **"Promote this server to a domain controller"**.
 
 ---
 
 #### Step 10 — Add a New Forest
 
-<img width="1087" height="811" alt="10" src="https://github.com/user-attachments/assets/c62d03c5-0d96-408c-a617-83246f5b48c1" />
+![Image 10](../assets/phase-2/06/10.png)
 
-
-In the **Deployment Configuration** wizard, select **"Add a new forest"** — this is the first Domain Controller in the environment. Set the **Root domain name** to:
+Select **"Add a new forest"**. Set Root domain name:
 
 ```
 mursad.local
@@ -1864,131 +1746,109 @@ mursad.local
 
 ---
 
-#### Step 11 — Domain Controller Options & DSRM Password
+#### Step 11 — DSRM Password
 
-<img width="1093" height="822" alt="11" src="https://github.com/user-attachments/assets/b1ef81a0-9b45-48da-b92e-f99d77a220f2" />
+![Image 11](../assets/phase-2/06/11.png)
 
-
-Set a strong password for **Directory Services Restore Mode (DSRM)**. Store this securely — it is required if AD recovery is ever needed. Click **Next**.
+Set a strong **Directory Services Restore Mode (DSRM)** password and store it securely. Click **Next**.
 
 ---
 
 #### Step 12 — Verify NetBIOS Name
 
-<img width="1087" height="817" alt="12" src="https://github.com/user-attachments/assets/1acf5b47-6f60-4b02-9186-379d28be9f11" />
+![Image 12](../assets/phase-2/06/12.png)
 
-
-Confirm the **NetBIOS domain name** has auto-populated as `MURSAD` based on the root domain. Click **Next**.
+Confirm NetBIOS name auto-populated as `MURSAD`. Click **Next**.
 
 ---
 
 #### Step 13 — AD DS Database Paths
 
-<img width="1081" height="819" alt="13" src="https://github.com/user-attachments/assets/31b30ef2-449c-457d-92a3-cc6fa560d076" />
+![Image 13](../assets/phase-2/06/13.png)
 
-The wizard displays default paths for the AD DS database, log files, and SYSVOL folder. Leave these as default and click **Next**.
+Leave default paths for the AD DS database, log files, and SYSVOL. Click **Next**.
 
 ---
 
 #### Step 14 — Prerequisites Check
 
-<img width="1086" height="816" alt="14" src="https://github.com/user-attachments/assets/690587e1-9b6d-4062-9639-259ad8137b47" />
+![Image 14](../assets/phase-2/06/14.png)
 
-
-The wizard runs a prerequisites check. Once the green checkmark confirms all checks passed, click **Install** to begin the promotion.
+Once the green checkmark appears, click **Install**.
 
 ---
 
 #### Step 15 — Reboot to Apply DC Configuration
 
-<img width="1086" height="819" alt="15" src="https://github.com/user-attachments/assets/9da3f728-3a08-4d9d-9efe-7081c78727ea" />
+![Image 15](../assets/phase-2/06/15.png)
 
-
-Once installation completes, the system will sign out and **automatically restart** to apply the Domain Controller configuration.
+The system will sign out and **automatically restart** to finalize the Domain Controller configuration.
 
 ---
 
 ### Part C — User Provisioning
 
-#### Step 16 — Provision the IT Workstation VM in Proxmox
+#### Step 16 — Provision the IT Workstation VM
 
-<img width="1226" height="473" alt="16" src="https://github.com/user-attachments/assets/41569c79-3504-4062-8ba7-4b7b0c5c98e1" />
+![Image 16](../assets/phase-2/06/16.png)
 
-
-While the DC reboots, go to **Proxmox** and create a new Windows 10 VM for the IT department. Allocate appropriate hardware resources as shown.
+While the DC reboots, create a new Windows 10 VM in Proxmox for the IT department.
 
 ---
 
 #### Step 17 — Install Windows 10 Pro
 
-<img width="1049" height="653" alt="17" src="https://github.com/user-attachments/assets/a99310e4-8874-4bd9-8b07-880b3c0f7761" />
+![Image 17](../assets/phase-2/06/17.png)
 
-
-Install **Windows 10 Pro** on the workstation VM.
-
-> ⚠️ **Important:** Always select **Windows 10 Pro** — the Home edition cannot join an Active Directory domain.
+> ⚠️ Always select **Windows 10 Pro** — the Home edition cannot join a domain.
 
 ---
 
 #### Step 18 — Open Active Directory Users and Computers
 
-<img width="874" height="651" alt="18" src="https://github.com/user-attachments/assets/688c7c9f-e251-4796-961e-b814128080b8" />
+![Image 18](../assets/phase-2/06/18.png)
 
-
-Back on the Domain Controller, open **Active Directory Users and Computers** from **Server Manager → Tools**. This is the primary interface for managing all domain identities.
+**Server Manager → Tools → Active Directory Users and Computers**
 
 ---
 
 #### Step 19 — Create a New User
 
-<img width="871" height="652" alt="19" src="https://github.com/user-attachments/assets/73d0d452-0c6c-4474-b740-d69378af3d54" />
+![Image 19](../assets/phase-2/06/19.png)
 
-
-Right-click on the **"Users"** container (or your target Organizational Unit) and select **New → User**.
+Right-click the **Users** container → **New → User**.
 
 ---
 
 #### Step 20 — Enter User Details
 
-<img width="869" height="653" alt="20" src="https://github.com/user-attachments/assets/1633d994-b83c-4f5e-b5f3-c353d40e4e51" />
+![Image 20](../assets/phase-2/06/20.png)
 
-
-Enter the name details and set the **User logon name** to:
-
-```
-a.alaradi@mursad.local
-```
-
-Click **Next** to proceed to password assignment.
+Set User logon name: `a.alaradi@mursad.local`. Click **Next**.
 
 ---
 
 #### Step 21 — Set User Password
 
-<img width="868" height="654" alt="21" src="https://github.com/user-attachments/assets/8eabcb7e-79a2-448e-be95-294e71444075" />
+![Image 21](../assets/phase-2/06/21.png)
 
-
-Set a password for the new user. For this lab environment, **"Password never expires"** was selected to avoid lockouts during testing.
-
-> **Note:** In a production environment, password expiration policies should follow your organization's security policy.
+Set a password. **"Password never expires"** selected for lab use.
 
 ---
 
 #### Step 22 — Confirm User Settings
 
-<img width="865" height="653" alt="22" src="https://github.com/user-attachments/assets/8e844195-2b4c-49ed-9667-e39bf22935f2" />
+![Image 22](../assets/phase-2/06/22.png)
 
-
-Review the confirmation screen: verify the full name, user logon name (`a.alaradi@mursad.local`), and password policy settings. Click **Finish**.
+Verify all details and click **Finish**.
 
 ---
 
 #### Step 23 — User Created Successfully
 
-<img width="869" height="652" alt="23" src="https://github.com/user-attachments/assets/2ff4aca8-b4b6-46d7-a0d7-778b1c8cf1a7" />
+![Image 23](../assets/phase-2/06/23.png)
 
-
-The user account is now visible in the **Active Directory Users and Computers** directory, confirming successful creation.
+The user `a.alaradi` is now visible in the AD Users and Computers directory.
 
 ---
 
@@ -1996,19 +1856,17 @@ The user account is now visible in the **Active Directory Users and Computers** 
 
 #### Step 24 — Mount VirtIO Drivers on the Workstation
 
-<img width="916" height="427" alt="24" src="https://github.com/user-attachments/assets/552719c3-365e-471d-961d-b2467464ee66" />
+![Image 24](../assets/phase-2/06/24.png)
 
-
-Shut down the Windows 10 VM. In Proxmox, navigate to its **Hardware** settings and add the `virtio-win` ISO to the CD/DVD drive — same process as the Domain Controller in `[05]`.
+Shut down the Windows 10 VM. In Proxmox Hardware settings, add the `virtio-win` ISO to CD/DVD.
 
 ---
 
 #### Step 25 — Install VirtIO Drivers
 
-<img width="1044" height="651" alt="25" src="https://github.com/user-attachments/assets/002963be-7163-4fd6-aafa-7ffe24cd9a03" />
+![Image 25](../assets/phase-2/06/25.png)
 
-
-Boot the Windows 10 VM, run the **VirtIO installer** from the mounted CD drive, and click **Finish** once complete. Restart the VM to allow the network drivers to fully initialize.
+Run the VirtIO installer and click **Finish**. Restart the VM.
 
 ---
 
@@ -2016,10 +1874,9 @@ Boot the Windows 10 VM, run the **VirtIO installer** from the mounted CD drive, 
 
 #### Step 26 — Enable DHCP for the IT Workstation Interface
 
-<img width="1168" height="930" alt="26" src="https://github.com/user-attachments/assets/6137551d-1522-4df4-b9c4-0bf188cee1a7" />
+![Image 26](../assets/phase-2/06/26.png)
 
-
-In the **pfSense WebConfigurator**, navigate to **Services → DHCP Server → ITWORKSTATION** and enable the DHCP server:
+**pfSense → Services → DHCP Server → ITWORKSTATION**
 
 | Field | Value |
 |-------|-------|
@@ -2027,63 +1884,45 @@ In the **pfSense WebConfigurator**, navigate to **Services → DHCP Server → I
 | Address Pool To | `10.22.1.100` |
 | DNS Server | `10.22.1.1` |
 
-Click **Save**.
-
 ---
 
 #### Step 27 — Add NAT Mapping for IT Subnet
 
-<img width="1174" height="840" alt="27" src="https://github.com/user-attachments/assets/2f401313-720c-4469-8762-a4839741b77c" />
+![Image 27](../assets/phase-2/06/27.png)
 
-
-Navigate to **Firewall → NAT → Outbound** and add a new manual NAT mapping for the IT workstation subnet:
-
-| Field | Value |
-|-------|-------|
-| Source Network | `10.22.1.0` / `24` |
-| Description | `Manual NAT — IT Workstation` |
-
-Click **Save → Apply Changes**.
+**Firewall → NAT → Outbound** — add manual mapping for `10.22.1.0/24`.
 
 ---
 
 #### Step 28 — Add Firewall Rules for IT Workstation
 
-<img width="1168" height="477" alt="28" src="https://github.com/user-attachments/assets/6f104b65-b94e-4899-be3d-2fe8eb5c8f4b" />
+![Image 28](../assets/phase-2/06/28.png)
 
-Navigate to **Firewall → Rules → ITWORKSTATION** and add the necessary pass rules to allow outbound traffic from the IT workstation subnet. Click **Apply Changes**.
+**Firewall → Rules → ITWORKSTATION** — add pass rules for outbound traffic.
 
 ---
 
 #### Step 29 — Verify Connectivity from Workstation
 
-<img width="1311" height="824" alt="29" src="https://github.com/user-attachments/assets/14bdf043-4a0e-4d33-a43e-26bffecd61f9" />
-
-On the Windows 10 machine, open **Command Prompt** and verify connectivity:
+![Image 29](../assets/phase-2/06/29.png)
 
 ```cmd
 ping 10.22.7.3
 ping 10.22.1.1
 ```
 
-Both the Active Directory server and the gateway should respond successfully.
-
 ---
 
 #### Step 30 — Configure DNS on the Workstation
 
-<img width="1303" height="819" alt="30" src="https://github.com/user-attachments/assets/e9121768-719f-4213-9847-7754d6f06d60" />
+![Image 30](../assets/phase-2/06/30.png)
 
-Navigate to **Network and Sharing Center → Ethernet → Properties → Internet Protocol Version 4 (TCP/IPv4)** and set:
+**Network → Ethernet → IPv4 Properties**
 
 | Field | Value |
 |-------|-------|
-| Preferred DNS Server | `10.22.7.3` *(Domain Controller)* |
-| Alternate DNS Server | `10.22.1.1` *(pfSense gateway)* |
-
-> This step is critical — the workstation must use the DC for DNS resolution so it can locate the `mursad.local` domain during the join process.
-
-Click **OK**.
+| Preferred DNS | `10.22.7.3` *(Domain Controller)* |
+| Alternate DNS | `10.22.1.1` *(pfSense gateway)* |
 
 ---
 
@@ -2091,38 +1930,31 @@ Click **OK**.
 
 #### Step 31 — Initiate Domain Join
 
-<img width="1304" height="814" alt="31" src="https://github.com/user-attachments/assets/4428fa74-2b6e-400d-8d64-5f056b503224" />
+![Image 31](../assets/phase-2/06/31.png)
 
-Navigate to **Settings → System → About → Advanced system settings**. Under the **"Computer Name"** tab, click **"Change..."**. Select the **"Domain"** radio button and enter:
+**Settings → System → About → Advanced system settings → Computer Name → Change...**
 
-```
-mursad.local
-```
-
-Click **OK**.
+Select **Domain** and enter `mursad.local`.
 
 ---
 
 #### Step 32 — Authenticate with Domain Admin Credentials
 
-<img width="1307" height="813" alt="32" src="https://github.com/user-attachments/assets/fbb814ca-52cb-4aab-8cac-ea70007d6bfd" />
+![Image 32](../assets/phase-2/06/32.png)
 
-A **Windows Security** prompt will appear requesting credentials with domain-join privileges. Enter the credentials of the **Domain Admin** account and click **OK**.
+Enter Domain Admin credentials when prompted.
 
 ---
 
 #### Step 33 — Domain Join Successful
 
-<img width="1304" height="815" alt="33" src="https://github.com/user-attachments/assets/776ecc6e-2f7c-41a7-be19-e3967b49912f" />
-
-
-A welcome message confirms:
+![Image 33](../assets/phase-2/06/33.png)
 
 ```
 Welcome to the mursad.local domain.
 ```
 
-The workstation has successfully authenticated with the Domain Controller and is now formally joined to the Active Directory environment. Restart the workstation to apply domain policies.
+Restart the workstation to apply domain policies.
 
 ---
 
@@ -2165,6 +1997,323 @@ The workstation has successfully authenticated with the Domain Controller and is
 
 ---
 
+<details>
+<summary><b>📙 Phase 2 · [07] — DMZ Architecture Setup</b></summary>
+<a name="phase-2--07"></a>
+
+<br>
+
+> **Scope:** Organizing the Active Directory hierarchy with Organizational Units (OUs), provisioning the public-facing **DMZ web server** (`DMZ-SRV-01`), securing the pfSense management port, configuring **Destination NAT** (Port Forwarding) to expose web services through the WAN, and staging a vulnerable web application (XAMPP) for SOC telemetry and future attack simulation.
+
+---
+
+### Overview
+
+```text
+Proxmox Node: mursad
+├── VM 101  —  DC  (Windows Server 2019)
+│       └── Active Directory  ·  mursad.local
+│           ├── OU: Admin-Department     ← Domain Admins
+│           ├── OU: HR-Department
+│           ├── OU: Operations-Department
+│           └── OU: Accounting-Department
+│
+└── VM 103  —  DMZ-SRV-01  (Windows Server)
+        ├── Network:  vmbr4  (DMZ)
+        ├── IP:       192.168.50.10  (Static)
+        └── Role:     Public Web Server  (Apache / XAMPP)
+
+pfSense WebConfigurator
+└── Edge Routing
+        ├── WebGUI moved to TCP 4005   ← avoids conflict with HTTP forwarding
+        └── Port Forwarding (WAN → DMZ)
+                ├── TCP 80  →  192.168.50.10
+                └── TCP 443 →  192.168.50.10
+```
+
+| Part | Section | Description |
+|:----:|---------|-------------|
+| **A** | Active Directory Organization | Create Organizational Units and elevate domain user privileges |
+| **B** | DMZ Server Provisioning | Create VM 103, verify DMZ networking, and stage web services |
+| **C** | pfSense Port Forwarding | Secure the WebGUI port and expose the DMZ via Destination NAT |
+| **D** | Web Application Staging | Initialize Apache and deploy the custom `index.html` payload |
+| **E** | Domain Integration | Join `DMZ-SRV-01` to `mursad.local` and log in with a domain account |
+
+---
+
+### Part A — Active Directory Organization
+
+#### Step 1 — Create Organizational Units
+
+<img width="1082" height="817" alt="Image" src="https://github.com/user-attachments/assets/92d418f0-c988-41f0-9536-65ee0c444996" />
+
+
+Open **Server Manager → Tools → Active Directory Users and Computers**. Right-click the root domain `mursad.local`, select **New → Organizational Unit** to begin building the department hierarchy.
+
+---
+
+#### Step 2 — Name the First OU
+
+<img width="1085" height="813" alt="Image" src="https://github.com/user-attachments/assets/8eb8fd6c-cf66-4a50-a495-8c90507f1965" />
+
+
+Name the new OU (e.g., `Admin-Department`). Leave **"Protect container from accidental deletion"** checked — this prevents accidental removal of the OU and all objects inside it.
+
+---
+
+#### Step 3 — Build the Full Department Hierarchy
+
+<img width="1083" height="816" alt="Image" src="https://github.com/user-attachments/assets/460e975c-660a-45db-a145-e9f5ba274719" />
+
+
+Repeat the process to create all four department OUs. The final Active Directory structure should contain:
+
+| OU Name | Purpose |
+|---------|---------|
+| `Admin-Department` | Tier 0 administrators · Domain Admin accounts |
+| `HR-Department` | Human Resources endpoints and users |
+| `Operations-Department` | Operations team endpoints and users |
+| `Accounting-Department` | Finance and accounting endpoints and users |
+
+---
+
+#### Step 4 — Configure User Properties
+
+<img width="1082" height="811" alt="Image" src="https://github.com/user-attachments/assets/6bbd3dd6-f7fd-413e-b8c6-3d73becde096" />
+
+
+Move the domain user account from the default **Users** container into the `Admin-Department` OU. Right-click the user → **Properties** → fill in the operational details:
+
+| Field | Value |
+|-------|-------|
+| Description | `Tier 0 Domain Administrator` |
+| Office | `Security Operations Center (SOC)` |
+| Email | `admin.ali@mursad.local` |
+
+---
+
+#### Step 5 — Assign Domain Admin Privileges
+
+<img width="1087" height="818" alt="Image" src="https://github.com/user-attachments/assets/49bafdf3-6f79-4f79-9378-aa33265206fb" />
+
+
+Navigate to the **Member Of** tab. Click **Add**, type `domain admins`, click **Check Names**, then **OK**. Click **Apply** to finalize the privilege escalation.
+
+> ⚠️ **Security Note:** In production environments, Domain Admin privileges should be granted sparingly and audited regularly. For this lab, it is acceptable for the primary SOC admin account.
+
+---
+
+### Part B — DMZ Server Provisioning
+
+#### Step 6 — Create the DMZ Virtual Machine
+
+<img width="1088" height="813" alt="Image" src="https://github.com/user-attachments/assets/cc0ca443-d224-4c9b-b47d-6840ca812ead" />
+
+In Proxmox, create **VM 103** named `DMZ-SRV-01`. Allocate the following hardware:
+
+| Component | Value |
+|-----------|-------|
+| VM ID | `103` |
+| Name | `DMZ-SRV-01` |
+| Memory | `4096 MiB (4 GB)` |
+| CPU Cores | `2` (Type: `host`) |
+| Hard Disk | `60 GB` (VirtIO Block) |
+| Network Bridge | `vmbr4` (DMZ) · Model: VirtIO |
+
+---
+
+#### Step 7 — Verify DMZ Network Connectivity
+
+<img width="1077" height="815" alt="Image" src="https://github.com/user-attachments/assets/c10d6168-b600-44fa-af1f-4a931424bbf6" />
+
+
+Once Windows Server is installed and VirtIO drivers are loaded, open **PowerShell** and run:
+
+```powershell
+ipconfig
+```
+
+Confirm the machine has obtained the correct DMZ addressing:
+
+| Field | Expected Value |
+|-------|---------------|
+| IPv4 Address | `192.168.50.10` |
+| Default Gateway | `192.168.50.1` *(pfSense DMZ interface)* |
+
+---
+
+#### Step 8 — Stage Web Services
+
+<img width="1088" height="813" alt="Image" src="https://github.com/user-attachments/assets/3960513b-825d-4d6e-b8a8-4182fba085ba" />
+
+
+With the server connected to the DMZ VLAN, download the **XAMPP for Windows** installer to `DMZ-SRV-01`. XAMPP bundles Apache, MariaDB, and PHP — providing a realistic vulnerable web stack for future SOC monitoring and Red Team attack simulations.
+
+---
+
+### Part C — pfSense Port Forwarding & WebGUI Security
+
+> ⚠️ **Critical — Read Before Proceeding:** pfSense listens on TCP **80** and **443** by default for its WebGUI. To forward inbound HTTP/HTTPS traffic to the DMZ server, we must first **move the management port** to avoid a conflict. If you skip this step, the port forward rules will intercept your own firewall management traffic.
+
+#### Step 9 — Secure the pfSense WebGUI Port
+
+<img width="1181" height="583" alt="Image" src="https://github.com/user-attachments/assets/0bfc7f3b-053e-4c17-932e-640c30ae95a5" />
+
+Navigate to **System → Advanced → Admin Access** and apply the following changes:
+
+| Setting | Value |
+|---------|-------|
+| TCP Port | `4005` *(custom management port)* |
+| Disable webConfigurator redirect rule | ✅ Checked |
+
+> **Why both settings?** The **TCP port** defines which port the interface listens on (`4005`). The **redirect rule checkbox** controls whether pfSense automatically redirects standard HTTP traffic (port 80) to the management port — disabling it ensures port 80 stays free for the DMZ forward.
+
+Click **Save**. The WebGUI will now be accessible at:
+
+```
+https://192.168.50.10
+```
+
+---
+
+#### Step 10 — Configure Destination NAT (Port Forwarding)
+
+<img width="1187" height="428" alt="Image" src="https://github.com/user-attachments/assets/a0c9a79b-d418-4270-96d5-d5feef332a56" />
+
+
+Navigate to **Firewall → NAT → Port Forward** and create two rules on the **WAN** interface:
+
+| Rule | Interface | Protocol | WAN Port | Redirect Target | Redirect Port | Description |
+|------|-----------|----------|----------|-----------------|---------------|-------------|
+| HTTP | WAN | TCP | `80` | `192.168.50.10` | `80` | Forward HTTP to DMZ web server |
+| HTTPS | WAN | TCP | `443` | `192.168.50.10` | `443` | Forward HTTPS to DMZ web server |
+
+Click **Apply Changes**. External traffic hitting the WAN IP on ports 80/443 is now routed directly into the isolated DMZ zone.
+
+---
+
+### Part D — Web Application Staging
+
+#### Step 11 — Initialize Apache Server
+
+<img width="1088" height="816" alt="Image" src="https://github.com/user-attachments/assets/9e88885a-18bb-4d93-8268-c6dc65b29ba4" />
+
+
+Back on **DMZ-SRV-01**, open the **XAMPP Control Panel** and click **Start** next to the **Apache** module. The row should highlight green, confirming Apache is actively listening on:
+
+```
+HTTP  →  Port 80
+HTTPS →  Port 443
+```
+
+---
+
+#### Step 12 — Deploy the Web Application
+
+<img width="1081" height="812" alt="Image" src="https://github.com/user-attachments/assets/d1d4b3d6-32e6-4a7b-86bb-00854c26e185" />
+
+Open **File Explorer** and navigate to the Apache web root:
+
+```
+C:\xampp\htdocs\
+```
+
+Clear all default XAMPP placeholder files from this directory. Create a new file named `index.html` — this will serve as the custom landing page for the public-facing web server.
+
+---
+
+#### Step 13 — Verify Local Web Access
+
+<img width="1084" height="813" alt="Image" src="https://github.com/user-attachments/assets/d1b8d2a3-deab-4148-b82b-6096d8f95d20" />
+
+Open a browser on the DMZ server and navigate to:
+
+```
+http://192.168.50.10/
+```
+
+The custom **Project Mursad** web page should render successfully, confirming Apache is serving the `index.html` payload. This also validates that the XAMPP stack is correctly initialized and ready for SOC telemetry.
+
+---
+
+### Part E — Domain Integration
+
+#### Step 14 — Join the Active Directory Domain
+
+<img width="1081" height="815" alt="Image" src="https://github.com/user-attachments/assets/05c67729-29bc-40cb-98f8-3ca03769c2a6" />
+
+To enable centralized management and Group Policy enforcement, join `DMZ-SRV-01` to the Active Directory domain. Navigate to:
+
+**Control Panel → System and Security → System → Advanced system settings → Computer Name tab → Change...**
+
+| Field | Value |
+|-------|-------|
+| Computer Name | `DMZ-SRV-01` |
+| Member of | ◉ Domain: `mursad.local` |
+
+Click **OK** and authenticate with **Domain Admin credentials** when prompted.
+
+---
+
+#### Step 15 — Log In with Domain Credentials
+
+<img width="1085" height="812" alt="Image" src="https://github.com/user-attachments/assets/7c69408d-6b6f-4219-8761-04e4dba9c4ed" />
+
+After the domain join, Windows will prompt for a restart. Once the server reboots, select **Other user** at the login screen and authenticate using the domain admin account:
+
+```
+Username:  a.alaradi
+Domain:    MURSAD
+```
+
+`DMZ-SRV-01` is now fully integrated into the `mursad.local` Active Directory environment and subject to Group Policy Objects applied at the domain level.
+
+---
+
+### VM Summary
+
+| VM | OS | Bridge | IP | Role |
+|:--:|:--:|:------:|:--:|------|
+| VM 101 — DC | Windows Server 2019 | vmbr5 | `10.22.7.3` | AD DS · DNS · Forest Root |
+| VM 103 — DMZ-SRV-01 | Windows Server | vmbr4 | `192.168.50.10` | Public-Facing DMZ Web Server |
+
+---
+
+### ✅ Phase Checklist
+
+- [ ] Departmental OUs created in Active Directory — `Admin`, `HR`, `Operations`, `Accounting`
+- [ ] Primary user account moved to `Admin-Department` OU
+- [ ] User properties populated — Description, Office, Email
+- [ ] User granted `Domain Admins` group membership
+- [ ] VM 103 (`DMZ-SRV-01`) created — `4 GB RAM · 2 cores · 60 GB · vmbr4`
+- [ ] DMZ IP verified via `ipconfig` — `192.168.50.10`, gateway `192.168.50.1`
+- [ ] XAMPP installer staged on the DMZ server
+- [ ] pfSense Admin Access port changed to `TCP 4005`
+- [ ] pfSense WebGUI redirect rule disabled
+- [ ] WebGUI confirmed accessible at `https://10.22.0.1:4005`
+- [ ] Port Forwarding rule created — WAN `TCP 80` → `192.168.50.10:80`
+- [ ] Port Forwarding rule created — WAN `TCP 443` → `192.168.50.10:443`
+- [ ] Port Forward rules applied in pfSense
+- [ ] Apache module started in XAMPP Control Panel — status: green
+- [ ] Default `htdocs` content cleared
+- [ ] Custom `index.html` deployed to `C:\xampp\htdocs\`
+- [ ] Web application verified at `http://192.168.50.10/`
+- [ ] `DMZ-SRV-01` hostname configured
+- [ ] Server joined to `mursad.local` domain
+- [ ] Server restarted and logged in via domain account (`a.alaradi`)
+
+<div align="center"><br>
+
+**🟢 Phase Complete**
+
+`[06] Active Directory Installation` ◄── **`[07] DMZ Architecture Setup`** ──► `[08] LAN/DMZ Traffic Isolation`
+
+<br></div>
+
+</details>
+
+---
+
 ## 📁 Repository Structure
 
 ```
@@ -2177,7 +2326,11 @@ Project-Mursad/
 │   │   ├── 02-proxmox-deployment/
 │   │   ├── 03-pfsense-installation/
 │   │   └── 04-firewall-routing/
-│   └── phase-2/  phase-3/  phase-4/  ...
+│   ├── phase-2/
+│   │   ├── 05-dc-provisioning/
+│   │   ├── 06/
+│   │   └── 07/
+│   └── phase-3/  phase-4/  ...
 │
 ├── 📂 configs/                       # Exported configs and rule sets
 │   ├── pfsense/
@@ -2191,7 +2344,11 @@ Project-Mursad/
 │   │   ├── 02-proxmox-deployment.md
 │   │   ├── 03-pfsense-installation.md
 │   │   └── 04-firewall-routing.md
-│   └── phase-2/  phase-3/  phase-4/  ...
+│   ├── phase-2/
+│   │   ├── 05-dc-provisioning.md
+│   │   ├── 06-active-directory.md
+│   │   └── 07-dmz-architecture.md
+│   └── phase-3/  phase-4/  ...
 │
 ├── 📂 scripts/                       # Automation scripts
 │   ├── ad-provisioning.ps1
