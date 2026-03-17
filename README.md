@@ -2,10 +2,12 @@
 
 <br>
 
-<h1>👁️ PROJECT MURSAD</h1>
-<h3>Enterprise Security Architecture & SOC Telemetry Lab</h3>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=28&duration=3000&pause=1000&color=E94560&center=true&vCenter=true&width=600&lines=%F0%9F%91%81%EF%B8%8F+PROJECT+MURSAD;SOC+Telemetry+Lab;Enterprise+Security+Architecture">
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=700&size=28&duration=3000&pause=1000&color=E94560&center=true&vCenter=true&width=600&lines=%F0%9F%91%81%EF%B8%8F+PROJECT+MURSAD;SOC+Telemetry+Lab;Enterprise+Security+Architecture" alt="Project Mursad"/>
+</picture>
 
-<br>
+<br><br>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Proxmox_VE-E57000?style=for-the-badge&logo=proxmox&logoColor=white"/>
@@ -16,24 +18,19 @@
   <img src="https://img.shields.io/badge/Kali_Linux-557C94?style=for-the-badge&logo=kali-linux&logoColor=white"/>
 </p>
 
-<br>
-
 <p align="center">
-  <img src="https://img.shields.io/badge/Phase_1-COMPLETE-2ecc71?style=flat-square&labelColor=1a1a2e"/>
-  <img src="https://img.shields.io/badge/Phase_2-COMPLETE-2ecc71?style=flat-square&labelColor=1a1a2e"/>
-  <img src="https://img.shields.io/badge/Phase_3-IN_PROGRESS-e94560?style=flat-square&labelColor=1a1a2e"/>
-  <img src="https://img.shields.io/badge/Phase_4-PENDING-555555?style=flat-square&labelColor=1a1a2e"/>
+  <img src="https://img.shields.io/badge/Phase_1-COMPLETE-2ecc71?style=flat-square&labelColor=0d1117"/>
+  <img src="https://img.shields.io/badge/Phase_2-COMPLETE-2ecc71?style=flat-square&labelColor=0d1117"/>
+  <img src="https://img.shields.io/badge/Phase_3-IN_PROGRESS-e94560?style=flat-square&labelColor=0d1117"/>
+  <img src="https://img.shields.io/badge/Phase_4-PENDING-555555?style=flat-square&labelColor=0d1117"/>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Progress-Phase%203%20In%20Progress%20%7C%2060%25-e94560?style=flat-square&labelColor=1a1a2e"/>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Platform-Proxmox%20VE%209.1-E57000?style=flat-square&logo=proxmox&logoColor=white&labelColor=1a1a2e"/>
-  <img src="https://img.shields.io/badge/AD%20Domain-mursad.local-0078D4?style=flat-square&logo=microsoft&logoColor=white&labelColor=1a1a2e"/>
-  <img src="https://img.shields.io/badge/Host%20FQDN-mursad.me-6B4CFF?style=flat-square&labelColor=1a1a2e"/>
-  <img src="https://img.shields.io/badge/License-MIT-2ecc71?style=flat-square&labelColor=1a1a2e"/>
+  <img src="https://img.shields.io/badge/Progress-60%25-e94560?style=flat-square&labelColor=0d1117"/>
+  <img src="https://img.shields.io/badge/Platform-Proxmox_VE_9.1-E57000?style=flat-square&logo=proxmox&logoColor=white&labelColor=0d1117"/>
+  <img src="https://img.shields.io/badge/Domain-mursad.local-0078D4?style=flat-square&logo=microsoft&logoColor=white&labelColor=0d1117"/>
+  <img src="https://img.shields.io/badge/FQDN-mursad.me-6B4CFF?style=flat-square&labelColor=0d1117"/>
+  <img src="https://img.shields.io/badge/License-MIT-2ecc71?style=flat-square&labelColor=0d1117"/>
 </p>
 
 <br>
@@ -62,7 +59,8 @@
   - [Phase 2 · 05 — Domain Controller Provisioning](#phase-2--05)
   - [Phase 2 · 06 — Active Directory Installation](#phase-2--06)
   - [Phase 2 · 07 — DMZ Architecture Setup](#phase-2--07)
-  - [Phase 3 · 08 — Suricata IDS/IPS Configuration](#phase-3--08)
+  - [Phase 2 · 08 — Suricata IDS/IPS Configuration](#phase-2--08)
+  - [Phase 3 · 09 — LAN/DMZ Traffic Isolation & DNS Mapping](#phase-3--09)
 - [Repository Structure](#-repository-structure)
 - [Disclaimer](#-disclaimer)
 
@@ -76,12 +74,12 @@ Project Mursad is a fully virtualized, enterprise-grade Security Operations Cent
 
 | Objective | Description |
 |-----------|-------------|
-| 🔒 Network Segmentation | Multi-zone pfSense firewall — Workstation, Servers, DMZ isolation |
-| 🎯 Adversary Simulation | Red Team capability via isolated Kali Linux on the WAN |
-| 📊 SOC Telemetry | Wazuh SIEM collecting logs from all endpoints and network infrastructure |
-| 🚨 Intrusion Detection | Suricata IDS/IPS inline on pfSense for live traffic inspection |
-| 🛡️ Endpoint Hardening | CIS benchmarks, EDR via Kaspersky Security Center, AV integration |
-| 🔁 Incident Response | Realistic alert triage, correlation, and response workflows |
+| 🔒 **Network Segmentation** | Multi-zone pfSense firewall — Workstation, Servers, DMZ isolation |
+| 🎯 **Adversary Simulation** | Red Team capability via isolated Kali Linux on the WAN |
+| 📊 **SOC Telemetry** | Wazuh SIEM collecting logs from all endpoints and network infrastructure |
+| 🚨 **Intrusion Detection** | Suricata IDS/IPS inline on pfSense for live traffic inspection |
+| 🛡️ **Endpoint Hardening** | CIS benchmarks, EDR via Kaspersky Security Center, AV integration |
+| 🔁 **Incident Response** | Realistic alert triage, correlation, and response workflows |
 
 ---
 
@@ -172,15 +170,13 @@ Project Mursad is a fully virtualized, enterprise-grade Security Operations Cent
 
 ## 🗓️ Roadmap
 
-<br>
-
 <div align="center">
 
 ```
-  PHASE 1          PHASE 2          PHASE 3          PHASE 4
-Infrastructure  ──►  Identity    ──►  Telemetry   ──►  Hardening
-  & Perimeter     & Segmentation  & Detection      & Validation
-  [ COMPLETE ]     [ COMPLETE ]     [ ACTIVE ]       [ PENDING ]
+  PHASE 1          PHASE 2              PHASE 3          PHASE 4
+Infrastructure  ──►  Identity       ──►  Telemetry   ──►  Hardening
+  & Perimeter     & Segmentation       & Detection      & Validation
+  [ COMPLETE ]     [ COMPLETE ]         [ ACTIVE ]       [ PENDING ]
 ```
 
 </div>
@@ -193,23 +189,23 @@ Infrastructure  ──►  Identity    ──►  Telemetry   ──►  Hardeni
 
 | # | Task | Status |
 |:---:|------|:------:|
-| `[01]` | Project Architecture & Introduction | `✅` |
-| `[02]` | Proxmox Hypervisor Deployment & Bridge VLAN Engineering | `✅` |
-| `[03]` | pfSense Edge Firewall Installation & Baseline Setup | `✅` |
-| `[04]` | Advanced Firewall Routing & Network Configuration | `✅` |
+| `[01]` | Project Architecture & Introduction | ✅ |
+| `[02]` | Proxmox Hypervisor Deployment & Bridge VLAN Engineering | ✅ |
+| `[03]` | pfSense Edge Firewall Installation & Baseline Setup | ✅ |
+| `[04]` | Advanced Firewall Routing & Network Configuration | ✅ |
 
 <br>
 
 ### ◆ Phase 2 — Enterprise Identity & Network Segmentation
 
-> *Building the corporate network, managing identities, and isolating services.*
+> *Building the corporate network, managing identities, and deploying IDS/IPS.*
 
 | # | Task | Status |
 |:---:|------|:------:|
-| `[05]` | Domain Controller Provisioning & Network Integration | `✅` |
-| `[06]` | Active Directory Domain Installation & Configuration | `✅` |
-| `[07]` | DMZ Architecture Setup | `✅` |
-| `[08]` | LAN/DMZ Traffic Isolation & Secure Local DNS Mapping | `✅` |
+| `[05]` | Domain Controller Provisioning & Network Integration | ✅ |
+| `[06]` | Active Directory Domain Installation & Configuration | ✅ |
+| `[07]` | DMZ Architecture Setup | ✅ |
+| `[08]` | Suricata IDS/IPS Configuration | ✅ |
 
 <br>
 
@@ -219,8 +215,8 @@ Infrastructure  ──►  Identity    ──►  Telemetry   ──►  Hardeni
 
 | # | Task | Status |
 |:---:|------|:------:|
-| `[09]` | Suricata IDS/IPS Configuration | `🔄` |
-| `[10]` | Wazuh SIEM Installation · Syslog Ingestion · Agent Rollout | `⬜` |
+| `[09]` | LAN/DMZ Traffic Isolation & Secure Local DNS Mapping | 🔄 |
+| `[10]` | Wazuh SIEM Installation · Syslog Ingestion · Agent Rollout | ⬜ |
 
 <br>
 
@@ -230,10 +226,10 @@ Infrastructure  ──►  Identity    ──►  Telemetry   ──►  Hardeni
 
 | # | Task | Status |
 |:---:|------|:------:|
-| `[11]` | Antivirus Integration & SIEM Efficiency Testing | `⬜` |
-| `[12]` | Infrastructure Auditing via CIS Benchmarks | `⬜` |
-| `[13]` | Kaspersky Security Center (EDR/AV) Enterprise Setup | `⬜` |
-| `[14]` | Final Security Review & Operations Wrap-Up | `⬜` |
+| `[11]` | Antivirus Integration & SIEM Efficiency Testing | ⬜ |
+| `[12]` | Infrastructure Auditing via CIS Benchmarks | ⬜ |
+| `[13]` | Kaspersky Security Center (EDR/AV) Enterprise Setup | ⬜ |
+| `[14]` | Final Security Review & Operations Wrap-Up | ⬜ |
 
 <br>
 
@@ -2048,8 +2044,7 @@ pfSense WebConfigurator
 
 <img width="1082" height="817" alt="Image" src="https://github.com/user-attachments/assets/92d418f0-c988-41f0-9536-65ee0c444996" />
 
-
-Open **Server Manager → Tools → Active Directory Users and Computers**. Right-click the root domain `mursad.local`, select **New → Organizational Unit** to begin building the department hierarchy.
+Open **Server Manager → Tools → Active Directory Users and Computers**. Right-click the root domain `mursad.local`, select **New → Organizational Unit**.
 
 ---
 
@@ -2057,17 +2052,13 @@ Open **Server Manager → Tools → Active Directory Users and Computers**. Righ
 
 <img width="1085" height="813" alt="Image" src="https://github.com/user-attachments/assets/8eb8fd6c-cf66-4a50-a495-8c90507f1965" />
 
-
-Name the new OU (e.g., `Admin-Department`). Leave **"Protect container from accidental deletion"** checked — this prevents accidental removal of the OU and all objects inside it.
+Name the new OU (e.g., `Admin-Department`). Leave **"Protect container from accidental deletion"** checked.
 
 ---
 
 #### Step 3 — Build the Full Department Hierarchy
 
 <img width="1083" height="816" alt="Image" src="https://github.com/user-attachments/assets/460e975c-660a-45db-a145-e9f5ba274719" />
-
-
-Repeat the process to create all four department OUs. The final Active Directory structure should contain:
 
 | OU Name | Purpose |
 |---------|---------|
@@ -2082,9 +2073,6 @@ Repeat the process to create all four department OUs. The final Active Directory
 
 <img width="1082" height="811" alt="Image" src="https://github.com/user-attachments/assets/6bbd3dd6-f7fd-413e-b8c6-3d73becde096" />
 
-
-Move the domain user account from the default **Users** container into the `Admin-Department` OU. Right-click the user → **Properties** → fill in the operational details:
-
 | Field | Value |
 |-------|-------|
 | Description | `Tier 0 Domain Administrator` |
@@ -2097,10 +2085,9 @@ Move the domain user account from the default **Users** container into the `Admi
 
 <img width="1087" height="818" alt="Image" src="https://github.com/user-attachments/assets/49bafdf3-6f79-4f79-9378-aa33265206fb" />
 
+**Member Of** tab → **Add** → type `domain admins` → **Check Names** → **OK** → **Apply**.
 
-Navigate to the **Member Of** tab. Click **Add**, type `domain admins`, click **Check Names**, then **OK**. Click **Apply** to finalize the privilege escalation.
-
-> ⚠️ **Security Note:** In production environments, Domain Admin privileges should be granted sparingly and audited regularly. For this lab, it is acceptable for the primary SOC admin account.
+> ⚠️ In production, Domain Admin privileges should be granted sparingly and audited regularly.
 
 ---
 
@@ -2109,8 +2096,6 @@ Navigate to the **Member Of** tab. Click **Add**, type `domain admins`, click **
 #### Step 6 — Create the DMZ Virtual Machine
 
 <img width="1088" height="813" alt="Image" src="https://github.com/user-attachments/assets/cc0ca443-d224-4c9b-b47d-6840ca812ead" />
-
-In Proxmox, create **VM 103** named `DMZ-SRV-01`. Allocate the following hardware:
 
 | Component | Value |
 |-----------|-------|
@@ -2127,19 +2112,14 @@ In Proxmox, create **VM 103** named `DMZ-SRV-01`. Allocate the following hardwar
 
 <img width="1077" height="815" alt="Image" src="https://github.com/user-attachments/assets/c10d6168-b600-44fa-af1f-4a931424bbf6" />
 
-
-Once Windows Server is installed and VirtIO drivers are loaded, open **PowerShell** and run:
-
 ```powershell
 ipconfig
 ```
 
-Confirm the machine has obtained the correct DMZ addressing:
-
 | Field | Expected Value |
 |-------|---------------|
 | IPv4 Address | `192.168.50.10` |
-| Default Gateway | `192.168.50.1` *(pfSense DMZ interface)* |
+| Default Gateway | `192.168.50.1` |
 
 ---
 
@@ -2147,33 +2127,24 @@ Confirm the machine has obtained the correct DMZ addressing:
 
 <img width="1088" height="813" alt="Image" src="https://github.com/user-attachments/assets/3960513b-825d-4d6e-b8a8-4182fba085ba" />
 
-
-With the server connected to the DMZ VLAN, download the **XAMPP for Windows** installer to `DMZ-SRV-01`. XAMPP bundles Apache, MariaDB, and PHP — providing a realistic vulnerable web stack for future SOC monitoring and Red Team attack simulations.
+Download **XAMPP for Windows** to `DMZ-SRV-01`.
 
 ---
 
 ### Part C — pfSense Port Forwarding & WebGUI Security
 
-> ⚠️ **Critical — Read Before Proceeding:** pfSense listens on TCP **80** and **443** by default for its WebGUI. To forward inbound HTTP/HTTPS traffic to the DMZ server, we must first **move the management port** to avoid a conflict. If you skip this step, the port forward rules will intercept your own firewall management traffic.
+> ⚠️ **Critical:** pfSense defaults to TCP **80/443** for its WebGUI. Move the port first before creating forwarding rules.
 
 #### Step 9 — Secure the pfSense WebGUI Port
 
 <img width="1181" height="583" alt="Image" src="https://github.com/user-attachments/assets/0bfc7f3b-053e-4c17-932e-640c30ae95a5" />
 
-Navigate to **System → Advanced → Admin Access** and apply the following changes:
+**System → Advanced → Admin Access**
 
 | Setting | Value |
 |---------|-------|
-| TCP Port | `4005` *(custom management port)* |
+| TCP Port | `4005` |
 | Disable webConfigurator redirect rule | ✅ Checked |
-
-> **Why both settings?** The **TCP port** defines which port the interface listens on (`4005`). The **redirect rule checkbox** controls whether pfSense automatically redirects standard HTTP traffic (port 80) to the management port — disabling it ensures port 80 stays free for the DMZ forward.
-
-Click **Save**. The WebGUI will now be accessible at:
-
-```
-https://192.168.50.10
-```
 
 ---
 
@@ -2181,15 +2152,12 @@ https://192.168.50.10
 
 <img width="1187" height="428" alt="Image" src="https://github.com/user-attachments/assets/a0c9a79b-d418-4270-96d5-d5feef332a56" />
 
+**Firewall → NAT → Port Forward** — WAN interface:
 
-Navigate to **Firewall → NAT → Port Forward** and create two rules on the **WAN** interface:
-
-| Rule | Interface | Protocol | WAN Port | Redirect Target | Redirect Port | Description |
-|------|-----------|----------|----------|-----------------|---------------|-------------|
-| HTTP | WAN | TCP | `80` | `192.168.50.10` | `80` | Forward HTTP to DMZ web server |
-| HTTPS | WAN | TCP | `443` | `192.168.50.10` | `443` | Forward HTTPS to DMZ web server |
-
-Click **Apply Changes**. External traffic hitting the WAN IP on ports 80/443 is now routed directly into the isolated DMZ zone.
+| Rule | Protocol | WAN Port | Redirect Target | Redirect Port |
+|------|----------|----------|-----------------|---------------|
+| HTTP | TCP | `80` | `192.168.50.10` | `80` |
+| HTTPS | TCP | `443` | `192.168.50.10` | `443` |
 
 ---
 
@@ -2199,12 +2167,11 @@ Click **Apply Changes**. External traffic hitting the WAN IP on ports 80/443 is 
 
 <img width="1088" height="816" alt="Image" src="https://github.com/user-attachments/assets/9e88885a-18bb-4d93-8268-c6dc65b29ba4" />
 
-
-Back on **DMZ-SRV-01**, open the **XAMPP Control Panel** and click **Start** next to the **Apache** module. The row should highlight green, confirming Apache is actively listening on:
+**XAMPP Control Panel → Start → Apache**
 
 ```
-HTTP  →  Port 80
-HTTPS →  Port 443
+HTTP  →  Port 80   ✅
+HTTPS →  Port 443  ✅
 ```
 
 ---
@@ -2213,13 +2180,7 @@ HTTPS →  Port 443
 
 <img width="1081" height="812" alt="Image" src="https://github.com/user-attachments/assets/d1d4b3d6-32e6-4a7b-86bb-00854c26e185" />
 
-Open **File Explorer** and navigate to the Apache web root:
-
-```
-C:\xampp\htdocs\
-```
-
-Clear all default XAMPP placeholder files from this directory. Create a new file named `index.html` — this will serve as the custom landing page for the public-facing web server.
+Navigate to `C:\xampp\htdocs\` → clear defaults → create `index.html`.
 
 ---
 
@@ -2227,13 +2188,9 @@ Clear all default XAMPP placeholder files from this directory. Create a new file
 
 <img width="1084" height="813" alt="Image" src="https://github.com/user-attachments/assets/d1b8d2a3-deab-4148-b82b-6096d8f95d20" />
 
-Open a browser on the DMZ server and navigate to:
-
 ```
 http://192.168.50.10/
 ```
-
-The custom **Project Mursad** web page should render successfully, confirming Apache is serving the `index.html` payload. This also validates that the XAMPP stack is correctly initialized and ready for SOC telemetry.
 
 ---
 
@@ -2243,16 +2200,10 @@ The custom **Project Mursad** web page should render successfully, confirming Ap
 
 <img width="1081" height="815" alt="Image" src="https://github.com/user-attachments/assets/05c67729-29bc-40cb-98f8-3ca03769c2a6" />
 
-To enable centralized management and Group Policy enforcement, join `DMZ-SRV-01` to the Active Directory domain. Navigate to:
-
-**Control Panel → System and Security → System → Advanced system settings → Computer Name tab → Change...**
-
 | Field | Value |
 |-------|-------|
 | Computer Name | `DMZ-SRV-01` |
 | Member of | ◉ Domain: `mursad.local` |
-
-Click **OK** and authenticate with **Domain Admin credentials** when prompted.
 
 ---
 
@@ -2260,14 +2211,10 @@ Click **OK** and authenticate with **Domain Admin credentials** when prompted.
 
 <img width="1085" height="812" alt="Image" src="https://github.com/user-attachments/assets/7c69408d-6b6f-4219-8761-04e4dba9c4ed" />
 
-After the domain join, Windows will prompt for a restart. Once the server reboots, select **Other user** at the login screen and authenticate using the domain admin account:
-
 ```
 Username:  a.alaradi
 Domain:    MURSAD
 ```
-
-`DMZ-SRV-01` is now fully integrated into the `mursad.local` Active Directory environment and subject to Group Policy Objects applied at the domain level.
 
 ---
 
@@ -2282,26 +2229,21 @@ Domain:    MURSAD
 
 ### ✅ Phase Checklist
 
-- [ ] Departmental OUs created in Active Directory — `Admin`, `HR`, `Operations`, `Accounting`
+- [ ] Departmental OUs created — `Admin`, `HR`, `Operations`, `Accounting`
 - [ ] Primary user account moved to `Admin-Department` OU
 - [ ] User properties populated — Description, Office, Email
 - [ ] User granted `Domain Admins` group membership
 - [ ] VM 103 (`DMZ-SRV-01`) created — `4 GB RAM · 2 cores · 60 GB · vmbr4`
-- [ ] DMZ IP verified via `ipconfig` — `192.168.50.10`, gateway `192.168.50.1`
+- [ ] DMZ IP verified — `192.168.50.10`, gateway `192.168.50.1`
 - [ ] XAMPP installer staged on the DMZ server
 - [ ] pfSense Admin Access port changed to `TCP 4005`
 - [ ] pfSense WebGUI redirect rule disabled
-- [ ] WebGUI confirmed accessible at `https://10.22.0.1:4005`
-- [ ] Port Forwarding rule created — WAN `TCP 80` → `192.168.50.10:80`
-- [ ] Port Forwarding rule created — WAN `TCP 443` → `192.168.50.10:443`
-- [ ] Port Forward rules applied in pfSense
-- [ ] Apache module started in XAMPP Control Panel — status: green
-- [ ] Default `htdocs` content cleared
+- [ ] Port Forwarding rule — WAN `TCP 80` → `192.168.50.10:80`
+- [ ] Port Forwarding rule — WAN `TCP 443` → `192.168.50.10:443`
+- [ ] Apache started in XAMPP — status: green
 - [ ] Custom `index.html` deployed to `C:\xampp\htdocs\`
 - [ ] Web application verified at `http://192.168.50.10/`
-- [ ] `DMZ-SRV-01` hostname configured
-- [ ] Server joined to `mursad.local` domain
-- [ ] Server restarted and logged in via domain account (`a.alaradi`)
+- [ ] `DMZ-SRV-01` joined to `mursad.local` and logged in via domain account
 
 <div align="center"><br>
 
@@ -2316,8 +2258,8 @@ Domain:    MURSAD
 ---
 
 <details>
-<summary><b>📘 Phase 3 · [09] — Suricata IDS/IPS Configuration</b></summary>
-<a name="phase-3--08"></a>
+<summary><b>📘 Phase 2 · [08] — Suricata IDS/IPS Configuration</b></summary>
+<a name="phase-2--08"></a>
 
 <br>
 
@@ -2368,9 +2310,7 @@ Today we will implement Suricata, a high-performance Network IDS, IPS, and Netwo
 
 #### Step 2 — Install Suricata Package
 
-Log into the pfSense WebConfigurator and navigate to **System → Package Manager → Available Packages**.
-
-In the search bar, type `suricata` and click **Search**. Locate the `suricata` package in the list and click the green **Install** button.
+Navigate to **System → Package Manager → Available Packages**. Search for `suricata` and click **Install**.
 
 <img width="1191" height="494" alt="2" src="https://github.com/user-attachments/assets/dda5cdad-7d85-4c86-9b66-8d68cdc4fb66" />
 
@@ -2378,11 +2318,11 @@ In the search bar, type `suricata` and click **Search**. Locate the `suricata` p
 
 #### Step 3 — Confirm Installation
 
-Confirm the installation and wait for the package manager to download and extract the binaries. Once complete, you will see a green **Success** message.
-
-> **Note:** While Snort is another excellent option available on pfSense, this SOC lab utilizes Suricata for its multithreading capabilities and native integration with the emerging threats landscape.
-
 <img width="1174" height="627" alt="3" src="https://github.com/user-attachments/assets/a5f17e77-e494-4b16-9df6-0c24856a6bc7" />
+
+Wait for: `TASK OK`
+
+> **Note:** Suricata is preferred over Snort for this lab due to multithreading capabilities and native integration with the emerging threats landscape.
 
 ---
 
@@ -2390,13 +2330,13 @@ Confirm the installation and wait for the package manager to download and extrac
 
 #### Step 4 — Configure Global Settings & Threat Feeds
 
-Navigate to **Services → Suricata → Global Settings**. Here, we must define which threat intelligence feeds Suricata will use to detect malicious traffic. Scroll down and enable the following rule sets:
+**Services → Suricata → Global Settings** — enable:
 
-- ✅ **Install ETOpen Emerging Threats rules** — Open-source ruleset for general malware, exploits, and anomalies.
-- ✅ **Install Feodo Tracker Botnet C2 IP rules** — Tracks Command and Control (C2) infrastructure used by botnets.
-- ✅ **Install ABUSE.ch SSL Blacklist rules** — Detects malicious SSL certificates associated with botnets and malware campaigns.
+- ✅ **Install ETOpen Emerging Threats rules**
+- ✅ **Install Feodo Tracker Botnet C2 IP rules**
+- ✅ **Install ABUSE.ch SSL Blacklist rules**
 
-Set the **Update Interval** to `1 DAY` to ensure your firewall regularly pulls the latest threat signatures automatically. Click **Save**.
+Set **Update Interval** to `1 DAY`. Click **Save**.
 
 <img width="1179" height="878" alt="4" src="https://github.com/user-attachments/assets/4a3b1b37-7fb3-4349-a9cd-4aa647ac7dd5" />
 
@@ -2404,20 +2344,17 @@ Set the **Update Interval** to `1 DAY` to ensure your firewall regularly pulls t
 
 #### Step 5 — Force Rule Updates
 
-Navigate to the **Updates** tab (**Services → Suricata → Updates**). Click the **Update** button to force an immediate manual download of all the rule sets you enabled in the previous step. Wait until the status for all rules shows as successful.
+**Services → Suricata → Updates → Update** — force immediate download of all enabled rule sets.
 
 <img width="1175" height="840" alt="5" src="https://github.com/user-attachments/assets/6f0ff995-5900-4098-a61d-3b3a2f272cca" />
-
 
 ---
 
 ### Part C — Management Interfaces Overview
 
-Before mapping Suricata to our specific interfaces (WAN, LAN, DMZ), let's review the primary management tabs used for day-to-day SOC operations.
-
 #### Step 6 — Alerts Interface
 
-Navigate to **Services → Suricata → Alerts**. Once Suricata is mapped to an interface and actively inspecting traffic, this tab acts as your primary dashboard for viewing triggered rules, the source/destination IPs involved, and the specific payload that caused the alert.
+**Services → Suricata → Alerts** — primary dashboard for triggered rules, source/destination IPs, and payload details.
 
 <img width="1174" height="735" alt="6" src="https://github.com/user-attachments/assets/e0e1ca4f-4a3a-4c3e-8cea-0ca4cd2d94c0" />
 
@@ -2425,7 +2362,7 @@ Navigate to **Services → Suricata → Alerts**. Once Suricata is mapped to an 
 
 #### Step 7 — Blocked Hosts Interface
 
-Navigate to **Services → Suricata → Blocked Hosts**. When Suricata is configured in IPS (Prevention) mode or Legacy Mode with block enforcement, any IP address deemed malicious by the rules engine will be actively dropped and listed here. You can manually clear blocks from this screen if false positives occur.
+**Services → Suricata → Blocked Hosts** — in IPS mode, malicious IPs are actively dropped and listed here.
 
 <img width="1194" height="641" alt="7" src="https://github.com/user-attachments/assets/49e522c1-4f86-44e7-8209-84007992f36e" />
 
@@ -2433,7 +2370,7 @@ Navigate to **Services → Suricata → Blocked Hosts**. When Suricata is config
 
 #### Step 8 — Files Interface
 
-Navigate to **Services → Suricata → Files**. This tab manages file extraction and logging capabilities. Suricata can be configured to carve and store specific file types traversing the network for further malware analysis.
+**Services → Suricata → Files** — file extraction and carving for malware analysis.
 
 <img width="1182" height="684" alt="8" src="https://github.com/user-attachments/assets/6941a9d5-e636-4977-866e-2f6fa95e44c4" />
 
@@ -2441,7 +2378,7 @@ Navigate to **Services → Suricata → Files**. This tab manages file extractio
 
 #### Step 9 — Pass Lists (Whitelisting)
 
-Navigate to **Services → Suricata → Pass Lists**. A Pass List acts as a "Whitelist." If you have specific internal servers, vulnerability scanners, or trusted external IPs that are triggering false positives, you can add them to a Pass List so Suricata bypasses them.
+**Services → Suricata → Pass Lists** — whitelist trusted IPs to prevent false positives.
 
 <img width="1186" height="420" alt="9" src="https://github.com/user-attachments/assets/ee6b8dc8-31dc-49bf-a069-8534c031ac22" />
 
@@ -2449,7 +2386,7 @@ Navigate to **Services → Suricata → Pass Lists**. A Pass List acts as a "Whi
 
 #### Step 10 — Suppress Lists (Silencing Rules)
 
-Navigate to **Services → Suricata → Suppress Lists**. Unlike a Pass List (which whitelists an IP), a Suppress List is a configuration feature used to silence specific noisy alerts without completely disabling the underlying rule. This is critical for tuning your IDS to your specific environment and reducing SOC alert fatigue.
+**Services → Suricata → Suppress Lists** — silence noisy rules without disabling them. Critical for reducing SOC alert fatigue.
 
 <img width="1201" height="418" alt="10" src="https://github.com/user-attachments/assets/8903fbb9-4526-4945-b657-186fe5bd54d8" />
 
@@ -2457,7 +2394,7 @@ Navigate to **Services → Suricata → Suppress Lists**. Unlike a Pass List (wh
 
 #### Step 11 — Logs View Interface
 
-Navigate to **Services → Suricata → Logs View**. This tab allows you to view raw log files generated by the Suricata engine directly from the pfSense web interface. Currently, this will appear empty as we have not yet generated any alert traffic.
+**Services → Suricata → Logs View** — raw Suricata engine logs from the pfSense web interface.
 
 <img width="1174" height="834" alt="11" src="https://github.com/user-attachments/assets/058d1a57-450f-473e-9044-46ca39bbb94c" />
 
@@ -2465,7 +2402,7 @@ Navigate to **Services → Suricata → Logs View**. This tab allows you to view
 
 #### Step 12 — Logs Management
 
-Navigate to **Services → Suricata → Logs Mgmt**. This section allows you to configure log rotation, retention sizes, and auto-deletion settings to ensure Suricata logs do not consume all available disk space on the firewall appliance.
+**Services → Suricata → Logs Mgmt** — configure log rotation to prevent disk exhaustion.
 
 <img width="1206" height="878" alt="12" src="https://github.com/user-attachments/assets/e784ced5-da54-44ab-870d-d7586a31b54d" />
 
@@ -2473,7 +2410,7 @@ Navigate to **Services → Suricata → Logs Mgmt**. This section allows you to 
 
 #### Step 13 — SID Management
 
-Navigate to **Services → Suricata → SID Mgmt**. Suricata SID (Signature ID) Management automatically enables, disables, or modifies specific detection rules via configuration files, preventing the need to manually edit the massive, auto-generated rules lists.
+**Services → Suricata → SID Mgmt** — automatically enable/disable/modify specific detection rules via configuration files.
 
 <img width="1188" height="791" alt="13" src="https://github.com/user-attachments/assets/ce9e0516-e0eb-44d4-8674-122b0930fc29" />
 
@@ -2481,18 +2418,16 @@ Navigate to **Services → Suricata → SID Mgmt**. Suricata SID (Signature ID) 
 
 ### Part D — Interface Configuration & Rule Categories
 
-With the global settings configured, we must now attach Suricata to a specific network interface (the DMZ) and tell it which rule categories to apply to that traffic.
-
 #### Step 14 — Configure DMZ Interface Settings
 
-Navigate to **Services → Suricata → Interfaces** and click **Add**.
+**Services → Suricata → Interfaces → Add**
 
 | Field | Value |
 |-------|-------|
 | Interface | DMZ (`vtnet3`) |
-| Enable | ✅ Enable Suricata inspection on this interface |
+| Enable | ✅ Enable Suricata inspection |
 
-For this initial deployment, we will run Suricata in **IDS mode** (Intrusion Detection System) only, meaning it will alert on malicious traffic but not actively block it. Click **Save**.
+Running in **IDS mode** initially — alerts only, no blocking.
 
 <img width="1190" height="879" alt="14" src="https://github.com/user-attachments/assets/071e3a4a-ea64-4661-bfb7-7b01e05cabeb" />
 
@@ -2500,15 +2435,13 @@ For this initial deployment, we will run Suricata in **IDS mode** (Intrusion Det
 
 #### Step 15 — IPS Mode Configuration (Optional)
 
-If you wish to elevate the deployment from IDS to IPS (Intrusion Prevention System) to actively block offenders, you would configure the Block Settings on this page:
+To elevate to IPS (active blocking):
 
 | Setting | Value |
 |---------|-------|
 | Block Offenders | ✅ Checked |
-| IPS Mode | Inline Mode *(drops packets natively)* |
-| Run Mode | Workers *(required for Inline IPS operation)* |
-
-> Leave blocking disabled for now to establish a baseline.
+| IPS Mode | Inline Mode |
+| Run Mode | Workers |
 
 <img width="1162" height="634" alt="15" src="https://github.com/user-attachments/assets/c1121b3e-fa84-48cf-bb7d-a674480baac4" />
 
@@ -2516,19 +2449,17 @@ If you wish to elevate the deployment from IDS to IPS (Intrusion Prevention Syst
 
 #### Step 16 — Interface Status & Control
 
-Back on the **Interfaces** tab, the DMZ interface is now listed. The "Block" column shows as disabled. You can control the Suricata service using the Play/Stop icon. Click the **Pencil** icon (Edit) to continue configuring the rules.
-
 <img width="1201" height="444" alt="16" src="https://github.com/user-attachments/assets/8348f7d7-98fa-4797-a871-c98be0ad5314" />
+
+Click the **Pencil** icon to continue configuring rules for the DMZ interface.
 
 ---
 
 #### Step 17 — Select DMZ Rule Categories
 
-While editing the DMZ interface, navigate to the **Categories** tab. Here you select which rule sets apply to this specific network zone.
+**Categories** tab → Click **Select All** → **Save**.
 
-> ⚠️ **Tuning Warning:** The more rules you enable, the higher the CPU load and the greater the chance of false positive alerts. You should ideally only enable rules relevant to the services running in that zone.
-
-For this aggressive lab environment, click **Select All** to enable all threat signatures, then click **Save**.
+> ⚠️ More rules = higher CPU load. For production, enable only categories relevant to running services.
 
 <img width="1064" height="931" alt="17" src="https://github.com/user-attachments/assets/e674b9a4-10be-4cbf-9ca3-e8d632c85802" />
 
@@ -2536,140 +2467,130 @@ For this aggressive lab environment, click **Select All** to enable all threat s
 
 #### Step 18 — View and Manage Individual Rules
 
-Navigate to the **Rules** tab. Here you can select a specific category from the dropdown menu to view the individual threat signatures (SIDs) it contains. You can manually disable or enable specific rules here if you notice false positives during operation.
+**Rules** tab — select a category from the dropdown to view and manage individual SIDs.
 
 <img width="1207" height="881" alt="18" src="https://github.com/user-attachments/assets/268740b4-a444-4d79-b30b-d5c8dbb4ef4e" />
-
+ 
 ---
-
+ 
 #### Step 19 — Start Suricata on the DMZ
-
-Return to the **Interfaces** tab. Click the **Play** button under the Status column for the DMZ interface. The icon will turn into a green checkmark, confirming the Suricata engine is successfully running and inspecting traffic on the DMZ VLAN.
-
+ 
+Return to the **Interfaces** tab. Click the **Play** button for the DMZ interface. The icon turns green — Suricata is now actively inspecting traffic.
+ 
 <img width="1169" height="418" alt="19" src="https://github.com/user-attachments/assets/e4c6307a-68da-470d-8f75-05d990f714c5" />
-
+ 
 ---
-
+ 
 ### Part E — Target Preparation
-
-Before launching an attack from Kali Linux, we must ensure the Windows Server firewall in the DMZ allows inbound HTTP/HTTPS traffic.
-
+ 
 #### Step 20 — Create Inbound Firewall Rule
-
-Switch over to the **DMZ-SRV-01** virtual machine. Open **Windows Defender Firewall with Advanced Security**. Click **Inbound Rules** on the left pane, then **New Rule...** on the right pane. Select **Port** and click **Next**.
-
+ 
+On **DMZ-SRV-01**, open **Windows Defender Firewall with Advanced Security → Inbound Rules → New Rule... → Port**.
+ 
 <img width="1550" height="1175" alt="20" src="https://github.com/user-attachments/assets/12465c0d-09c7-49c4-88c1-22f9576e0483" />
-
+ 
 ---
-
+ 
 #### Step 21 — Specify Protocols and Ports
-
-Select **TCP** and enter `80, 443` for specific local ports. Click **Next**.
-
+ 
+Select **TCP** · Specific local ports: `80, 443`.
+ 
 <img width="1077" height="813" alt="21" src="https://github.com/user-attachments/assets/b3157332-d9c3-477f-8fd4-38caf28e876f" />
-
+ 
 ---
-
+ 
 #### Step 22 — Rule Action
-
-Select **Allow the connection** and click **Next**.
-
+ 
+Select **Allow the connection**.
+ 
 <img width="1074" height="811" alt="22" src="https://github.com/user-attachments/assets/9317bb59-0f45-4570-88f5-9b2ec15a8590" />
-
+ 
 ---
-
+ 
 #### Step 23 — Apply to Profiles
-
-Check all three boxes (**Domain**, **Private**, **Public**) to ensure the rule applies regardless of the active network profile. Click **Next**.
-
+ 
+Check all three: **Domain**, **Private**, **Public**.
+ 
 <img width="1079" height="815" alt="23" src="https://github.com/user-attachments/assets/869bddef-8470-45ae-acd8-238bc2e9ba32" />
-
+ 
 ---
-
+ 
 #### Step 24 — Name the Rule
-
-Name the rule `Allow Web Traffic (HTTP/HTTPS)` and click **Finish**. The web server is now officially open to traffic.
-
+ 
+Name: `Allow Web Traffic (HTTP/HTTPS)` → **Finish**.
+ 
 <img width="1081" height="814" alt="24" src="https://github.com/user-attachments/assets/9065dc2e-948d-40ff-941c-4d01343b25ec" />
-
+ 
 ---
-
-#### Step 25 — External Access Validation (Host)
-
-Once the rule is applied, open a browser on your Host machine and navigate to the pfSense WAN IP (e.g., `http://192.168.140.130/`). The pfSense Destination NAT configuration correctly forwards this traffic to the DMZ, loading your custom Mursad landing page.
-
+ 
+#### Step 25 — External Access Validation
+ 
+Navigate to `http://192.168.140.130/` from the Host machine. The pfSense Destination NAT correctly forwards the request to the DMZ — the custom Mursad landing page loads.
+ 
 <img width="1077" height="815" alt="25" src="https://github.com/user-attachments/assets/2824be68-2245-42cd-835e-00ee9868bd85" />
-
+ 
 ---
-
+ 
 ### Part F — Red Team Adversary Simulation
-
+ 
 #### Step 26 — Kali Linux Verification
-
-Switch to your **Kali Linux** virtual machine (attached to the WAN/External network). Verify it can access the web application at the same WAN IP (`http://192.168.140.130/`). With access confirmed, we will now launch attacks to test Suricata's detection capabilities.
-
+ 
+Verify Kali Linux can access `http://192.168.140.130/`. Connectivity confirmed — proceed with attacks.
+ 
 <img width="1276" height="794" alt="26" src="https://github.com/user-attachments/assets/fc97e38f-dbb2-4611-bd86-1f6fb952d73b" />
-
+ 
 ---
-
+ 
 #### Step 27 — Execute SQL Injection Attack (SQLMap)
-
-Open the Kali Linux terminal and launch an automated SQL injection simulation against the web server using `sqlmap`. This simulates an attacker attempting to dump backend databases.
-
+ 
 ```bash
 sqlmap -u 'http://192.168.140.130/index.html?id=' --batch --random-agent
 ```
-
+ 
 <img width="1272" height="791" alt="27" src="https://github.com/user-attachments/assets/3502f297-c245-4238-878a-3b0f1110e15e" />
-
+ 
 ---
-
+ 
 #### Step 28 — Execute Network Reconnaissance (Nmap)
-
-Next, launch an aggressive port scan and service enumeration attack using `nmap`. This simulates an attacker attempting to map the infrastructure and find vulnerable services.
-
+ 
 ```bash
 sudo nmap -sS -sV -sC -O -p- -T4 -Pn --reason 192.168.140.130
 ```
-
+ 
 <img width="1274" height="792" alt="28" src="https://github.com/user-attachments/assets/d279e8d2-07dd-4c3f-a48e-e87eee97ffe0" />
-
+ 
 ---
-
+ 
 ### Part G — Blue Team Telemetry Validation
-
+ 
 #### Step 29 — Analyze Nmap Alerts
-
-Switch back to the pfSense WebConfigurator and navigate to **Services → Suricata → Alerts**.
-
-The interface will be flooded with critical telemetry. You will clearly see multiple alerts categorized as **Web Application Attack** generated directly by the `nmap` reconnaissance scan, identifying the Kali Linux IP as the source and the DMZ server as the destination.
-
+ 
+**Services → Suricata → Alerts** — multiple **Web Application Attack** alerts generated by the Nmap scan, identifying Kali Linux as the source.
+ 
 <img width="1257" height="872" alt="29" src="https://github.com/user-attachments/assets/ae8651b5-3982-4aa2-982f-78a10e47266f" />
-
+ 
 ---
-
+ 
 #### Step 30 — Analyze SQL Injection Alerts
-
-Scroll through the logs or filter the results to view the telemetry from the `sqlmap` attack. You will see numerous **SQL ATTEMPTS** logs, including specific rule triggers for `ET SCAN Sqlmap SQL Injection Scan`.
-
-The IDS is successfully monitoring, parsing, and alerting on live hostile traffic crossing the firewall boundary.
-
+ 
+Numerous **SQL ATTEMPTS** logs visible, including `ET SCAN Sqlmap SQL Injection Scan` rule triggers. The IDS is successfully detecting live hostile traffic crossing the firewall boundary.
+ 
 <img width="1263" height="873" alt="30" src="https://github.com/user-attachments/assets/e2da3be8-f8a0-42ca-b8cc-552fae23c07f" />
-
+ 
 ---
-
+ 
 ### VM Summary
-
+ 
 | VM | Network Zone | IP Address | Role in Simulation |
 |:--:|:------------:|:----------:|-------------------|
 | pfSense | WAN / DMZ | `192.168.140.130` (WAN) | Inline Suricata IDS Engine |
 | DMZ-SRV-01 | DMZ | `192.168.50.10` | Vulnerable Web Server Target |
 | Kali Linux | WAN | DHCP | External Red Team Attacker |
-
+ 
 ---
-
+ 
 ### ✅ Phase Checklist
-
+ 
 - [ ] Suricata package installed via pfSense Package Manager
 - [ ] ETOpen, Feodo Tracker, and ABUSE.ch rules enabled
 - [ ] Rule signatures successfully downloaded and updated
@@ -2680,23 +2601,45 @@ The IDS is successfully monitoring, parsing, and alerting on live hostile traffi
 - [ ] External web connectivity verified from Host and Kali Linux
 - [ ] SQL Injection simulation executed via `sqlmap`
 - [ ] Network reconnaissance simulation executed via `nmap`
-- [ ] Web Application Attack alerts successfully verified in Suricata logs
-- [ ] SQL Injection Attempt alerts successfully verified in Suricata logs
-
+- [ ] Web Application Attack alerts verified in Suricata logs
+- [ ] SQL Injection Attempt alerts verified in Suricata logs
+ 
 <div align="center"><br>
-
-**🟢 Phase Complete**
-
-`[07] DMZ Architecture Setup` ◄── **`[09] Suricata IDS/IPS Configuration`** ──► `[10] Wazuh SIEM Installation`
-
+ 
+**🟢 Phase 2 Complete**
+ 
+`[07] DMZ Architecture Setup` ◄── **`[08] Suricata IDS/IPS Configuration`** ──► `[09] LAN/DMZ Traffic Isolation`
+ 
 <br></div>
-
+ 
 </details>
-
+ 
 ---
-
+ 
+<details>
+<summary><b>📙 Phase 3 · [09] — LAN/DMZ Traffic Isolation & Secure Local DNS Mapping</b></summary>
+<a name="phase-3--09"></a>
+ 
+<br>
+ 
+> **Scope:** This module is currently in progress. Documentation will be added upon completion.
+ 
+---
+ 
+<div align="center"><br>
+ 
+🔄 **In Progress**
+ 
+`[08] Suricata IDS/IPS Configuration` ◄── **`[09] LAN/DMZ Traffic Isolation`** ──► `[10] Wazuh SIEM Installation`
+ 
+<br></div>
+ 
+</details>
+ 
+---
+ 
 ## 📁 Repository Structure
-
+ 
 ```
 Project-Mursad/
 │
@@ -2710,7 +2653,8 @@ Project-Mursad/
 │   ├── phase-2/
 │   │   ├── 05-dc-provisioning/
 │   │   ├── 06/
-│   │   └── 07/
+│   │   ├── 07/
+│   │   └── 08-suricata-ids-ips/
 │   └── phase-3/  phase-4/  ...
 │
 ├── 📂 configs/                       # Exported configs and rule sets
@@ -2728,9 +2672,10 @@ Project-Mursad/
 │   ├── phase-2/
 │   │   ├── 05-dc-provisioning.md
 │   │   ├── 06-active-directory.md
-│   │   └── 07-dmz-architecture.md
+│   │   ├── 07-dmz-architecture.md
+│   │   └── 08-suricata-ids-ips.md
 │   ├── phase-3/
-│   │   └── 09-suricata-ids-ips.md
+│   │   └── 09-lan-dmz-isolation.md
 │   └── phase-4/  ...
 │
 ├── 📂 scripts/                       # Automation scripts
@@ -2741,17 +2686,17 @@ Project-Mursad/
 ├── README.md
 └── LICENSE
 ```
-
+ 
 ---
-
+ 
 ## ⚠️ Disclaimer
-
+ 
 This project is built strictly for **educational purposes** and authorized security research in a fully isolated, privately-owned virtual environment. All attack simulations, penetration tests, and adversary emulations are conducted exclusively within this lab. Do not reproduce any offensive techniques outside of your own authorized and controlled environment. The author assumes no liability for misuse.
-
+ 
 ---
-
+ 
 <div align="center">
-
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0f3460,50:16213e,100:1a1a2e&height=120&section=footer&text=Built%20to%20understand%20the%20attack.%20Designed%20to%20defend%20against%20it.&fontSize=14&fontColor=a8b2d8&fontAlignY=65&animation=fadeIn" width="100%"/>
-
+ 
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:0d1117,50:e94560,100:0d1117&height=120&section=footer&text=Built+to+understand+the+attack.+Designed+to+defend+against+it.&fontSize=13&fontColor=ffffff&fontAlignY=65&animation=fadeIn" width="100%"/>
+ 
 </div>
