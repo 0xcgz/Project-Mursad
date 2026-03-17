@@ -2613,27 +2613,260 @@ Numerous **SQL ATTEMPTS** logs visible, including `ET SCAN Sqlmap SQL Injection 
 <br></div>
  
 </details>
- 
+
 ---
- 
+
 <details>
 <summary><b>📙 Phase 3 · [09] — LAN/DMZ Traffic Isolation & Secure Local DNS Mapping</b></summary>
 <a name="phase-3--09"></a>
- 
+
 <br>
- 
-> **Scope:** This module is currently in progress. Documentation will be added upon completion.
- 
+
+> **Scope:** Hardening the network perimeter by implementing strict inter-VLAN isolation rules, configuring rate-limiting to mitigate DoS attacks, and establishing secure local DNS resolution for the DMZ environment.
+
 ---
- 
+
+### Overview
+
+```text
+pfSense WebConfigurator
+├── Traffic Shaper
+│   └── Limiters: Rate Limiting & Anti-DDoS
+├── Firewall Rules: ITWORKSTATION
+│   └── Block Rule: IT ──✗──► DMZ subnets
+└── Firewall Rules: DMZ
+    └── Block Rule: DMZ ──✗──► Internal Subnets (HR, IT, OPs, SERVERS)
+
+Local DNS Resolution
+└── Static Entry: alialaradi.bh ──► 192.168.140.130  (WAN VIP → DMZ)
+```
+
+| Part | Section | Description |
+|:----:|---------|-------------|
+| **A** | DMZ Security Principles | Core architectural concepts governing perimeter hardening |
+| **B** | Traffic Shaping | Configure pfSense limiters to mitigate resource exhaustion |
+| **C** | Connectivity Baseline | Verify initial routing state before applying restrictive policies |
+| **D** | Traffic Isolation | Implement strict deny rules between internal VLANs and the DMZ |
+| **E** | DNS Mapping | Map a custom local domain for professional web access |
+
+---
+
+### Part A — DMZ Hardening & Security Best Practices
+
+Before technical implementation, the following architectural principles govern the Mursad SOC perimeter:
+
+#### Restrict DMZ-to-Internal Communication
+Apply a **"Deny All"** policy for any traffic originating from the DMZ toward the internal network. Exceptions must be explicit — define exact protocols and ports (e.g., `TCP/3306` for MySQL) rather than broad `Any` rules.
+
+#### Inbound Internet Traffic Control
+Only specific services are exposed. Port `443` (HTTPS) is the primary inbound channel. Port `80` (HTTP) is kept open solely to redirect clients to `443`, ensuring all sessions remain encrypted.
+
+#### Restrict Outbound Traffic (Egress Filtering)
+Most DMZ assets have no reason to initiate outbound connections. Block all egress by default — allow only DNS resolution, NTP sync, and specific update repository endpoints.
+
+#### IDS/IPS and Geo-IP Blocking
+As a public-facing zone, the DMZ is a primary attack surface. Suricata must remain active to detect and drop malicious payloads inline. Geo-IP blocking restricts inbound traffic from high-risk regions while preserving access for authorized regions (e.g., Bahrain).
+
+#### Least Privilege Service Execution
+Never run web services (Apache, IIS) under `Administrator` or `root`. Isolate management ports (RDP, SSH, WebGUI) to a dedicated internal VLAN — never expose them to the WAN.
+
+#### Rate Limiting & DDoS Mitigation
+Prevent resource exhaustion via pfSense connection limits and Traffic Shaper Limiters. Tools like Fail2Ban or a WAF can automatically block IPs exceeding failed request thresholds.
+
+#### SIEM Integration
+Local logs are insufficient at scale. All perimeter telemetry must be shipped to Wazuh for centralized correlation, dashboard visibility, and coordinated attack detection.
+
+---
+
+### Part B — Traffic Shaping & DoS Mitigation
+
+#### Step 1 — Configure Traffic Limiters
+
+To protect the DMZ web server from connection exhaustion and basic DDoS attempts, we utilize the **pfSense Traffic Shaper** to cap bandwidth and connection state rates per source IP.
+
+<img width="1301" height="271" alt="1" src="https://github.com/user-attachments/assets/8d71d2c1-7856-4115-b8c9-aeea28822367" />
+
+
+Navigate to **Firewall → Traffic Shaper → Limiters** and define the rate-limit masks.
+
+> This ensures no single abusive IP can overwhelm the Apache service by exhausting available connection slots.
+
+---
+
+### Part C — Connectivity Baseline
+
+Before applying isolation rules, the current routing state must be verified to confirm what traffic is permitted and what will be blocked after lockdown.
+
+#### Step 2 — Verify DMZ → Internal Connectivity
+
+Initiate a ping from `DMZ-SRV-01` to the IT Workstation subnet.
+
+<img width="1087" height="818" alt="2" src="https://github.com/user-attachments/assets/cec4a57d-fb82-4bfb-826d-8962153232c7" />
+
+
+```powershell
+# Executed from DMZ-SRV-01
+ping 10.22.1.2
+```
+
+> ✅ **Result:** Successful replies confirm the DMZ can currently reach the internal IT subnet — this bidirectional access will be severed after isolation rules are applied.
+
+---
+
+#### Step 3 — Verify Internal → DMZ Connectivity
+
+Perform the reverse test from the IT Workstation to the DMZ server.
+
+<img width="1305" height="817" alt="3" src="https://github.com/user-attachments/assets/a680d8fb-1f71-43ea-a952-2b470bce918e" />
+
+
+```powershell
+# Executed from IT-Workstation
+ping 192.168.50.10
+```
+
+> ✅ **Result:** Successful replies confirm full bidirectional routing is active. Baseline documented — proceed to lockdown.
+
+---
+
+### Part D — Traffic Isolation Implementation
+
+#### Step 4 — Navigate to ITWORKSTATION Firewall Rules
+
+Navigate to **Firewall → Rules → ITWORKSTATION** and click **Add ↑** to insert a new rule at the **top** of the list.
+
+> ⚠️ **Rule order is critical.** pfSense evaluates rules top-to-bottom — the block rule must appear above any existing pass rules to take effect.
+
+<img width="1328" height="542" alt="4" src="https://github.com/user-attachments/assets/bb5d4fde-a028-421a-9ebb-99e3c6aa59a2" />
+
+---
+
+#### Step 5 — Configure IT → DMZ Block Rule
+
+<img width="1301" height="730" alt="5" src="https://github.com/user-attachments/assets/6a267a10-e075-4dab-b945-d13b88ddf00c" />
+
+
+| Field | Value |
+|-------|-------|
+| Action | **Block** *(drops packets silently — no RST sent)* |
+| Interface | `ITWORKSTATION` |
+| Address Family | IPv4 |
+| Protocol | Any |
+| Source | `ITWORKSTATION` subnets |
+| Destination | `DMZ` subnets |
+| Description | `Block IT → DMZ — Enforce Zone Isolation` |
+
+Click **Save** → **Apply Changes**.
+
+---
+
+#### Step 6 — Validate IT Isolation
+
+<img width="1305" height="817" alt="6" src="https://github.com/user-attachments/assets/2cce4c28-4bdd-4297-badb-9709d6d1eba9" />
+
+```powershell
+# Executed from IT-Workstation
+ping 192.168.50.10
+```
+
+> 🔴 **Result:** `Request timed out.` The firewall is silently dropping all traffic from the IT zone to the DMZ. Isolation confirmed.
+
+---
+
+#### Step 7 — Harden DMZ Outbound Rules
+
+The most critical step in DMZ architecture is preventing a **compromised DMZ asset from pivoting into the internal network**. A breached web server must never be able to reach domain controllers, workstations, or the SIEM.
+
+<img width="1291" height="565" alt="7" src="https://github.com/user-attachments/assets/93a39bfa-5e78-4dee-b172-5c9a8e3edbef" />
+
+Navigate to **Firewall → Rules → DMZ** and click **Add ↑** to create a block rule at the top:
+
+| Field | Value |
+|-------|-------|
+| Action | **Block** |
+| Interface | `DMZ` |
+| Address Family | IPv4 |
+| Protocol | Any |
+| Source | `DMZ` subnets |
+| Destination | Internal subnets *(HR · IT · OPs · SERVERS)* |
+| Description | `Block DMZ → Internal — Prevent Lateral Movement` |
+
+Click **Save** → **Apply Changes**.
+
+> ⚠️ In a full production deployment, this rule is replicated for each internal VLAN to form an explicit deny matrix. No implicit trust should exist between the DMZ and any internal segment.
+
+---
+
+### Part E — Secure Local DNS Mapping
+
+#### Step 8 — Static DNS Configuration
+
+To provide a professional, enterprise-grade access point — and to make Red Team targeting more realistic — we map a custom domain to the WAN IP that forwards to the DMZ web server.
+
+<img width="738" height="269" alt="8" src="https://github.com/user-attachments/assets/5b9643d9-6564-4fac-96a1-965b5ec9f289" />
+
+On the local router (or pfSense **Services → DNS Resolver → Host Overrides**), add a static DNS entry:
+
+| Field | Value |
+|-------|-------|
+| Host | `alialaradi` |
+| Domain | `bh` |
+| IP Address | `192.168.140.130` *(WAN VIP → NAT → DMZ)* |
+| Description | `Project Mursad SOC Lab — Public DNS Mapping` |
+
+Click **Save** → **Apply Changes**.
+
+---
+
+#### Step 9 — Final Web Validation
+
+<img width="1329" height="761" alt="9" src="https://github.com/user-attachments/assets/19ac7596-ed40-4bf0-8cf6-b043a6d9cef1" />
+
+Open a browser and navigate to the custom domain:
+
+```
+http://alialaradi.bh
+```
+
+> ✅ **Result:** The Project Mursad deployment page loads successfully via the FQDN — confirming the full chain: `DNS → WAN IP → pfSense NAT → DMZ web server`.
+
+---
+
+### Zone Isolation Summary
+
+```
+Before Lockdown:
+  IT Workstation  ◄──────────►  DMZ-SRV-01   ✅ (open)
+  DMZ-SRV-01      ◄──────────►  IT / HR / OPs  ✅ (open)
+
+After Lockdown:
+  IT Workstation  ─────✗──────►  DMZ-SRV-01   🔴 (blocked)
+  DMZ-SRV-01      ─────✗──────►  IT / HR / OPs  🔴 (blocked)
+  Internet        ────────────►  DMZ-SRV-01   ✅ (port 80/443 only)
+```
+
+---
+
+### ✅ Phase Checklist
+
+- [ ] DMZ architectural hardening principles reviewed and documented
+- [ ] Traffic Limiters configured in pfSense — **Firewall → Traffic Shaper → Limiters**
+- [ ] Baseline bidirectional connectivity verified: IT ↔ DMZ both responding
+- [ ] Block rule created on `ITWORKSTATION` — source: IT subnets · destination: DMZ subnets
+- [ ] `ping 192.168.50.10` from IT Workstation returns **Request timed out** ✅
+- [ ] Block rule created on `DMZ` — source: DMZ subnets · destination: all internal subnets
+- [ ] Rules applied in correct top-down order on both interfaces
+- [ ] Static DNS host override created — `alialaradi.bh` → `192.168.140.130`
+- [ ] Web application verified via FQDN — `http://alialaradi.bh` loads correctly
+
 <div align="center"><br>
- 
-🔄 **In Progress**
- 
+
+**🟢 Phase 3 · [09] Complete**
+
 `[08] Suricata IDS/IPS Configuration` ◄── **`[09] LAN/DMZ Traffic Isolation`** ──► `[10] Wazuh SIEM Installation`
- 
+
 <br></div>
- 
+
 </details>
  
 ---
