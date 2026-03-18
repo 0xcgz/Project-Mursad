@@ -61,6 +61,7 @@
   - [Phase 2 · 07 — DMZ Architecture Setup](#phase-2--07)
   - [Phase 2 · 08 — Suricata IDS/IPS Configuration](#phase-2--08)
   - [Phase 3 · 09 — LAN/DMZ Traffic Isolation & DNS Mapping](#phase-3--09)
+  - [Phase 3 · 10 — Wazuh SIEM Installation](#phase-3--10)
 - [Repository Structure](#-repository-structure)
 - [Disclaimer](#-disclaimer)
 
@@ -74,12 +75,12 @@ Project Mursad is a fully virtualized, enterprise-grade Security Operations Cent
 
 | Objective | Description |
 |-----------|-------------|
-| 🔒 **Network Segmentation** | Multi-zone pfSense firewall — Workstation, Servers, DMZ isolation |
-| 🎯 **Adversary Simulation** | Red Team capability via isolated Kali Linux on the WAN |
-| 📊 **SOC Telemetry** | Wazuh SIEM collecting logs from all endpoints and network infrastructure |
-| 🚨 **Intrusion Detection** | Suricata IDS/IPS inline on pfSense for live traffic inspection |
-| 🛡️ **Endpoint Hardening** | CIS benchmarks, EDR via Kaspersky Security Center, AV integration |
-| 🔁 **Incident Response** | Realistic alert triage, correlation, and response workflows |
+|  **Network Segmentation** | Multi-zone pfSense firewall — Workstation, Servers, DMZ isolation |
+|  **Adversary Simulation** | Red Team capability via isolated Kali Linux on the WAN |
+|  **SOC Telemetry** | Wazuh SIEM collecting logs from all endpoints and network infrastructure |
+|  **Intrusion Detection** | Suricata IDS/IPS inline on pfSense for live traffic inspection |
+|  **Endpoint Hardening** | CIS benchmarks, EDR via Kaspersky Security Center, AV integration |
+|  **Incident Response** | Realistic alert triage, correlation, and response workflows |
 
 ---
 
@@ -105,14 +106,13 @@ Project Mursad is a fully virtualized, enterprise-grade Security Operations Cent
 ║  │  └────┼────────┼─────────┼─────────┼─────────┼─────────┼───────────────┘   │   ║
 ║  │       │        │         │         │         │         │                    │   ║
 ║  │  [ignored]  vmbr1      vmbr2     vmbr3     vmbr4     vmbr5                 │   ║
-║  │            10.22.0/24 10.22.1/24 10.22.2/24 192.168.50/24 10.22.7/24      │   ║
-║  │               HR         IT        OPs        DMZ       SERVERS            │   ║
-║  │               │          │          │           │           │               │   ║
-║  │         ┌─────┴───┐  ┌───┴──┐  ┌───┴──┐  ┌────┴────┐  ┌───┴─────┐         │   ║
-║  │         │DC .0.2  │  │IT WS │  │Ops WS│  │DMZ Srvr │  │  Wazuh  │         │   ║
-║  │         │mursad   │  │.1.x  │  │.2.x  │  │.50.10   │  │  SIEM   │         │   ║
-║  │         │.local   │  └──────┘  └──────┘  └─────────┘  │ .7.2    │         │   ║
-║  │         └─────────┘                                    └─────────┘         │   ║
+║  │            10.22.0/24 10.22.7/24 192.168.50/24 10.22.1/24 10.22.2/24      │   ║
+║  │               HR       SERVERS      DMZ         IT        OPs              │   ║
+║  │               │          │           │           │          │               │   ║
+║  │         ┌─────┴───┐  ┌───┴──────┐  ┌┴────────┐  ┌──┴───┐  ┌──┴──┐         │   ║
+║  │         │HR WS    │  │DC .7.3   │  │DMZ Srvr │  │IT WS │  │Ops  │         │   ║
+║  │         │.0.x     │  │Wazuh .67 │  │.50.10   │  │.1.x  │  │.2.x │         │   ║
+║  │         └─────────┘  └──────────┘  └─────────┘  └──────┘  └─────┘         │   ║
 ║  │                                                                             │   ║
 ║  │   [ Kali Linux ]  ──  WAN/DHCP  ──  External Red Team Attacker             │   ║
 ║  └───────────────────────────────────────────────────────────────────────────┘   ║
@@ -125,12 +125,12 @@ Project Mursad is a fully virtualized, enterprise-grade Security Operations Cent
 
 | Zone | Bridge | Subnet | Gateway | Purpose |
 |------|:------:|--------|:-------:|---------|
-| 🌍 WAN / Management | `vmbr0` | `192.168.140.0/24` | `192.168.140.2` | NAT uplink · Proxmox host access |
-| 💻 HR Workstation | `vmbr1` | `10.22.0.0/24` | `10.22.0.1` | HR domain-joined endpoints · DC |
-| 💻 IT Workstation | `vmbr2` | `10.22.1.0/24` | `10.22.1.1` | IT department endpoints |
-| 💻 OPs Workstation | `vmbr3` | `10.22.2.0/24` | `10.22.2.1` | Operations department endpoints |
-| 🔶 DMZ | `vmbr4` | `192.168.50.0/24` | `192.168.50.1` | Isolated public-facing services |
-| 🖥️ Servers | `vmbr5` | `10.22.7.0/24` | `10.22.7.1` | Internal services · Wazuh SIEM |
+|  WAN / Management | `vmbr0` | `192.168.140.0/24` | `192.168.140.2` | NAT uplink · Proxmox host access |
+|  HR Workstation | `vmbr1` | `10.22.0.0/24` | `10.22.0.1` | HR domain-joined endpoints |
+|  Servers | `vmbr2` | `10.22.7.0/24` | `10.22.7.1` | Internal services · DC · Wazuh SIEM |
+|  DMZ | `vmbr3` | `192.168.50.0/24` | `192.168.50.1` | Isolated public-facing services |
+|  IT Workstation | `vmbr4` | `10.22.1.0/24` | `10.22.1.1` | IT department endpoints |
+|  OPs Workstation | `vmbr5` | `10.22.2.0/24` | `10.22.2.1` | Operations department endpoints |
 
 ---
 
@@ -141,14 +141,14 @@ Project Mursad is a fully virtualized, enterprise-grade Security Operations Cent
 | Proxmox Node | `192.168.140.129` | Management | Hypervisor — Web UI `:8006` |
 | pfSense — WAN | `192.168.140.x` (DHCP) | WAN | Internet uplink |
 | pfSense — HR | `10.22.0.1` | HR Workstation | HR segment gateway |
+| pfSense — Servers | `10.22.7.1` | Servers | Servers segment gateway |
+| pfSense — DMZ | `192.168.50.1` | DMZ | DMZ gateway |
 | pfSense — IT | `10.22.1.1` | IT Workstation | IT segment gateway |
 | pfSense — OPs | `10.22.2.1` | OPs Workstation | Operations segment gateway |
-| pfSense — DMZ | `192.168.50.1` | DMZ | DMZ gateway |
-| pfSense — SERVERS | `10.22.7.1` | Servers | Servers gateway |
-| Windows Server DC | `10.22.0.2` | HR Workstation | AD · DNS · `mursad.local` |
+| Windows Server DC | `10.22.7.3` | Servers | AD · DNS · `mursad.local` |
+| Wazuh SIEM | `10.22.7.67` | Servers | Log aggregation · alerting |
 | IT Workstation | `10.22.1.x` | IT Workstation | Domain-joined · Wazuh agent |
 | OPs Workstation | `10.22.2.x` | OPs Workstation | Domain-joined · Wazuh agent |
-| Wazuh SIEM | `10.22.7.2` | Servers | Log aggregation · alerting |
 | DMZ Server | `192.168.50.10` | DMZ | Public-facing web server · XAMPP |
 | Kali Linux | WAN DHCP | WAN | External Red Team attacker |
 
@@ -215,8 +215,8 @@ Infrastructure  ──►  Identity       ──►  Telemetry   ──►  Hard
 
 | # | Task | Status |
 |:---:|------|:------:|
-| `[09]` | LAN/DMZ Traffic Isolation & Secure Local DNS Mapping | 🔄 |
-| `[10]` | Wazuh SIEM Installation · Syslog Ingestion · Agent Rollout | ⬜ |
+| `[09]` | LAN/DMZ Traffic Isolation & Secure Local DNS Mapping | ✅ |
+| `[10]` | Wazuh SIEM Installation · Syslog Ingestion · Agent Rollout | ✅ |
 
 <br>
 
@@ -265,10 +265,10 @@ Infrastructure  ──►  Identity       ──►  Telemetry   ──►  Hard
                 └── Proxmox VE 9.1  —  node: mursad
                         ├── vmbr0  →  Management / NAT       192.168.140.129/24
                         ├── vmbr1  →  HR Workstation          10.22.0.1/24
-                        ├── vmbr2  →  IT Workstation          10.22.1.1/24
-                        ├── vmbr3  →  OPs Workstation         10.22.2.1/24
-                        ├── vmbr4  →  DMZ Zone                192.168.50.1/24
-                        └── vmbr5  →  Servers Segment         10.22.7.1/24
+                        ├── vmbr2  →  Servers Segment         10.22.7.1/24
+                        ├── vmbr3  →  DMZ Zone                192.168.50.1/24
+                        ├── vmbr4  →  IT Workstation          10.22.1.1/24
+                        └── vmbr5  →  OPs Workstation         10.22.2.1/24
 ```
 
 | Part | Section | Description |
@@ -283,7 +283,7 @@ Infrastructure  ──►  Identity       ──►  Telemetry   ──►  Hard
 
 #### Step 1 — Download Proxmox VE
 
-<img width="1394" height="1263" alt="proxmox-download" src="https://github.com/user-attachments/assets/6136a1bf-d31d-43a1-a7ba-00084520a044" />
+![1](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/1.png)
 
 Navigate to [proxmox.com/en/downloads](https://www.proxmox.com/en/downloads) and download **Proxmox VE 9.1-1 ISO Installer**.
 
@@ -291,7 +291,7 @@ Navigate to [proxmox.com/en/downloads](https://www.proxmox.com/en/downloads) and
 
 #### Step 2 — Create a New Virtual Machine
 
-<img width="842" height="590" alt="vmware-new-vm" src="https://github.com/user-attachments/assets/27bafdc6-26e3-4ed8-b2a8-06c4ab5a46f6" />
+![2](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/2.png)
 
 Launch **VMware Workstation Pro 17** and create a new VM via:
 - **"Create a New Virtual Machine"** on the dashboard, or
@@ -301,7 +301,7 @@ Launch **VMware Workstation Pro 17** and create a new VM via:
 
 #### Step 3 — Mount the Proxmox ISO
 
-<img width="840" height="592" alt="vmware-iso" src="https://github.com/user-attachments/assets/006037a3-4952-49e9-99f6-8befcd6191c3" />
+![3](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/3.png)
 
 Select **"Installer disc image file (iso)"** → Browse → mount:
 
@@ -313,7 +313,7 @@ proxmox-ve_9.1-1.iso
 
 #### Step 4 — Select Guest OS
 
-<img width="842" height="587" alt="vmware-guestos" src="https://github.com/user-attachments/assets/ad4f4547-5645-4c28-b6c9-cfa2ff6dd13b" />
+![4](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/4.png)
 
 | Setting | Value |
 |---------|-------|
@@ -324,7 +324,7 @@ proxmox-ve_9.1-1.iso
 
 #### Step 5 — Name & Storage Path
 
-<img width="841" height="589" alt="vmware-name" src="https://github.com/user-attachments/assets/5fcf6d79-262c-4e30-a6f7-5ef0b69fc8f9" />
+![5](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/5.png)
 
 | Setting | Value |
 |---------|-------|
@@ -335,7 +335,7 @@ proxmox-ve_9.1-1.iso
 
 #### Step 6 — Disk Allocation
 
-<img width="842" height="589" alt="vmware-disk" src="https://github.com/user-attachments/assets/ea02e56c-d17f-46c8-a2db-5968fdd4be4d" />
+![6](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/6.png)
 
 | Setting | Value |
 |---------|-------|
@@ -346,10 +346,8 @@ proxmox-ve_9.1-1.iso
 
 #### Step 7 — Hardware Summary & Power On
 
-<img width="835" height="588" alt="vmware-summary" src="https://github.com/user-attachments/assets/f173782e-2f3f-49ce-b098-e9a12173d976" />
-<img width="836" height="581" alt="vmware-poweron" src="https://github.com/user-attachments/assets/060645ad-cf64-4aa7-abb4-c02bb7527544" />
-
-Review the summary and click **Finish**:
+![7](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/7.png)
+![8](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/8.png)
 
 | Resource | Minimum |
 |----------|:-------:|
@@ -365,8 +363,8 @@ Click **"Power on this virtual machine"** to begin OS installation.
 
 #### Step 8 — Boot Menu
 
-<img width="1227" height="928" alt="proxmox-boot1" src="https://github.com/user-attachments/assets/d1fa235c-1821-46c9-8ddc-4aab6477d786" />
-<img width="1473" height="960" alt="proxmox-boot2" src="https://github.com/user-attachments/assets/19e1346d-be49-4302-b5e2-7fd7f0e8d6b8" />
+![9](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/9.png)
+![10](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/10.png)
 
 Select with arrow keys:
 
@@ -376,7 +374,7 @@ Install Proxmox VE (Graphical)
 
 > ⚠️ **Nested Virtualization Warning**
 >
-> <img width="1478" height="931" alt="kvm-warning" src="https://github.com/user-attachments/assets/3c189837-43ed-440d-aa27-60ad447042ad" />
+> ![11](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/11.png)
 >
 > If you receive a *"No support for hardware-accelerated KVM"* error, verify **"Virtualize AMD-V/RVI"** is enabled under VMware Processor settings. If the issue persists on Windows 11, Credential Guard / VBS may be blocking AMD-V passthrough — run Microsoft's `DG_Readiness_Tool_v3.6.ps1 -Disable` and reboot.
 
@@ -384,7 +382,7 @@ Install Proxmox VE (Graphical)
 
 #### Step 9 — EULA
 
-<img width="1483" height="905" alt="proxmox-eula" src="https://github.com/user-attachments/assets/7b11544f-f915-46fd-9884-8d790fba64f0" />
+![12](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/12.png)
 
 Click **"I agree"** to proceed.
 
@@ -392,7 +390,7 @@ Click **"I agree"** to proceed.
 
 #### Step 10 — Target Disk
 
-<img width="1269" height="791" alt="proxmox-disk" src="https://github.com/user-attachments/assets/6716b425-5a3f-4d8c-8670-eb209eae3c5f" />
+![13](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/13.png)
 
 Select:
 
@@ -404,7 +402,7 @@ Select:
 
 #### Step 11 — Localization
 
-<img width="1268" height="797" alt="proxmox-locale" src="https://github.com/user-attachments/assets/89429566-d436-47dd-9503-eb06446dd6b2" />
+![14](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/14.png)
 
 | Setting | Value |
 |---------|-------|
@@ -416,7 +414,7 @@ Select:
 
 #### Step 12 — Root Password & Email
 
-<img width="1274" height="799" alt="proxmox-password" src="https://github.com/user-attachments/assets/f138431e-6bd9-4fae-be67-b7737c5d0c6c" />
+![15](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/15.png)
 
 Set a strong password for the `root` account and provide an email for system alerts.
 
@@ -424,7 +422,7 @@ Set a strong password for the `root` account and provide an email for system ale
 
 #### Step 13 — Management Network
 
-<img width="1268" height="793" alt="proxmox-network" src="https://github.com/user-attachments/assets/b508270e-e6a3-483e-8ed4-cf06687c5c72" />
+![16](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/16.png)
 
 | Parameter | Value |
 |-----------|-------|
@@ -437,8 +435,8 @@ Set a strong password for the `root` account and provide an email for system ale
 
 #### Step 14 — Install & Reboot
 
-<img width="1271" height="793" alt="proxmox-install" src="https://github.com/user-attachments/assets/a50801af-ad88-49b7-9679-a902339a9122" />
-<img width="1274" height="826" alt="proxmox-reboot" src="https://github.com/user-attachments/assets/23d36733-fd11-49ae-9e55-3d6b4ec3fd6f" />
+![17](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/17.png)
+![18](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/18.png)
 
 Check **"Automatically reboot after successful installation"** → click **Install**.
 
@@ -456,8 +454,8 @@ https://192.168.140.129:8006/
 
 #### Step 15 — Login to Web UI
 
-<img width="1910" height="937" alt="proxmox-login1" src="https://github.com/user-attachments/assets/048302eb-2f9e-43e3-b356-c8a231eb1d55" />
-<img width="1911" height="938" alt="proxmox-login2" src="https://github.com/user-attachments/assets/bd1ffa4c-1ca1-4c3e-8386-7b16338a63e6" />
+![19](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/19.png)
+![20](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/20.png)
 
 Navigate to `https://192.168.140.129:8006/`
 
@@ -471,8 +469,8 @@ Navigate to `https://192.168.140.129:8006/`
 
 #### Step 16 — Create All SOC Bridges
 
-<img width="1917" height="942" alt="bridges-create" src="https://github.com/user-attachments/assets/82639e21-95ed-4d53-9090-90aa7e5be0bb" />
-<img width="634" height="281" alt="bridges-dialog" src="https://github.com/user-attachments/assets/6648ee3c-91c5-4450-bf1b-a11dcd7e55bb" />
+![21](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/21.png)
+![22](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/22.png)
 
 Navigate to **mursad → System → Network → Create → Linux Bridge**.
 
@@ -481,11 +479,11 @@ Repeat for each bridge below:
 | Bridge | CIDR | Autostart | Comment | Role |
 |:------:|------|:---------:|---------|------|
 | `vmbr0` | `192.168.140.129/24` | ✅ | — | Management / NAT uplink via `nic0` |
-| `vmbr1` | `10.22.0.1/24` | ✅ | `HR` | HR Workstation segment |
-| `vmbr2` | `10.22.1.1/24` | ✅ | `IT` | IT Workstation segment |
-| `vmbr3` | `10.22.2.1/24` | ✅ | `OPs` | OPs Workstation segment |
-| `vmbr4` | `192.168.50.1/24` | ✅ | `DMZ` | Demilitarized Zone |
-| `vmbr5` | `10.22.7.1/24` | ✅ | `Servers` | Internal servers segment |
+| `vmbr1` | `10.22.0.1/24` | ✅ | `HR Workstation` | HR Workstation segment |
+| `vmbr2` | `10.22.7.1/24` | ✅ | `Servers` | Internal servers segment |
+| `vmbr3` | `192.168.50.1/24` | ✅ | `DMZ` | Demilitarized Zone |
+| `vmbr4` | `10.22.1.1/24` | ✅ | `IT Workstation` | IT Workstation segment |
+| `vmbr5` | `10.22.2.1/24` | ✅ | `Operations Workstation` | OPs Workstation segment |
 
 > ⚠️ `vmbr2` through `vmbr5` will show **Active: No** until a VM is attached — this is expected.
 
@@ -501,28 +499,28 @@ Click **"Apply Configuration"**. The pending diff confirms changes written to `/
 +
 +auto vmbr2
 +iface vmbr2 inet static
-+    address 10.22.1.1/24
++    address 10.22.7.1/24
 +    bridge-ports none
 +    bridge-stp off
 +    bridge-fd 0
 +
 +auto vmbr3
 +iface vmbr3 inet static
-+    address 10.22.2.1/24
++    address 192.168.50.1/24
 +    bridge-ports none
 +    bridge-stp off
 +    bridge-fd 0
 +
 +auto vmbr4
 +iface vmbr4 inet static
-+    address 192.168.50.1/24
++    address 10.22.1.1/24
 +    bridge-ports none
 +    bridge-stp off
 +    bridge-fd 0
 +
 +auto vmbr5
 +iface vmbr5 inet static
-+    address 10.22.7.1/24
++    address 10.22.2.1/24
 +    bridge-ports none
 +    bridge-stp off
 +    bridge-fd 0
@@ -532,28 +530,28 @@ Click **"Apply Configuration"**. The pending diff confirms changes written to `/
 
 #### Step 17 — Verify Final Network State
 
-<img width="1601" height="687" alt="bridges-verify1" src="https://github.com/user-attachments/assets/3fdd4993-4f7a-41d5-8672-14a15c35f35d" />
-<img width="1610" height="698" alt="bridges-verify2" src="https://github.com/user-attachments/assets/2b9c6b02-c07e-48db-a001-3a26f7a0ccf3" />
+![23](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/23.png)
+![24](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/02-proxmox-deployment/24.png)
 
 | Bridge | Type | Active | Autostart | CIDR | Comment |
 |:------:|------|:------:|:---------:|------|---------|
 | `nic0` | Network Device | ✅ | — | — | Physical uplink `enp2s1` |
 | `vmbr0` | Linux Bridge | ✅ | ✅ | `192.168.140.129/24` | Management / NAT |
 | `vmbr1` | Linux Bridge | ✅ | ✅ | `10.22.0.1/24` | HR Workstation |
-| `vmbr2` | Linux Bridge | — | ✅ | `10.22.1.1/24` | IT Workstation |
-| `vmbr3` | Linux Bridge | — | ✅ | `10.22.2.1/24` | OPs Workstation |
-| `vmbr4` | Linux Bridge | — | ✅ | `192.168.50.1/24` | DMZ |
-| `vmbr5` | Linux Bridge | — | ✅ | `10.22.7.1/24` | Servers |
+| `vmbr2` | Linux Bridge | ✅ | ✅ | `10.22.7.1/24` | Servers |
+| `vmbr3` | Linux Bridge | — | ✅ | `192.168.50.1/24` | DMZ |
+| `vmbr4` | Linux Bridge | — | ✅ | `10.22.1.1/24` | IT Workstation |
+| `vmbr5` | Linux Bridge | — | ✅ | `10.22.2.1/24` | Operations Workstation |
 
 ```
 Proxmox Node: mursad
 │
 ├── vmbr0  ──►  Management / NAT     192.168.140.129/24   (nic0 uplink)
 ├── vmbr1  ──►  HR Workstation       10.22.0.1/24
-├── vmbr2  ──►  IT Workstation       10.22.1.1/24
-├── vmbr3  ──►  OPs Workstation      10.22.2.1/24
-├── vmbr4  ──►  DMZ Zone             192.168.50.1/24
-└── vmbr5  ──►  Servers Segment      10.22.7.1/24
+├── vmbr2  ──►  Servers Segment      10.22.7.1/24
+├── vmbr3  ──►  DMZ Zone             192.168.50.1/24
+├── vmbr4  ──►  IT Workstation       10.22.1.1/24
+└── vmbr5  ──►  OPs Workstation      10.22.2.1/24
 ```
 
 ---
@@ -563,11 +561,11 @@ Proxmox Node: mursad
 - [ ] Proxmox VE 9.1 installed and booting correctly
 - [ ] Web GUI accessible at `https://192.168.140.129:8006/`
 - [ ] `vmbr0` active — IP `192.168.140.129/24`, gateway `192.168.140.2`
-- [ ] `vmbr1` created — `10.22.0.1/24`, comment `HR`, Autostart ✅
-- [ ] `vmbr2` created — `10.22.1.1/24`, comment `IT`, Autostart ✅
-- [ ] `vmbr3` created — `10.22.2.1/24`, comment `OPs`, Autostart ✅
-- [ ] `vmbr4` created — `192.168.50.1/24`, comment `DMZ`, Autostart ✅
-- [ ] `vmbr5` created — `10.22.7.1/24`, comment `Servers`, Autostart ✅
+- [ ] `vmbr1` created — `10.22.0.1/24`, comment `HR Workstation`, Autostart ✅
+- [ ] `vmbr2` created — `10.22.7.1/24`, comment `Servers`, Autostart ✅
+- [ ] `vmbr3` created — `192.168.50.1/24`, comment `DMZ`, Autostart ✅
+- [ ] `vmbr4` created — `10.22.1.1/24`, comment `IT Workstation`, Autostart ✅
+- [ ] `vmbr5` created — `10.22.2.1/24`, comment `Operations Workstation`, Autostart ✅
 - [ ] **"Apply Configuration"** clicked — no pending changes remaining
 
 <div align="center"><br>
@@ -597,12 +595,12 @@ Proxmox Node: mursad
 ```
 Proxmox Node: mursad
 └── VM 100  —  Firewall  (pfSense CE)
-        ├── vtnet0  →  vmbr0  →  WAN    192.168.140.x/24  (DHCP from host)
-        ├── vtnet1  →  vmbr1  →  LAN    10.22.0.1/24      (HR Workstation)
-        ├── vtnet2  →  vmbr2  →  OPT1   10.22.1.1/24      (IT Workstation)
-        ├── vtnet3  →  vmbr3  →  OPT2   10.22.2.1/24      (OPs Workstation)
-        ├── vtnet4  →  vmbr4  →  OPT3   192.168.50.1/24   (DMZ)
-        └── vtnet5  →  vmbr5  →  OPT4   10.22.7.1/24      (Servers)
+        ├── vtnet0  →  vmbr0  →  WAN      192.168.140.x/24  (DHCP from host)
+        ├── vtnet1  →  vmbr1  →  LAN      10.22.0.1/24      (HR Workstation)
+        ├── vtnet2  →  vmbr2  →  OPT1     10.22.7.1/24      (Servers)
+        ├── vtnet3  →  vmbr3  →  OPT2     192.168.50.1/24   (DMZ)
+        ├── vtnet4  →  vmbr4  →  OPT3     10.22.1.1/24      (IT Workstation)
+        └── vtnet5  →  vmbr5  →  OPT4     10.22.2.1/24      (OPs Workstation)
 ```
 
 | Part | Section | Description |
@@ -617,8 +615,8 @@ Proxmox Node: mursad
 
 #### Step 1 — Download pfSense CE ISO
 
-<img width="1222" height="887" alt="pfsense-download1" src="https://github.com/user-attachments/assets/3fb40940-64ec-4a72-b7c2-b4bdcbb50f0c" />
-<img width="1111" height="776" alt="pfsense-download2" src="https://github.com/user-attachments/assets/a34523a6-f5f4-4924-8f3b-de108e33b15c" />
+![1](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/1.png)
+![2](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/2.png)
 
 Navigate to [pfsense.org/download](https://www.pfsense.org/download/) and select:
 
@@ -633,10 +631,10 @@ Navigate to [pfsense.org/download](https://www.pfsense.org/download/) and select
 
 #### Step 2 — Upload ISO to Proxmox
 
-<img width="1051" height="738" alt="pfsense-upload1" src="https://github.com/user-attachments/assets/08d05f59-4370-45b7-b6f7-11b673e2335e" />
-<img width="887" height="605" alt="pfsense-upload2" src="https://github.com/user-attachments/assets/76858e07-0a3a-4700-a28b-8951af9330c1" />
-<img width="406" height="312" alt="pfsense-upload3" src="https://github.com/user-attachments/assets/ace26d91-a790-4c7b-8bbb-9d179aa0a95a" />
-<img width="1911" height="537" alt="pfsense-upload4" src="https://github.com/user-attachments/assets/2ad9c755-c04d-4643-af6b-2a995e7d2235" />
+![3](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/3.png)
+![4](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/4.png)
+![5](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/5.png)
+![6](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/6.png)
 
 1. Navigate to **mursad → local (mursad) → ISO Images**
 2. Click **Upload → Select File** → browse to extracted `.iso`
@@ -646,7 +644,7 @@ Navigate to [pfsense.org/download](https://www.pfsense.org/download/) and select
 
 #### Step 3 — Create the VM
 
-<img width="460" height="472" alt="pfsense-createvm" src="https://github.com/user-attachments/assets/d874199a-96e4-45e3-8bdd-e974653b0c3d" />
+![7](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/7.png)
 
 Click **"Create VM"** in the top-right corner.
 
@@ -654,7 +652,7 @@ Click **"Create VM"** in the top-right corner.
 
 #### Step 4 — General Tab
 
-<img width="721" height="534" alt="pfsense-general" src="https://github.com/user-attachments/assets/2d20dc43-a1bc-43ab-9b7e-fb4c624bc64a" />
+![8](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/8.png)
 
 | Setting | Value |
 |---------|-------|
@@ -666,7 +664,7 @@ Click **"Create VM"** in the top-right corner.
 
 #### Step 5 — OS Tab
 
-<img width="788" height="539" alt="pfsense-os" src="https://github.com/user-attachments/assets/eca6d83d-692b-4b37-b0bf-d6f696bd12d5" />
+![9](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/9.png)
 
 | Setting | Value |
 |---------|-------|
@@ -678,7 +676,7 @@ Click **"Create VM"** in the top-right corner.
 
 #### Step 6 — System Tab
 
-<img width="716" height="537" alt="pfsense-system" src="https://github.com/user-attachments/assets/4dd7f1b1-b566-4a4e-ba26-63516c470873" />
+![10](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/10.png)
 
 | Setting | Value |
 |---------|-------|
@@ -692,7 +690,7 @@ Click **"Create VM"** in the top-right corner.
 
 #### Step 7 — Disks Tab
 
-<img width="719" height="539" alt="pfsense-disks" src="https://github.com/user-attachments/assets/da1a221c-1442-4245-af10-4d7f1bef1445" />
+![11](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/11.png)
 
 | Setting | Value |
 |---------|-------|
@@ -704,7 +702,7 @@ Click **"Create VM"** in the top-right corner.
 
 #### Step 8 — CPU Tab
 
-<img width="722" height="534" alt="pfsense-cpu" src="https://github.com/user-attachments/assets/6efdcca8-1312-4ba1-9b8a-2321629bd46b" />
+![12](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/12.png)
 
 | Setting | Value |
 |---------|-------|
@@ -717,7 +715,7 @@ Click **"Create VM"** in the top-right corner.
 
 #### Step 9 — Memory Tab
 
-<img width="722" height="539" alt="pfsense-memory" src="https://github.com/user-attachments/assets/62db1e06-74a7-4d0c-9995-95a1bcdb7812" />
+![13](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/13.png)
 
 | Setting | Value |
 |---------|-------|
@@ -729,7 +727,7 @@ Click **"Create VM"** in the top-right corner.
 
 #### Step 10 — Network Tab
 
-<img width="721" height="540" alt="pfsense-nic" src="https://github.com/user-attachments/assets/00513ee8-acbf-4af8-8fe6-4d58835ed1a2" />
+![14](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/14.png)
 
 | Setting | Value |
 |---------|-------|
@@ -743,7 +741,7 @@ Click **"Create VM"** in the top-right corner.
 
 #### Step 11 — Confirm & Finish
 
-<img width="718" height="538" alt="pfsense-finish" src="https://github.com/user-attachments/assets/a5e3caca-e066-4773-96b7-c52a9ec0930c" />
+![15](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/15.png)
 
 Review and click **Finish**. Do **not** check "Start after created".
 
@@ -758,10 +756,10 @@ Navigate to **VM 100 → Hardware → Add → Network Device**:
 | NIC | Bridge | Model | Zone |
 |:---:|:------:|:-----:|------|
 | net1 | `vmbr1` | VirtIO | HR Workstation |
-| net2 | `vmbr2` | VirtIO | IT Workstation |
-| net3 | `vmbr3` | VirtIO | OPs Workstation |
-| net4 | `vmbr4` | VirtIO | DMZ |
-| net5 | `vmbr5` | VirtIO | Servers |
+| net2 | `vmbr2` | VirtIO | Servers |
+| net3 | `vmbr3` | VirtIO | DMZ |
+| net4 | `vmbr4` | VirtIO | IT Workstation |
+| net5 | `vmbr5` | VirtIO | OPs Workstation |
 
 ---
 
@@ -769,8 +767,8 @@ Navigate to **VM 100 → Hardware → Add → Network Device**:
 
 #### Step 13 — Boot & Launch Console
 
-<img width="1914" height="743" alt="pfsense-boot1" src="https://github.com/user-attachments/assets/209f7861-d692-491a-bf8c-27fc7571d6f1" />
-<img width="1826" height="1021" alt="pfsense-boot2" src="https://github.com/user-attachments/assets/f51641f6-ebbd-4457-b4b4-12f920a0d8e3" />
+![16](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/16.png)
+![17](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/17.png)
 
 Select **VM 100 → Start → Console**. Allow bootloader timer to expire or press **Enter**.
 
@@ -778,7 +776,7 @@ Select **VM 100 → Start → Console**. Allow bootloader timer to expire or pre
 
 #### Step 14 — Accept License
 
-<img width="1832" height="1008" alt="pfsense-license" src="https://github.com/user-attachments/assets/aa7419e4-6074-4384-86de-c4acf363d09a" />
+![18](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/18.png)
 
 Accept the Netgate Copyright and Trademark notice.
 
@@ -786,7 +784,7 @@ Accept the Netgate Copyright and Trademark notice.
 
 #### Step 15 — Select Install
 
-<img width="1445" height="767" alt="pfsense-install" src="https://github.com/user-attachments/assets/d4a80dcc-f2a1-4b68-9ad6-c1cfb2795730" />
+![19](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/19.png)
 
 Select **Install pfSense** from the welcome menu.
 
@@ -794,7 +792,7 @@ Select **Install pfSense** from the welcome menu.
 
 #### Step 16 — Partition Scheme
 
-<img width="1812" height="1009" alt="pfsense-zfs" src="https://github.com/user-attachments/assets/a9cf0420-c040-4159-8c74-597dd4eaaf26" />
+![20](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/20.png)
 
 Select **Auto (ZFS)** — provides data integrity, snapshot support, and is ideal for firewall appliances.
 
@@ -804,7 +802,7 @@ Select **Auto (ZFS)** — provides data integrity, snapshot support, and is idea
 
 #### Step 17 — VLAN Setup
 
-<img width="1830" height="1012" alt="pfsense-vlan" src="https://github.com/user-attachments/assets/62497691-b1de-4e89-a0cc-27a1de8848f3" />
+![21](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/21.png)
 
 ```
 Should VLANs be set up now? [y/n]  →  n
@@ -816,19 +814,19 @@ Segmentation is handled by separate Proxmox bridges — VLANs are not required.
 
 #### Step 18 — Assign Interfaces
 
-<img width="1823" height="976" alt="pfsense-assign1" src="https://github.com/user-attachments/assets/71ffea5d-b1d2-4d8a-abbc-9df6d232f0c8" />
-<img width="1818" height="1002" alt="pfsense-assign2" src="https://github.com/user-attachments/assets/bfe16e14-bfe2-437a-a141-281c20c39efc" />
-<img width="1827" height="1006" alt="pfsense-assign3" src="https://github.com/user-attachments/assets/557a26d7-1b4c-4c35-8deb-995254bddfcf" />
-<img width="1832" height="1005" alt="pfsense-assign4" src="https://github.com/user-attachments/assets/c4499423-f730-413b-853a-7d0d643d47d1" />
+![22](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/22.png)
+![23](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/23.png)
+![24](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/24.png)
+![25](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/25.png)
 
 | Prompt | Input | Maps To |
 |--------|:-----:|---------|
 | WAN interface | `vtnet0` | `vmbr0` — Internet |
 | LAN interface | `vtnet1` | `vmbr1` — HR Workstation |
-| OPT1 interface | `vtnet2` | `vmbr2` — IT Workstation |
-| OPT2 interface | `vtnet3` | `vmbr3` — OPs Workstation |
-| OPT3 interface | `vtnet4` | `vmbr4` — DMZ |
-| OPT4 interface | `vtnet5` | `vmbr5` — Servers |
+| OPT1 interface | `vtnet2` | `vmbr2` — Servers |
+| OPT2 interface | `vtnet3` | `vmbr3` — DMZ |
+| OPT3 interface | `vtnet4` | `vmbr4` — IT Workstation |
+| OPT4 interface | `vtnet5` | `vmbr5` — OPs Workstation |
 
 Type `y` → Enter to confirm.
 
@@ -836,8 +834,8 @@ Type `y` → Enter to confirm.
 
 #### Step 19 — Verify Boot & WAN DHCP
 
-<img width="1820" height="1006" alt="pfsense-wan1" src="https://github.com/user-attachments/assets/dc6b95ec-adc2-476d-9330-236e0ec4e277" />
-<img width="1820" height="1003" alt="pfsense-wan2" src="https://github.com/user-attachments/assets/439cfa86-0660-44a4-b7bc-c3d07eeecbcb" />
+![26](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/26.png)
+![27](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/27.png)
 
 ```
 WAN (vtnet0) →  192.168.140.xxx/24   ✅  DHCP from Proxmox host
@@ -848,8 +846,8 @@ LAN (vtnet1) →  no IP yet            ←   configure next
 
 #### Step 20 — Set LAN IP Address
 
-<img width="1829" height="1012" alt="pfsense-lan1" src="https://github.com/user-attachments/assets/be136960-8327-4237-8582-bc752d7a646a" />
-<img width="1914" height="989" alt="pfsense-lan2" src="https://github.com/user-attachments/assets/359a4de9-de78-40d7-acd3-016d239679d1" />
+![28](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/28.png)
+![29](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/29.png)
 
 Console menu → type `2` → Enter → select `2` for **LAN**.
 
@@ -857,9 +855,9 @@ Console menu → type `2` → Enter → select `2` for **LAN**.
 
 #### Step 21 — Configure LAN
 
-<img width="1203" height="660" alt="pfsense-lan3" src="https://github.com/user-attachments/assets/4835f9b7-2b7a-4cee-bc91-233205219248" />
-<img width="1137" height="654" alt="pfsense-lan4" src="https://github.com/user-attachments/assets/837976e1-3106-4774-ba8d-91957acb0fb1" />
-<img width="1177" height="404" alt="pfsense-lan5" src="https://github.com/user-attachments/assets/e2307588-7ea4-4810-a4fc-6d59cd16dd8a" />
+![30](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/30.png)
+![31](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/31.png)
+![32](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/32.png)
 
 | Prompt | Value |
 |--------|-------|
@@ -872,10 +870,10 @@ Console menu → type `2` → Enter → select `2` for **LAN**.
 
 #### Step 22 — Enable DHCP on LAN
 
-<img width="1163" height="556" alt="pfsense-dhcp1" src="https://github.com/user-attachments/assets/d0705f08-fa84-4cf5-811b-f373c31dec22" />
-<img width="1151" height="186" alt="pfsense-dhcp2" src="https://github.com/user-attachments/assets/7eea0b2c-b401-4fdf-9801-00769d530a62" />
-<img width="1175" height="388" alt="pfsense-dhcp3" src="https://github.com/user-attachments/assets/a47bfb2f-c184-40a0-a1e6-80a075cbddef" />
-<img width="1176" height="267" alt="pfsense-dhcp4" src="https://github.com/user-attachments/assets/19c5ba61-d30e-42b4-827a-10ca312bc302" />
+![33](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/33.png)
+![34](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/34.png)
+![35](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/35.png)
+![36](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/36.png)
 
 Enable DHCP server: `y`
 
@@ -888,8 +886,8 @@ Enable DHCP server: `y`
 
 #### Step 23 — Confirm & Access WebConfigurator
 
-<img width="1169" height="716" alt="pfsense-confirm1" src="https://github.com/user-attachments/assets/3f21233a-6fc6-4268-a484-15ed81cceeda" />
-<img width="1173" height="879" alt="pfsense-confirm2" src="https://github.com/user-attachments/assets/3acda81b-24a7-4aed-98ef-54e76eb81e0d" />
+![37](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/37.png)
+![38](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/03-pfsense-installation/38.png)
 
 Revert to HTTP: `n` — keep HTTPS.
 
@@ -909,10 +907,10 @@ Access the WebConfigurator: `https://10.22.0.1` · Username: `admin` · Password
 |:-------:|:-----:|:------:|:--:|:----:|
 | WAN | vtnet0 | vmbr0 | DHCP `192.168.140.x` | Internet |
 | LAN | vtnet1 | vmbr1 | `10.22.0.1/24` | HR Workstation |
-| OPT1 | vtnet2 | vmbr2 | `10.22.1.1/24` | IT Workstation *(configured in `[04]`)* |
-| OPT2 | vtnet3 | vmbr3 | `10.22.2.1/24` | OPs Workstation *(configured in `[04]`)* |
-| OPT3 | vtnet4 | vmbr4 | `192.168.50.1/24` | DMZ *(configured in `[04]`)* |
-| OPT4 | vtnet5 | vmbr5 | `10.22.7.1/24` | Servers *(configured in `[04]`)* |
+| OPT1 | vtnet2 | vmbr2 | `10.22.7.1/24` | Servers *(configured in `[04]`)* |
+| OPT2 | vtnet3 | vmbr3 | `192.168.50.1/24` | DMZ *(configured in `[04]`)* |
+| OPT3 | vtnet4 | vmbr4 | `10.22.1.1/24` | IT Workstation *(configured in `[04]`)* |
+| OPT4 | vtnet5 | vmbr5 | `10.22.2.1/24` | OPs Workstation *(configured in `[04]`)* |
 
 ---
 
@@ -946,7 +944,7 @@ Access the WebConfigurator: `https://10.22.0.1` · Username: `admin` · Password
 
 <br>
 
-> **Scope:** Attaching all five VLAN bridges to the pfSense VM, provisioning and naming every interface (HR · IT · OPs · DMZ · SERVERS), configuring Hybrid Outbound NAT, and establishing the baseline WAN firewall rule that brings the full Mursad SOC network online.
+> **Scope:** Attaching all five VLAN bridges to the pfSense VM, provisioning and naming every interface (HR · SERVERS · DMZ · IT · OPs), configuring Hybrid Outbound NAT, and establishing the baseline WAN firewall rule that brings the full Mursad SOC network online.
 
 ---
 
@@ -957,10 +955,10 @@ Proxmox Node: mursad
 └── VM 100  —  Firewall  (pfSense CE)
         ├── vtnet0  →  vmbr0  →  WAN      192.168.140.x/24  (DHCP)
         ├── vtnet1  →  vmbr1  →  HR       10.22.0.1/24
-        ├── vtnet2  →  vmbr2  →  IT       10.22.1.1/24
-        ├── vtnet3  →  vmbr3  →  OPs      10.22.2.1/24
-        ├── vtnet4  →  vmbr4  →  DMZ      192.168.50.1/24
-        └── vtnet5  →  vmbr5  →  SERVERS  10.22.7.1/24
+        ├── vtnet2  →  vmbr2  →  SERVERS  10.22.7.1/24
+        ├── vtnet3  →  vmbr3  →  DMZ      192.168.50.1/24
+        ├── vtnet4  →  vmbr4  →  IT       10.22.1.1/24
+        └── vtnet5  →  vmbr5  →  OPs      10.22.2.1/24
 ```
 
 | Part | Section | Description |
@@ -976,23 +974,23 @@ Proxmox Node: mursad
 
 #### Step 1 — Review Proxmox Network Bridges
 
-<img width="1448" height="406" alt="1" src="https://github.com/user-attachments/assets/79a53dca-d936-4bef-8485-b94ddabf875c" />
+![1](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/1.png)
 
 Confirm all five internal bridges are present on the **mursad** node before proceeding.
 
 | Bridge | Zone | Subnet |
 |:------:|------|--------|
 | `vmbr1` | HR Workstation | `10.22.0.0/24` |
-| `vmbr2` | IT Workstation | `10.22.1.0/24` |
-| `vmbr3` | OPs Workstation | `10.22.2.0/24` |
-| `vmbr4` | DMZ | `192.168.50.0/24` |
-| `vmbr5` | Servers | `10.22.7.0/24` |
+| `vmbr2` | Servers | `10.22.7.0/24` |
+| `vmbr3` | DMZ | `192.168.50.0/24` |
+| `vmbr4` | IT Workstation | `10.22.1.0/24` |
+| `vmbr5` | OPs Workstation | `10.22.2.0/24` |
 
 ---
 
 #### Step 2 — Add Network Devices to Firewall VM
 
-<img width="1237" height="631" alt="2" src="https://github.com/user-attachments/assets/935bbc5e-6e3f-41d6-ac35-6cd053913779" />
+![2](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/2.png)
 
 Navigate to **VM 100 (Firewall) → Hardware → Add → Network Device**.
 
@@ -1000,7 +998,7 @@ Navigate to **VM 100 (Firewall) → Hardware → Add → Network Device**.
 
 #### Step 3 — Assign All Bridges to Firewall
 
-<img width="647" height="287" alt="3" src="https://github.com/user-attachments/assets/848bfd3b-462b-4510-8453-9c54bcb0e616" />
+![3](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/3.png)
 
 Add one **VirtIO** Network Device per bridge:
 
@@ -1018,17 +1016,17 @@ Add one **VirtIO** Network Device per bridge:
 
 #### Step 4 — Verify Firewall Hardware
 
-<img width="1008" height="438" alt="4" src="https://github.com/user-attachments/assets/231b245c-5a4d-422c-9c0f-50aa714802ac" />
+![4](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/4.png)
 
 Open **VM 100 → Hardware** and confirm the full NIC list:
 
 ```
 net0  →  vmbr0   WAN
 net1  →  vmbr1   HR
-net2  →  vmbr2   IT
-net3  →  vmbr3   OPs
-net4  →  vmbr4   DMZ
-net5  →  vmbr5   SERVERS
+net2  →  vmbr2   SERVERS
+net3  →  vmbr3   DMZ
+net4  →  vmbr4   IT
+net5  →  vmbr5   OPs
 ```
 
 ---
@@ -1037,7 +1035,7 @@ net5  →  vmbr5   SERVERS
 
 #### Step 5 — Navigate to Firewall Rules
 
-<img width="1912" height="936" alt="5" src="https://github.com/user-attachments/assets/4b8208c4-9cfd-4aad-ac4f-044105a94d40" />
+![5](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/5.png)
 
 Log into the pfSense WebConfigurator at `https://10.22.0.1` and navigate to **Firewall → Rules**.
 
@@ -1045,7 +1043,7 @@ Log into the pfSense WebConfigurator at `https://10.22.0.1` and navigate to **Fi
 
 #### Step 6 — Add WAN Firewall Rule
 
-<img width="1171" height="570" alt="6" src="https://github.com/user-attachments/assets/5c5f0b73-8a0d-4628-9f88-aff4b2693c6b" />
+![6](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/6.png)
 
 Select the **WAN** tab. Click **Add ↑** to insert a new rule at the top of the list.
 
@@ -1053,7 +1051,7 @@ Select the **WAN** tab. Click **Add ↑** to insert a new rule at the top of the
 
 #### Step 7 — Configure WAN Rule Parameters
 
-<img width="1167" height="917" alt="7" src="https://github.com/user-attachments/assets/85dd7330-3c39-41ad-920f-47c341e9414b" />
+![7](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/7.png)
 
 | Field | Value |
 |-------|-------|
@@ -1071,7 +1069,7 @@ Click **Save**.
 
 #### Step 8 — Apply WAN Rule
 
-<img width="1209" height="595" alt="8" src="https://github.com/user-attachments/assets/65da654e-8ade-4cb0-ab67-e55986c8495c" />
+![8](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/8.png)
 
 Click **Apply Changes** to activate the rule.
 
@@ -1081,7 +1079,7 @@ Click **Apply Changes** to activate the rule.
 
 #### Step 9 — Navigate to Outbound NAT
 
-<img width="1203" height="580" alt="9" src="https://github.com/user-attachments/assets/e91faaf1-f89a-4cfb-bb04-7c962e351528" />
+![9](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/9.png)
 
 Navigate to **Firewall → NAT → Outbound**.
 
@@ -1089,7 +1087,7 @@ Navigate to **Firewall → NAT → Outbound**.
 
 #### Step 10 — Enable Hybrid Outbound NAT
 
-<img width="1216" height="665" alt="10" src="https://github.com/user-attachments/assets/c87dd688-e179-4008-9a99-eeda1dfc95ab" />
+![10](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/10.png)
 
 Select **Hybrid Outbound NAT rule generation** and click **Save**.
 
@@ -1099,7 +1097,7 @@ Select **Hybrid Outbound NAT rule generation** and click **Save**.
 
 #### Step 11 — Add HR Workstation NAT Mapping
 
-<img width="1184" height="652" alt="11" src="https://github.com/user-attachments/assets/d7a44a09-c4b0-4665-9a80-e5d23eb127b9" />
+![11](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/11.png)
 
 | Field | Value |
 |-------|-------|
@@ -1110,7 +1108,7 @@ Select **Hybrid Outbound NAT rule generation** and click **Save**.
 
 #### Step 12 — Add SERVERS NAT Mapping
 
-<img width="1175" height="685" alt="12" src="https://github.com/user-attachments/assets/0c56f1ee-9ae1-471b-872d-edae3b01707d" />
+![12](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/12.png)
 
 | Field | Value |
 |-------|-------|
@@ -1121,7 +1119,7 @@ Select **Hybrid Outbound NAT rule generation** and click **Save**.
 
 #### Step 13 — Add DMZ NAT Mapping
 
-<img width="1178" height="805" alt="13" src="https://github.com/user-attachments/assets/706da33c-17d1-482a-bd93-bd1ca0df8079" />
+![13](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/13.png)
 
 | Field | Value |
 |-------|-------|
@@ -1133,7 +1131,7 @@ Select **Hybrid Outbound NAT rule generation** and click **Save**.
 
 #### Step 14 — Review & Apply NAT Mappings
 
-<img width="1196" height="386" alt="14" src="https://github.com/user-attachments/assets/9f783a64-5251-45ce-a3c6-ad695d83c788" />
+![14](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/14.png)
 
 ```
 [MANUAL]  10.22.0.0/24    →  WAN  (Any)       Manual NAT — HR Workstation
@@ -1151,63 +1149,15 @@ Click **Apply Changes**.
 
 #### Step 15 — Navigate to Interface Assignments
 
-<img width="1155" height="243" alt="15" src="https://github.com/user-attachments/assets/bea7d50d-9ad1-4f11-a5ea-1addcca3548f" />
+![15](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/15.png)
 
 Navigate to **Interfaces → Assignments**.
 
 ---
 
-#### Step 16 — Configure HR Interface (OPT1)
+#### Step 16 — Configure SERVERS Interface (OPT1)
 
-<img width="1164" height="289" alt="16" src="https://github.com/user-attachments/assets/9503ea2e-0529-47af-915d-3e13c26062dc" />
-
-| Field | Value |
-|-------|-------|
-| Enable | ✅ Checked |
-| Description | `HR` |
-| IPv4 Address | `10.22.0.1` / `24` |
-
----
-
-#### Step 17 — Configure IT Interface (OPT2)
-
-<img width="1183" height="937" alt="17" src="https://github.com/user-attachments/assets/5550c802-da20-419e-b2cd-60342c7a985e" />
-
-| Field | Value |
-|-------|-------|
-| Enable | ✅ Checked |
-| Description | `IT` |
-| IPv4 Address | `10.22.1.1` / `24` |
-
----
-
-#### Step 18 — Configure OPs Interface (OPT3)
-
-<img width="1174" height="544" alt="18" src="https://github.com/user-attachments/assets/17493441-dd4b-403b-8698-e936ad8bbd39" />
-
-| Field | Value |
-|-------|-------|
-| Enable | ✅ Checked |
-| Description | `OPs` |
-| IPv4 Address | `10.22.2.1` / `24` |
-
----
-
-#### Step 19 — Configure DMZ Interface (OPT4)
-
-<img width="1166" height="676" alt="19" src="https://github.com/user-attachments/assets/c75ef365-6623-4919-98d6-4b96fa14326c" />
-
-| Field | Value |
-|-------|-------|
-| Enable | ✅ Checked |
-| Description | `DMZ` |
-| IPv4 Address | `192.168.50.1` / `24` |
-
----
-
-#### Step 20 — Configure SERVERS Interface (OPT5)
-
-<img width="1197" height="756" alt="20" src="https://github.com/user-attachments/assets/07a17413-37b3-4b86-a4bf-57e5a8d0a87d" />
+![16](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/16.png)
 
 | Field | Value |
 |-------|-------|
@@ -1217,32 +1167,68 @@ Navigate to **Interfaces → Assignments**.
 
 ---
 
-#### Step 21 — Verify Complete Interface Table
+#### Step 17 — Configure DMZ Interface (OPT2)
 
-<img width="1158" height="786" alt="21" src="https://github.com/user-attachments/assets/548fc934-c9b2-4907-874e-ada079721918" />
+![17](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/17.png)
+
+| Field | Value |
+|-------|-------|
+| Enable | ✅ Checked |
+| Description | `DMZ` |
+| IPv4 Address | `192.168.50.1` / `24` |
+
+---
+
+#### Step 18 — Configure IT Interface (OPT3)
+
+![18](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/18.png)
+
+| Field | Value |
+|-------|-------|
+| Enable | ✅ Checked |
+| Description | `IT` |
+| IPv4 Address | `10.22.1.1` / `24` |
+
+---
+
+#### Step 19 — Configure OPs Interface (OPT4)
+
+![19](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/19.png)
+
+| Field | Value |
+|-------|-------|
+| Enable | ✅ Checked |
+| Description | `OPs` |
+| IPv4 Address | `10.22.2.1` / `24` |
+
+---
+
+#### Step 20 — Verify Complete Interface Table
+
+![20](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/20.png)
 
 | Interface | vtnet | Bridge | Description | IPv4 Address |
 |:---------:|:-----:|:------:|-------------|:------------:|
 | WAN | vtnet0 | vmbr0 | INTERNET | DHCP |
 | LAN | vtnet1 | vmbr1 | HR | `10.22.0.1/24` |
-| OPT1 | vtnet2 | vmbr2 | IT | `10.22.1.1/24` |
-| OPT2 | vtnet3 | vmbr3 | OPs | `10.22.2.1/24` |
-| OPT3 | vtnet4 | vmbr4 | DMZ | `192.168.50.1/24` |
-| OPT4 | vtnet5 | vmbr5 | SERVERS | `10.22.7.1/24` |
+| OPT1 | vtnet2 | vmbr2 | SERVERS | `10.22.7.1/24` |
+| OPT2 | vtnet3 | vmbr3 | DMZ | `192.168.50.1/24` |
+| OPT3 | vtnet4 | vmbr4 | IT | `10.22.1.1/24` |
+| OPT4 | vtnet5 | vmbr5 | OPs | `10.22.2.1/24` |
 
 ---
 
-#### Step 22 — Review pfSense Dashboard
+#### Step 21 — Review pfSense Dashboard
 
-<img width="1908" height="931" alt="22" src="https://github.com/user-attachments/assets/cef2f0bf-4ec0-4076-a112-4c267b57eadb" />
+![21](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-1/04-firewall-routing/21.png)
 
 ```
 WAN      →  192.168.140.x/24   ✅
 HR       →  10.22.0.1/24       ✅
+SERVERS  →  10.22.7.1/24       ✅
+DMZ      →  192.168.50.1/24    ✅
 IT       →  10.22.1.1/24       ✅
 OPs      →  10.22.2.1/24       ✅
-DMZ      →  192.168.50.1/24    ✅
-SERVERS  →  10.22.7.1/24       ✅
 ```
 
 ---
@@ -1257,11 +1243,10 @@ SERVERS  →  10.22.7.1/24       ✅
 - [ ] Manual NAT mapping created for SERVERS `10.22.7.0/24` (Any)
 - [ ] Manual NAT mapping created for DMZ `192.168.50.0/24` (TCP/UDP)
 - [ ] All NAT mappings applied
-- [ ] OPT1 enabled as `HR` — `10.22.0.1/24`
-- [ ] OPT2 enabled as `IT` — `10.22.1.1/24`
-- [ ] OPT3 enabled as `OPs` — `10.22.2.1/24`
-- [ ] OPT4 enabled as `DMZ` — `192.168.50.1/24`
-- [ ] OPT5 enabled as `SERVERS` — `10.22.7.1/24`
+- [ ] OPT1 enabled as `SERVERS` — `10.22.7.1/24`
+- [ ] OPT2 enabled as `DMZ` — `192.168.50.1/24`
+- [ ] OPT3 enabled as `IT` — `10.22.1.1/24`
+- [ ] OPT4 enabled as `OPs` — `10.22.2.1/24`
 - [ ] Dashboard shows all 6 interfaces active with correct IPs
 
 <div align="center"><br>
@@ -1291,13 +1276,13 @@ SERVERS  →  10.22.7.1/24       ✅
 ```text
 Proxmox Node: mursad
 └── VM 101  —  DC  (Windows Server 2019)
-        ├── Network: vmbr5 (SERVERS)
+        ├── Network: vmbr2 (SERVERS)
         ├── Compute: 2 vCores · 8 GB RAM
         └── Storage: 60 GB Disk · VirtIO Drivers
 
 pfSense WebConfigurator
 └── DHCP Server
-        ├── Interface: SERVERS
+        ├── Interface: SERVERS (OPT1)
         ├── Backend: Kea DHCP
         └── Range: 10.22.7.3 – 10.22.7.50
 ```
@@ -1324,9 +1309,9 @@ Navigate to **Services → DHCP Server → SERVERS** tab.
 | Range From | `10.22.7.3` |
 | Range To | `10.22.7.50` |
 
-> **Note:** The range starts at `.3` to reserve `.1` for the gateway and `.2` for the future Wazuh SIEM server.
+> **Note:** The range starts at `.3` to reserve `.1` for the gateway and `.2` for future use.
 
-<img width="1169" height="936" alt="1" src="https://github.com/user-attachments/assets/e1c72fb1-6cc6-46be-9f05-679a8db4b7b1" />
+![1](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/1.png)
 
 ---
 
@@ -1334,7 +1319,7 @@ Navigate to **Services → DHCP Server → SERVERS** tab.
 
 Navigate to **System → Advanced → Networking → DHCP Backend**, select **Kea DHCP**, and click **Save**.
 
-<img width="1188" height="830" alt="2" src="https://github.com/user-attachments/assets/430e3f8c-1544-4d96-a049-0eaa81fdde6e" />
+![2](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/2.png)
 
 ---
 
@@ -1342,7 +1327,7 @@ Navigate to **System → Advanced → Networking → DHCP Backend**, select **Ke
 
 Navigate back to **Services → DHCP Server → SERVERS → Servers** section. Add `10.22.7.1` as the primary DNS server.
 
-<img width="1172" height="333" alt="3" src="https://github.com/user-attachments/assets/d66ea4da-1b6c-42b6-82fb-96f496f3a194" />
+![3](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/3.png)
 
 ---
 
@@ -1354,7 +1339,7 @@ Navigate back to **Services → DHCP Server → SERVERS → Servers** section. A
 
 VM ID: `101` · Name: `DC`
 
-<img width="812" height="590" alt="4" src="https://github.com/user-attachments/assets/6933494a-cb94-4c1a-adcc-d2d2a43d5013" />
+![4](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/4.png)
 
 ---
 
@@ -1362,7 +1347,7 @@ VM ID: `101` · Name: `DC`
 
 Guest OS Type: `Microsoft Windows` · ISO: Windows Server
 
-<img width="748" height="551" alt="5" src="https://github.com/user-attachments/assets/dfb357ad-56f0-4244-abd9-62e140d5261d" />
+![5](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/5.png)
 
 ---
 
@@ -1370,7 +1355,7 @@ Guest OS Type: `Microsoft Windows` · ISO: Windows Server
 
 Bus/Device: **VirtIO Block** · Disk Size: **60 GB**
 
-<img width="750" height="549" alt="6" src="https://github.com/user-attachments/assets/d83792c9-56df-4e74-924f-b7a4761030ff" />
+![6](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/6.png)
 
 ---
 
@@ -1380,7 +1365,7 @@ Cores: `2` · Type: `host`
 
 > ⚠️ **Critical:** CPU type `host` is required for nested virtualization stability.
 
-<img width="749" height="549" alt="7" src="https://github.com/user-attachments/assets/f40f0339-1000-4b1b-bfdb-142c01cc9133" />
+![7](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/7.png)
 
 ---
 
@@ -1388,15 +1373,15 @@ Cores: `2` · Type: `host`
 
 Memory: **8192 MiB (8 GB)**
 
-<img width="744" height="550" alt="8" src="https://github.com/user-attachments/assets/08fcf3a0-b27c-4ce8-9bd6-faf3b7b16e05" />
+![8](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/8.png)
 
 ---
 
 #### Step 9 — Network Configuration
 
-Bridge: `vmbr5` (SERVERS) · Model: `VirtIO` · Firewall: Unchecked
+Bridge: `vmbr2` (SERVERS) · Model: `VirtIO` · Firewall: Unchecked
 
-<img width="733" height="545" alt="9" src="https://github.com/user-attachments/assets/3f745984-85d4-4bea-a9c8-1e95c39da3bd" />
+![9](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/9.png)
 
 ---
 
@@ -1404,7 +1389,7 @@ Bridge: `vmbr5` (SERVERS) · Model: `VirtIO` · Firewall: Unchecked
 
 Navigate to **VM 101 → Hardware → Add → CD/DVD Drive** and select the `virtio-win` ISO.
 
-<img width="1913" height="716" alt="10" src="https://github.com/user-attachments/assets/4f77de02-a2e4-4374-85c7-0ba72e7b339e" />
+![10](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/10.png)
 
 ---
 
@@ -1412,13 +1397,13 @@ Navigate to **VM 101 → Hardware → Add → CD/DVD Drive** and select the `vir
 
 #### Step 11 — Power On and Start Setup
 
-<img width="1088" height="810" alt="11" src="https://github.com/user-attachments/assets/a21a357c-0b44-40cc-818d-a838ed3c75c3" />
+![11](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/11.png)
 
 ---
 
 #### Step 12 — Install Now
 
-<img width="1090" height="805" alt="12" src="https://github.com/user-attachments/assets/36aac1cb-a7ef-4f04-a034-f24d739472b9" />
+![12](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/12.png)
 
 ---
 
@@ -1426,7 +1411,7 @@ Navigate to **VM 101 → Hardware → Add → CD/DVD Drive** and select the `vir
 
 Choose **Windows Server (Desktop Experience)** — Server Core has no GUI.
 
-<img width="1090" height="810" alt="13" src="https://github.com/user-attachments/assets/b0f110a8-ee0b-454d-a5b7-2a6e15443505" />
+![13](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/13.png)
 
 ---
 
@@ -1434,7 +1419,7 @@ Choose **Windows Server (Desktop Experience)** — Server Core has no GUI.
 
 Select **Custom: Install Windows only (advanced)**.
 
-<img width="1089" height="814" alt="14" src="https://github.com/user-attachments/assets/aac7bd1c-d9d8-4bff-beb8-45e80574f6ff" />
+![14](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/14.png)
 
 ---
 
@@ -1442,19 +1427,19 @@ Select **Custom: Install Windows only (advanced)**.
 
 Select **Drive 0** (60 GB). If it doesn't appear, load the `viostor` driver from the VirtIO CD.
 
-<img width="1082" height="808" alt="15" src="https://github.com/user-attachments/assets/d5711040-6d6c-4a7c-8a60-c95f62994466" />
+![15](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/15.png)
 
 ---
 
 #### Step 16 — Set Local Administrator Password
 
-<img width="1090" height="813" alt="16" src="https://github.com/user-attachments/assets/32c96d8b-25b6-4d98-91cd-1d1748bc5c89" />
+![16](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/16.png)
 
 ---
 
 #### Step 17 — Welcome to Windows Server
 
-<img width="1081" height="813" alt="17" src="https://github.com/user-attachments/assets/bc4810d4-3fc0-4a84-a967-35e133cefeb0" />
+![17](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/17.png)
 
 ---
 
@@ -1464,13 +1449,13 @@ Select **Drive 0** (60 GB). If it doesn't appear, load the `viostor` driver from
 
 Navigate to the `virtio-win` CD Drive and run **`virtio-win-gt-x64`**.
 
-<img width="1080" height="815" alt="18" src="https://github.com/user-attachments/assets/8ac08a49-c106-4cb4-aab6-f0c0adcc1131" />
+![18](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/18.png)
 
 ---
 
 #### Step 19 — Complete VirtIO Setup
 
-<img width="1090" height="816" alt="19" src="https://github.com/user-attachments/assets/4161063e-5034-4a45-b9d2-a6e0c43bc747" />
+![19](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/19.png)
 
 ---
 
@@ -1482,7 +1467,7 @@ ipconfig
 
 Expected lease: `10.22.7.3`
 
-<img width="1091" height="812" alt="20" src="https://github.com/user-attachments/assets/aee18131-69b3-4c13-8816-435004950e84" />
+![20](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/20.png)
 
 ---
 
@@ -1490,7 +1475,7 @@ Expected lease: `10.22.7.3`
 
 **Control Panel → System and Security → System → Change settings**
 
-<img width="1088" height="812" alt="21" src="https://github.com/user-attachments/assets/11557706-1735-41f1-a6c0-9d3a32601f9f" />
+![21](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/21.png)
 
 ---
 
@@ -1498,13 +1483,13 @@ Expected lease: `10.22.7.3`
 
 Set description to `DC`, then click **Change...** to modify the hostname.
 
-<img width="1083" height="814" alt="22" src="https://github.com/user-attachments/assets/55c7ec7c-55a3-4340-84c4-bcbdc3103b6a" />
+![22](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/22.png)
 
 ---
 
 #### Step 23 — Rename Computer to DC
 
-<img width="1083" height="814" alt="23" src="https://github.com/user-attachments/assets/0e82c160-05ef-439b-a36d-e6864cad71ab" />
+![23](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/23.png)
 
 ---
 
@@ -1514,7 +1499,7 @@ Set description to `DC`, then click **Change...** to modify the hostname.
 
 Yellow warning triangle on the network icon — outbound route to WAN is not yet defined.
 
-<img width="1089" height="807" alt="24" src="https://github.com/user-attachments/assets/34d6a443-a8d7-40a6-a0bc-8da79e903e1a" />
+![24](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/24.png)
 
 ---
 
@@ -1522,13 +1507,13 @@ Yellow warning triangle on the network icon — outbound route to WAN is not yet
 
 **System → Routing → Gateways → Add**
 
-<img width="1235" height="670" alt="25" src="https://github.com/user-attachments/assets/518bca0a-3bc4-4cba-9b99-54792fd31ff3" />
+![25](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/25.png)
 
 ---
 
 #### Step 26 — Configure External Gateway
 
-<img width="1177" height="524" alt="26" src="https://github.com/user-attachments/assets/cd92867b-a884-480a-b145-40ea411aae0a" />
+![26](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/26.png)
 
 ---
 
@@ -1541,7 +1526,7 @@ Yellow warning triangle on the network icon — outbound route to WAN is not yet
 | DNS | IPv4 UDP | SERVERS net | This Firewall | `53` | DNS queries to pfSense |
 | Outbound | IPv4 Any | SERVERS net | Any | Any | Internet access |
 
-<img width="1165" height="470" alt="27" src="https://github.com/user-attachments/assets/a5319eca-2b23-4b78-9b8d-459a8c6428bc" />
+![27](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/27.png)
 
 ---
 
@@ -1549,7 +1534,7 @@ Yellow warning triangle on the network icon — outbound route to WAN is not yet
 
 **Status → Services** — restart `dpinger` and `kea-dhcp4`.
 
-<img width="1183" height="477" alt="28" src="https://github.com/user-attachments/assets/e7e06cdb-b62a-4226-8182-df53679b8614" />
+![28](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/28.png)
 
 ---
 
@@ -1561,7 +1546,7 @@ ping 8.8.8.8
 
 `DC → SERVERS VLAN → pfSense → WAN → Internet` ✅
 
-<img width="1084" height="816" alt="29" src="https://github.com/user-attachments/assets/154d5b80-fddd-4428-a271-1490a2952cc1" />
+![29](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/29.png)
 
 ---
 
@@ -1569,7 +1554,7 @@ ping 8.8.8.8
 
 Navigate to `google.com` in Edge — full connectivity confirmed.
 
-<img width="1074" height="814" alt="30" src="https://github.com/user-attachments/assets/35ec7491-c54a-4939-bb81-244641e46958" />
+![30](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/30.png)
 
 ---
 
@@ -1577,8 +1562,8 @@ Navigate to `google.com` in Edge — full connectivity confirmed.
 
 | Component | Bridge | IP | Zone |
 |:---------:|:------:|:--:|:----:|
-| Windows Server DC | vmbr5 | `10.22.7.3` (DHCP) | SERVERS |
-| pfSense — SERVERS | vmbr5 | `10.22.7.1/24` | SERVERS gateway |
+| Windows Server DC | vmbr2 | `10.22.7.3` (DHCP) | SERVERS |
+| pfSense — SERVERS | vmbr2 | `10.22.7.1/24` | SERVERS gateway |
 
 ---
 
@@ -1589,7 +1574,7 @@ Navigate to `google.com` in Edge — full connectivity confirmed.
 - [ ] DHCP backend switched from ISC to **Kea DHCP**
 - [ ] DNS server `10.22.7.1` configured on SERVERS DHCP scope
 - [ ] VM 101 created — `2 cores · 8 GB RAM · 60 GB VirtIO Block disk`
-- [ ] Network bridge set to `vmbr5` (SERVERS), model VirtIO, firewall unchecked
+- [ ] Network bridge set to `vmbr2` (SERVERS), model VirtIO, firewall unchecked
 - [ ] VirtIO drivers ISO attached as second CD/DVD drive before first boot
 - [ ] Windows Server 2019 **Desktop Experience** installed via Custom install
 - [ ] Local Administrator password set
@@ -1598,7 +1583,7 @@ Navigate to `google.com` in Edge — full connectivity confirmed.
 - [ ] Computer renamed to `DC` and restarted
 - [ ] WAN gateway added in pfSense — **System → Routing → Gateways**
 - [ ] SERVERS firewall rules created — DNS (`UDP/53`) + outbound (`Any`)
-- [ ] Routing services restarted if required — `dpinger` and `kea-dhcp4`
+- [ ] Routing services restarted — `dpinger` and `kea-dhcp4`
 - [ ] Ping to `8.8.8.8` successful from DC
 - [ ] Browser connectivity confirmed — `google.com` loads in Edge
 
@@ -1635,7 +1620,7 @@ Proxmox Node: mursad
 │       └── Users: a.alaradi@mursad.local
 │
 └── VM 102  —  ITWS  (Windows 10 Pro)
-        ├── Network: vmbr2 (IT Workstation)
+        ├── Network: vmbr4 (IT Workstation)
         ├── DHCP: 10.22.1.x
         └── Domain-joined: mursad.local
 ```
@@ -1873,7 +1858,7 @@ Run the VirtIO installer and click **Finish**. Restart the VM.
 
 ![Image 26](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/26.png)
 
-**pfSense → Services → DHCP Server → ITWORKSTATION**
+**pfSense → Services → DHCP Server → IT**
 
 | Field | Value |
 |-------|-------|
@@ -1895,7 +1880,7 @@ Run the VirtIO installer and click **Finish**. Restart the VM.
 
 ![Image 28](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/28.png)
 
-**Firewall → Rules → ITWORKSTATION** — add pass rules for outbound traffic.
+**Firewall → Rules → IT** — add pass rules for outbound traffic.
 
 ---
 
@@ -1947,7 +1932,6 @@ Enter Domain Admin credentials when prompted.
 
 ![Image 33](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/33.png)
 
-
 ```
 Welcome to the mursad.local domain.
 ```
@@ -1960,8 +1944,8 @@ Restart the workstation to apply domain policies.
 
 | VM | OS | Bridge | IP | Role |
 |:--:|:--:|:------:|:--:|------|
-| VM 101 — DC | Windows Server 2019 | vmbr5 | `10.22.7.3` | AD DS · DNS · Forest Root |
-| VM 102 — ITWS | Windows 10 Pro | vmbr2 | `10.22.1.x` (DHCP) | Domain-joined IT workstation |
+| VM 101 — DC | Windows Server 2019 | vmbr2 | `10.22.7.3` | AD DS · DNS · Forest Root |
+| VM 102 — ITWS | Windows 10 Pro | vmbr4 | `10.22.1.x` (DHCP) | Domain-joined IT workstation |
 
 ---
 
@@ -1973,11 +1957,11 @@ Restart the workstation to apply domain policies.
 - [ ] NetBIOS name confirmed as `MURSAD`
 - [ ] DC restarted and AD DS fully operational
 - [ ] Domain user `a.alaradi@mursad.local` created in AD Users and Computers
-- [ ] Windows 10 Pro VM provisioned in Proxmox
+- [ ] Windows 10 Pro VM provisioned in Proxmox on `vmbr4` (IT)
 - [ ] VirtIO drivers installed on the workstation VM
-- [ ] pfSense DHCP enabled on ITWORKSTATION — pool `10.22.1.2`–`10.22.1.100`
+- [ ] pfSense DHCP enabled on IT — pool `10.22.1.2`–`10.22.1.100`
 - [ ] Manual NAT mapping added for `10.22.1.0/24`
-- [ ] Firewall pass rules added for ITWORKSTATION interface
+- [ ] Firewall pass rules added for IT interface
 - [ ] Workstation can ping DC (`10.22.7.3`) and gateway (`10.22.1.1`)
 - [ ] Workstation DNS set to `10.22.7.3` (primary) · `10.22.1.1` (alternate)
 - [ ] Workstation successfully joined to `mursad.local`
@@ -2017,7 +2001,7 @@ Proxmox Node: mursad
 │           └── OU: Accounting-Department
 │
 └── VM 103  —  DMZ-SRV-01  (Windows Server)
-        ├── Network:  vmbr4  (DMZ)
+        ├── Network:  vmbr3  (DMZ)
         ├── IP:       192.168.50.10  (Static)
         └── Role:     Public Web Server  (Apache / XAMPP)
 
@@ -2043,7 +2027,7 @@ pfSense WebConfigurator
 
 #### Step 1 — Create Organizational Units
 
-<img width="1082" height="817" alt="Image" src="https://github.com/user-attachments/assets/92d418f0-c988-41f0-9536-65ee0c444996" />
+![1](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/07-dmz-architecture/1.png)
 
 Open **Server Manager → Tools → Active Directory Users and Computers**. Right-click the root domain `mursad.local`, select **New → Organizational Unit**.
 
@@ -2051,7 +2035,7 @@ Open **Server Manager → Tools → Active Directory Users and Computers**. Righ
 
 #### Step 2 — Name the First OU
 
-<img width="1085" height="813" alt="Image" src="https://github.com/user-attachments/assets/8eb8fd6c-cf66-4a50-a495-8c90507f1965" />
+![2](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/07-dmz-architecture/2.png)
 
 Name the new OU (e.g., `Admin-Department`). Leave **"Protect container from accidental deletion"** checked.
 
@@ -2059,7 +2043,7 @@ Name the new OU (e.g., `Admin-Department`). Leave **"Protect container from acci
 
 #### Step 3 — Build the Full Department Hierarchy
 
-<img width="1083" height="816" alt="Image" src="https://github.com/user-attachments/assets/460e975c-660a-45db-a145-e9f5ba274719" />
+![3](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/07-dmz-architecture/3.png)
 
 | OU Name | Purpose |
 |---------|---------|
@@ -2072,7 +2056,7 @@ Name the new OU (e.g., `Admin-Department`). Leave **"Protect container from acci
 
 #### Step 4 — Configure User Properties
 
-<img width="1082" height="811" alt="Image" src="https://github.com/user-attachments/assets/6bbd3dd6-f7fd-413e-b8c6-3d73becde096" />
+![4](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/07-dmz-architecture/4.png)
 
 | Field | Value |
 |-------|-------|
@@ -2084,7 +2068,7 @@ Name the new OU (e.g., `Admin-Department`). Leave **"Protect container from acci
 
 #### Step 5 — Assign Domain Admin Privileges
 
-<img width="1087" height="818" alt="Image" src="https://github.com/user-attachments/assets/49bafdf3-6f79-4f79-9378-aa33265206fb" />
+![5](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/07-dmz-architecture/5.png)
 
 **Member Of** tab → **Add** → type `domain admins` → **Check Names** → **OK** → **Apply**.
 
@@ -2096,7 +2080,7 @@ Name the new OU (e.g., `Admin-Department`). Leave **"Protect container from acci
 
 #### Step 6 — Create the DMZ Virtual Machine
 
-<img width="1088" height="813" alt="Image" src="https://github.com/user-attachments/assets/cc0ca443-d224-4c9b-b47d-6840ca812ead" />
+![6](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/07-dmz-architecture/6.png)
 
 | Component | Value |
 |-----------|-------|
@@ -2105,13 +2089,13 @@ Name the new OU (e.g., `Admin-Department`). Leave **"Protect container from acci
 | Memory | `4096 MiB (4 GB)` |
 | CPU Cores | `2` (Type: `host`) |
 | Hard Disk | `60 GB` (VirtIO Block) |
-| Network Bridge | `vmbr4` (DMZ) · Model: VirtIO |
+| Network Bridge | `vmbr3` (DMZ) · Model: VirtIO |
 
 ---
 
 #### Step 7 — Verify DMZ Network Connectivity
 
-<img width="1077" height="815" alt="Image" src="https://github.com/user-attachments/assets/c10d6168-b600-44fa-af1f-4a931424bbf6" />
+![7](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/07-dmz-architecture/7.png)
 
 ```powershell
 ipconfig
@@ -2126,7 +2110,7 @@ ipconfig
 
 #### Step 8 — Stage Web Services
 
-<img width="1088" height="813" alt="Image" src="https://github.com/user-attachments/assets/3960513b-825d-4d6e-b8a8-4182fba085ba" />
+![8](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/07-dmz-architecture/8.png)
 
 Download **XAMPP for Windows** to `DMZ-SRV-01`.
 
@@ -2138,7 +2122,7 @@ Download **XAMPP for Windows** to `DMZ-SRV-01`.
 
 #### Step 9 — Secure the pfSense WebGUI Port
 
-<img width="1181" height="583" alt="Image" src="https://github.com/user-attachments/assets/0bfc7f3b-053e-4c17-932e-640c30ae95a5" />
+![9](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/07-dmz-architecture/9.png)
 
 **System → Advanced → Admin Access**
 
@@ -2151,7 +2135,7 @@ Download **XAMPP for Windows** to `DMZ-SRV-01`.
 
 #### Step 10 — Configure Destination NAT (Port Forwarding)
 
-<img width="1187" height="428" alt="Image" src="https://github.com/user-attachments/assets/a0c9a79b-d418-4270-96d5-d5feef332a56" />
+![10](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/07-dmz-architecture/10.png)
 
 **Firewall → NAT → Port Forward** — WAN interface:
 
@@ -2166,7 +2150,7 @@ Download **XAMPP for Windows** to `DMZ-SRV-01`.
 
 #### Step 11 — Initialize Apache Server
 
-<img width="1088" height="816" alt="Image" src="https://github.com/user-attachments/assets/9e88885a-18bb-4d93-8268-c6dc65b29ba4" />
+![11](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/07-dmz-architecture/11.png)
 
 **XAMPP Control Panel → Start → Apache**
 
@@ -2179,7 +2163,7 @@ HTTPS →  Port 443  ✅
 
 #### Step 12 — Deploy the Web Application
 
-<img width="1081" height="812" alt="Image" src="https://github.com/user-attachments/assets/d1d4b3d6-32e6-4a7b-86bb-00854c26e185" />
+![12](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/07-dmz-architecture/12.png)
 
 Navigate to `C:\xampp\htdocs\` → clear defaults → create `index.html`.
 
@@ -2187,7 +2171,7 @@ Navigate to `C:\xampp\htdocs\` → clear defaults → create `index.html`.
 
 #### Step 13 — Verify Local Web Access
 
-<img width="1084" height="813" alt="Image" src="https://github.com/user-attachments/assets/d1b8d2a3-deab-4148-b82b-6096d8f95d20" />
+![13](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/07-dmz-architecture/13.png)
 
 ```
 http://192.168.50.10/
@@ -2199,7 +2183,7 @@ http://192.168.50.10/
 
 #### Step 14 — Join the Active Directory Domain
 
-<img width="1081" height="815" alt="Image" src="https://github.com/user-attachments/assets/05c67729-29bc-40cb-98f8-3ca03769c2a6" />
+![14](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/07-dmz-architecture/14.png)
 
 | Field | Value |
 |-------|-------|
@@ -2210,7 +2194,7 @@ http://192.168.50.10/
 
 #### Step 15 — Log In with Domain Credentials
 
-<img width="1085" height="812" alt="Image" src="https://github.com/user-attachments/assets/7c69408d-6b6f-4219-8761-04e4dba9c4ed" />
+![15](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/07-dmz-architecture/15.png)
 
 ```
 Username:  a.alaradi
@@ -2223,8 +2207,8 @@ Domain:    MURSAD
 
 | VM | OS | Bridge | IP | Role |
 |:--:|:--:|:------:|:--:|------|
-| VM 101 — DC | Windows Server 2019 | vmbr5 | `10.22.7.3` | AD DS · DNS · Forest Root |
-| VM 103 — DMZ-SRV-01 | Windows Server | vmbr4 | `192.168.50.10` | Public-Facing DMZ Web Server |
+| VM 101 — DC | Windows Server 2019 | vmbr2 | `10.22.7.3` | AD DS · DNS · Forest Root |
+| VM 103 — DMZ-SRV-01 | Windows Server | vmbr3 | `192.168.50.10` | Public-Facing DMZ Web Server |
 
 ---
 
@@ -2234,7 +2218,7 @@ Domain:    MURSAD
 - [ ] Primary user account moved to `Admin-Department` OU
 - [ ] User properties populated — Description, Office, Email
 - [ ] User granted `Domain Admins` group membership
-- [ ] VM 103 (`DMZ-SRV-01`) created — `4 GB RAM · 2 cores · 60 GB · vmbr4`
+- [ ] VM 103 (`DMZ-SRV-01`) created — `4 GB RAM · 2 cores · 60 GB · vmbr3`
 - [ ] DMZ IP verified — `192.168.50.10`, gateway `192.168.50.1`
 - [ ] XAMPP installer staged on the DMZ server
 - [ ] pfSense Admin Access port changed to `TCP 4005`
@@ -2303,9 +2287,7 @@ Attack Path Simulation
 
 #### Step 1 — Introduction to IDS/IPS
 
-Today we will implement Suricata, a high-performance Network IDS, IPS, and Network Security Monitoring engine. It will sit inline on our pfSense firewall to inspect traffic traversing our network zones, detecting and potentially blocking malicious activity in real-time.
-
-<img width="1912" height="939" alt="1" src="https://github.com/user-attachments/assets/5ec90052-51c4-4a48-8451-80addda02e25" />
+![1](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/1.png)
 
 ---
 
@@ -2313,13 +2295,13 @@ Today we will implement Suricata, a high-performance Network IDS, IPS, and Netwo
 
 Navigate to **System → Package Manager → Available Packages**. Search for `suricata` and click **Install**.
 
-<img width="1191" height="494" alt="2" src="https://github.com/user-attachments/assets/dda5cdad-7d85-4c86-9b66-8d68cdc4fb66" />
+![2](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/2.png)
 
 ---
 
 #### Step 3 — Confirm Installation
 
-<img width="1174" height="627" alt="3" src="https://github.com/user-attachments/assets/a5f17e77-e494-4b16-9df6-0c24856a6bc7" />
+![3](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/3.png)
 
 Wait for: `TASK OK`
 
@@ -2339,7 +2321,7 @@ Wait for: `TASK OK`
 
 Set **Update Interval** to `1 DAY`. Click **Save**.
 
-<img width="1179" height="878" alt="4" src="https://github.com/user-attachments/assets/4a3b1b37-7fb3-4349-a9cd-4aa647ac7dd5" />
+![4](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/4.png)
 
 ---
 
@@ -2347,7 +2329,7 @@ Set **Update Interval** to `1 DAY`. Click **Save**.
 
 **Services → Suricata → Updates → Update** — force immediate download of all enabled rule sets.
 
-<img width="1175" height="840" alt="5" src="https://github.com/user-attachments/assets/6f0ff995-5900-4098-a61d-3b3a2f272cca" />
+![5](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/5.png)
 
 ---
 
@@ -2357,7 +2339,7 @@ Set **Update Interval** to `1 DAY`. Click **Save**.
 
 **Services → Suricata → Alerts** — primary dashboard for triggered rules, source/destination IPs, and payload details.
 
-<img width="1174" height="735" alt="6" src="https://github.com/user-attachments/assets/e0e1ca4f-4a3a-4c3e-8cea-0ca4cd2d94c0" />
+![6](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/6.png)
 
 ---
 
@@ -2365,7 +2347,7 @@ Set **Update Interval** to `1 DAY`. Click **Save**.
 
 **Services → Suricata → Blocked Hosts** — in IPS mode, malicious IPs are actively dropped and listed here.
 
-<img width="1194" height="641" alt="7" src="https://github.com/user-attachments/assets/49e522c1-4f86-44e7-8209-84007992f36e" />
+![7](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/7.png)
 
 ---
 
@@ -2373,7 +2355,7 @@ Set **Update Interval** to `1 DAY`. Click **Save**.
 
 **Services → Suricata → Files** — file extraction and carving for malware analysis.
 
-<img width="1182" height="684" alt="8" src="https://github.com/user-attachments/assets/6941a9d5-e636-4977-866e-2f6fa95e44c4" />
+![8](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/8.png)
 
 ---
 
@@ -2381,7 +2363,7 @@ Set **Update Interval** to `1 DAY`. Click **Save**.
 
 **Services → Suricata → Pass Lists** — whitelist trusted IPs to prevent false positives.
 
-<img width="1186" height="420" alt="9" src="https://github.com/user-attachments/assets/ee6b8dc8-31dc-49bf-a069-8534c031ac22" />
+![9](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/9.png)
 
 ---
 
@@ -2389,7 +2371,7 @@ Set **Update Interval** to `1 DAY`. Click **Save**.
 
 **Services → Suricata → Suppress Lists** — silence noisy rules without disabling them. Critical for reducing SOC alert fatigue.
 
-<img width="1201" height="418" alt="10" src="https://github.com/user-attachments/assets/8903fbb9-4526-4945-b657-186fe5bd54d8" />
+![10](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/10.png)
 
 ---
 
@@ -2397,7 +2379,7 @@ Set **Update Interval** to `1 DAY`. Click **Save**.
 
 **Services → Suricata → Logs View** — raw Suricata engine logs from the pfSense web interface.
 
-<img width="1174" height="834" alt="11" src="https://github.com/user-attachments/assets/058d1a57-450f-473e-9044-46ca39bbb94c" />
+![11](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/11.png)
 
 ---
 
@@ -2405,7 +2387,7 @@ Set **Update Interval** to `1 DAY`. Click **Save**.
 
 **Services → Suricata → Logs Mgmt** — configure log rotation to prevent disk exhaustion.
 
-<img width="1206" height="878" alt="12" src="https://github.com/user-attachments/assets/e784ced5-da54-44ab-870d-d7586a31b54d" />
+![12](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/12.png)
 
 ---
 
@@ -2413,7 +2395,7 @@ Set **Update Interval** to `1 DAY`. Click **Save**.
 
 **Services → Suricata → SID Mgmt** — automatically enable/disable/modify specific detection rules via configuration files.
 
-<img width="1188" height="791" alt="13" src="https://github.com/user-attachments/assets/ce9e0516-e0eb-44d4-8674-122b0930fc29" />
+![13](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/13.png)
 
 ---
 
@@ -2430,7 +2412,7 @@ Set **Update Interval** to `1 DAY`. Click **Save**.
 
 Running in **IDS mode** initially — alerts only, no blocking.
 
-<img width="1190" height="879" alt="14" src="https://github.com/user-attachments/assets/071e3a4a-ea64-4661-bfb7-7b01e05cabeb" />
+![14](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/14.png)
 
 ---
 
@@ -2444,13 +2426,13 @@ To elevate to IPS (active blocking):
 | IPS Mode | Inline Mode |
 | Run Mode | Workers |
 
-<img width="1162" height="634" alt="15" src="https://github.com/user-attachments/assets/c1121b3e-fa84-48cf-bb7d-a674480baac4" />
+![15](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/15.png)
 
 ---
 
 #### Step 16 — Interface Status & Control
 
-<img width="1201" height="444" alt="16" src="https://github.com/user-attachments/assets/8348f7d7-98fa-4797-a871-c98be0ad5314" />
+![16](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/16.png)
 
 Click the **Pencil** icon to continue configuring rules for the DMZ interface.
 
@@ -2462,7 +2444,7 @@ Click the **Pencil** icon to continue configuring rules for the DMZ interface.
 
 > ⚠️ More rules = higher CPU load. For production, enable only categories relevant to running services.
 
-<img width="1064" height="931" alt="17" src="https://github.com/user-attachments/assets/e674b9a4-10be-4cbf-9ca3-e8d632c85802" />
+![17](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/17.png)
 
 ---
 
@@ -2470,128 +2452,128 @@ Click the **Pencil** icon to continue configuring rules for the DMZ interface.
 
 **Rules** tab — select a category from the dropdown to view and manage individual SIDs.
 
-<img width="1207" height="881" alt="18" src="https://github.com/user-attachments/assets/268740b4-a444-4d79-b30b-d5c8dbb4ef4e" />
- 
+![18](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/18.png)
+
 ---
- 
+
 #### Step 19 — Start Suricata on the DMZ
- 
+
 Return to the **Interfaces** tab. Click the **Play** button for the DMZ interface. The icon turns green — Suricata is now actively inspecting traffic.
- 
-<img width="1169" height="418" alt="19" src="https://github.com/user-attachments/assets/e4c6307a-68da-470d-8f75-05d990f714c5" />
- 
+
+![19](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/19.png)
+
 ---
- 
+
 ### Part E — Target Preparation
- 
+
 #### Step 20 — Create Inbound Firewall Rule
- 
+
 On **DMZ-SRV-01**, open **Windows Defender Firewall with Advanced Security → Inbound Rules → New Rule... → Port**.
- 
-<img width="1550" height="1175" alt="20" src="https://github.com/user-attachments/assets/12465c0d-09c7-49c4-88c1-22f9576e0483" />
- 
+
+![20](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/20.png)
+
 ---
- 
+
 #### Step 21 — Specify Protocols and Ports
- 
+
 Select **TCP** · Specific local ports: `80, 443`.
- 
-<img width="1077" height="813" alt="21" src="https://github.com/user-attachments/assets/b3157332-d9c3-477f-8fd4-38caf28e876f" />
- 
+
+![21](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/21.png)
+
 ---
- 
+
 #### Step 22 — Rule Action
- 
+
 Select **Allow the connection**.
- 
-<img width="1074" height="811" alt="22" src="https://github.com/user-attachments/assets/9317bb59-0f45-4570-88f5-9b2ec15a8590" />
- 
+
+![22](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata/22.png)
+
 ---
- 
+
 #### Step 23 — Apply to Profiles
- 
+
 Check all three: **Domain**, **Private**, **Public**.
- 
-<img width="1079" height="815" alt="23" src="https://github.com/user-attachments/assets/869bddef-8470-45ae-acd8-238bc2e9ba32" />
- 
+
+![23](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata/23.png)
+
 ---
- 
+
 #### Step 24 — Name the Rule
- 
+
 Name: `Allow Web Traffic (HTTP/HTTPS)` → **Finish**.
- 
-<img width="1081" height="814" alt="24" src="https://github.com/user-attachments/assets/9065dc2e-948d-40ff-941c-4d01343b25ec" />
- 
+
+![24](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata/24.png)
+
 ---
- 
+
 #### Step 25 — External Access Validation
- 
+
 Navigate to `http://192.168.140.130/` from the Host machine. The pfSense Destination NAT correctly forwards the request to the DMZ — the custom Mursad landing page loads.
- 
-<img width="1077" height="815" alt="25" src="https://github.com/user-attachments/assets/2824be68-2245-42cd-835e-00ee9868bd85" />
- 
+
+![25](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata/25.png)
+
 ---
- 
+
 ### Part F — Red Team Adversary Simulation
- 
+
 #### Step 26 — Kali Linux Verification
- 
+
 Verify Kali Linux can access `http://192.168.140.130/`. Connectivity confirmed — proceed with attacks.
- 
-<img width="1276" height="794" alt="26" src="https://github.com/user-attachments/assets/fc97e38f-dbb2-4611-bd86-1f6fb952d73b" />
- 
+
+![26](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata/26.png)
+
 ---
- 
+
 #### Step 27 — Execute SQL Injection Attack (SQLMap)
- 
+
 ```bash
 sqlmap -u 'http://192.168.140.130/index.html?id=' --batch --random-agent
 ```
- 
-<img width="1272" height="791" alt="27" src="https://github.com/user-attachments/assets/3502f297-c245-4238-878a-3b0f1110e15e" />
- 
+
+![27](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/27.png)
+
 ---
- 
+
 #### Step 28 — Execute Network Reconnaissance (Nmap)
- 
+
 ```bash
 sudo nmap -sS -sV -sC -O -p- -T4 -Pn --reason 192.168.140.130
 ```
- 
-<img width="1274" height="792" alt="28" src="https://github.com/user-attachments/assets/d279e8d2-07dd-4c3f-a48e-e87eee97ffe0" />
- 
+
+![28](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/28.png)
+
 ---
- 
+
 ### Part G — Blue Team Telemetry Validation
- 
+
 #### Step 29 — Analyze Nmap Alerts
- 
+
 **Services → Suricata → Alerts** — multiple **Web Application Attack** alerts generated by the Nmap scan, identifying Kali Linux as the source.
- 
-<img width="1257" height="872" alt="29" src="https://github.com/user-attachments/assets/ae8651b5-3982-4aa2-982f-78a10e47266f" />
- 
+
+![29](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/29.png)
+
 ---
- 
+
 #### Step 30 — Analyze SQL Injection Alerts
- 
+
 Numerous **SQL ATTEMPTS** logs visible, including `ET SCAN Sqlmap SQL Injection Scan` rule triggers. The IDS is successfully detecting live hostile traffic crossing the firewall boundary.
- 
-<img width="1263" height="873" alt="30" src="https://github.com/user-attachments/assets/e2da3be8-f8a0-42ca-b8cc-552fae23c07f" />
- 
+
+![30](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/30.png)
+
 ---
- 
+
 ### VM Summary
- 
+
 | VM | Network Zone | IP Address | Role in Simulation |
 |:--:|:------------:|:----------:|-------------------|
 | pfSense | WAN / DMZ | `192.168.140.130` (WAN) | Inline Suricata IDS Engine |
 | DMZ-SRV-01 | DMZ | `192.168.50.10` | Vulnerable Web Server Target |
 | Kali Linux | WAN | DHCP | External Red Team Attacker |
- 
+
 ---
- 
+
 ### ✅ Phase Checklist
- 
+
 - [ ] Suricata package installed via pfSense Package Manager
 - [ ] ETOpen, Feodo Tracker, and ABUSE.ch rules enabled
 - [ ] Rule signatures successfully downloaded and updated
@@ -2604,15 +2586,15 @@ Numerous **SQL ATTEMPTS** logs visible, including `ET SCAN Sqlmap SQL Injection 
 - [ ] Network reconnaissance simulation executed via `nmap`
 - [ ] Web Application Attack alerts verified in Suricata logs
 - [ ] SQL Injection Attempt alerts verified in Suricata logs
- 
+
 <div align="center"><br>
- 
+
 **🟢 Phase 2 Complete**
- 
+
 `[07] DMZ Architecture Setup` ◄── **`[08] Suricata IDS/IPS Configuration`** ──► `[09] LAN/DMZ Traffic Isolation`
- 
+
 <br></div>
- 
+
 </details>
 
 ---
@@ -2633,10 +2615,10 @@ Numerous **SQL ATTEMPTS** logs visible, including `ET SCAN Sqlmap SQL Injection 
 pfSense WebConfigurator
 ├── Traffic Shaper
 │   └── Limiters: Rate Limiting & Anti-DDoS
-├── Firewall Rules: ITWORKSTATION
+├── Firewall Rules: IT
 │   └── Block Rule: IT ──✗──► DMZ subnets
 └── Firewall Rules: DMZ
-    └── Block Rule: DMZ ──✗──► Internal Subnets (HR, IT, OPs, SERVERS)
+    └── Block Rule: DMZ ──✗──► Internal Subnets (HR, SERVERS, IT, OPs)
 
 Local DNS Resolution
 └── Static Entry: alialaradi.bh ──► 192.168.140.130  (WAN VIP → DMZ)
@@ -2685,8 +2667,7 @@ Local logs are insufficient at scale. All perimeter telemetry must be shipped to
 
 To protect the DMZ web server from connection exhaustion and basic DDoS attempts, we utilize the **pfSense Traffic Shaper** to cap bandwidth and connection state rates per source IP.
 
-<img width="1301" height="271" alt="1" src="https://github.com/user-attachments/assets/8d71d2c1-7856-4115-b8c9-aeea28822367" />
-
+![1](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-traffic-isolation/1.png)
 
 Navigate to **Firewall → Traffic Shaper → Limiters** and define the rate-limit masks.
 
@@ -2702,8 +2683,7 @@ Before applying isolation rules, the current routing state must be verified to c
 
 Initiate a ping from `DMZ-SRV-01` to the IT Workstation subnet.
 
-<img width="1087" height="818" alt="2" src="https://github.com/user-attachments/assets/cec4a57d-fb82-4bfb-826d-8962153232c7" />
-
+![2](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-lan-dmz-isolation/2.png)
 
 ```powershell
 # Executed from DMZ-SRV-01
@@ -2718,8 +2698,7 @@ ping 10.22.1.2
 
 Perform the reverse test from the IT Workstation to the DMZ server.
 
-<img width="1305" height="817" alt="3" src="https://github.com/user-attachments/assets/a680d8fb-1f71-43ea-a952-2b470bce918e" />
-
+![3](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-lan-dmz-isolation/3.png)
 
 ```powershell
 # Executed from IT-Workstation
@@ -2732,28 +2711,27 @@ ping 192.168.50.10
 
 ### Part D — Traffic Isolation Implementation
 
-#### Step 4 — Navigate to ITWORKSTATION Firewall Rules
+#### Step 4 — Navigate to IT Firewall Rules
 
-Navigate to **Firewall → Rules → ITWORKSTATION** and click **Add ↑** to insert a new rule at the **top** of the list.
+Navigate to **Firewall → Rules → IT** and click **Add ↑** to insert a new rule at the **top** of the list.
 
 > ⚠️ **Rule order is critical.** pfSense evaluates rules top-to-bottom — the block rule must appear above any existing pass rules to take effect.
 
-<img width="1328" height="542" alt="4" src="https://github.com/user-attachments/assets/bb5d4fde-a028-421a-9ebb-99e3c6aa59a2" />
+![4](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-lan-dmz-isolation/4.png)
 
 ---
 
 #### Step 5 — Configure IT → DMZ Block Rule
 
-<img width="1301" height="730" alt="5" src="https://github.com/user-attachments/assets/6a267a10-e075-4dab-b945-d13b88ddf00c" />
-
+![5](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-lan-dmz-isolation/5.png)
 
 | Field | Value |
 |-------|-------|
 | Action | **Block** *(drops packets silently — no RST sent)* |
-| Interface | `ITWORKSTATION` |
+| Interface | `IT` |
 | Address Family | IPv4 |
 | Protocol | Any |
-| Source | `ITWORKSTATION` subnets |
+| Source | `IT` subnets |
 | Destination | `DMZ` subnets |
 | Description | `Block IT → DMZ — Enforce Zone Isolation` |
 
@@ -2763,7 +2741,7 @@ Click **Save** → **Apply Changes**.
 
 #### Step 6 — Validate IT Isolation
 
-<img width="1305" height="817" alt="6" src="https://github.com/user-attachments/assets/2cce4c28-4bdd-4297-badb-9709d6d1eba9" />
+![6](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-lan-dmz-isolation/6.png)
 
 ```powershell
 # Executed from IT-Workstation
@@ -2778,7 +2756,7 @@ ping 192.168.50.10
 
 The most critical step in DMZ architecture is preventing a **compromised DMZ asset from pivoting into the internal network**. A breached web server must never be able to reach domain controllers, workstations, or the SIEM.
 
-<img width="1291" height="565" alt="7" src="https://github.com/user-attachments/assets/93a39bfa-5e78-4dee-b172-5c9a8e3edbef" />
+![7](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-lan-dmz-isolation/7.png)
 
 Navigate to **Firewall → Rules → DMZ** and click **Add ↑** to create a block rule at the top:
 
@@ -2789,7 +2767,7 @@ Navigate to **Firewall → Rules → DMZ** and click **Add ↑** to create a blo
 | Address Family | IPv4 |
 | Protocol | Any |
 | Source | `DMZ` subnets |
-| Destination | Internal subnets *(HR · IT · OPs · SERVERS)* |
+| Destination | Internal subnets *(HR · SERVERS · IT · OPs)* |
 | Description | `Block DMZ → Internal — Prevent Lateral Movement` |
 
 Click **Save** → **Apply Changes**.
@@ -2804,7 +2782,7 @@ Click **Save** → **Apply Changes**.
 
 To provide a professional, enterprise-grade access point — and to make Red Team targeting more realistic — we map a custom domain to the WAN IP that forwards to the DMZ web server.
 
-<img width="738" height="269" alt="8" src="https://github.com/user-attachments/assets/5b9643d9-6564-4fac-96a1-965b5ec9f289" />
+![8](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-lan-dmz-isolation/8.png)
 
 On the local router (or pfSense **Services → DNS Resolver → Host Overrides**), add a static DNS entry:
 
@@ -2821,7 +2799,7 @@ Click **Save** → **Apply Changes**.
 
 #### Step 9 — Final Web Validation
 
-<img width="1329" height="761" alt="9" src="https://github.com/user-attachments/assets/19ac7596-ed40-4bf0-8cf6-b043a6d9cef1" />
+![9](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-lan-dmz-isolation/9.png)
 
 Open a browser and navigate to the custom domain:
 
@@ -2837,13 +2815,13 @@ http://alialaradi.bh
 
 ```
 Before Lockdown:
-  IT Workstation  ◄──────────►  DMZ-SRV-01   ✅ (open)
-  DMZ-SRV-01      ◄──────────►  IT / HR / OPs  ✅ (open)
+  IT Workstation  ◄──────────►  DMZ-SRV-01       ✅ (open)
+  DMZ-SRV-01      ◄──────────►  IT / HR / SERVERS  ✅ (open)
 
 After Lockdown:
-  IT Workstation  ─────✗──────►  DMZ-SRV-01   🔴 (blocked)
-  DMZ-SRV-01      ─────✗──────►  IT / HR / OPs  🔴 (blocked)
-  Internet        ────────────►  DMZ-SRV-01   ✅ (port 80/443 only)
+  IT Workstation  ─────✗──────►  DMZ-SRV-01       🔴 (blocked)
+  DMZ-SRV-01      ─────✗──────►  IT / HR / SERVERS  🔴 (blocked)
+  Internet        ────────────►  DMZ-SRV-01       ✅ (port 80/443 only)
 ```
 
 ---
@@ -2853,7 +2831,7 @@ After Lockdown:
 - [ ] DMZ architectural hardening principles reviewed and documented
 - [ ] Traffic Limiters configured in pfSense — **Firewall → Traffic Shaper → Limiters**
 - [ ] Baseline bidirectional connectivity verified: IT ↔ DMZ both responding
-- [ ] Block rule created on `ITWORKSTATION` — source: IT subnets · destination: DMZ subnets
+- [ ] Block rule created on `IT` — source: IT subnets · destination: DMZ subnets
 - [ ] `ping 192.168.50.10` from IT Workstation returns **Request timed out** ✅
 - [ ] Block rule created on `DMZ` — source: DMZ subnets · destination: all internal subnets
 - [ ] Rules applied in correct top-down order on both interfaces
@@ -2887,12 +2865,12 @@ After Lockdown:
 ```text
 Proxmox Node: mursad
 └── VM 104  —  Wazuh  (Ubuntu Server 22.04 LTS)
-        ├── Network:  vmbr5 (SERVERS) · vmbr0 (WAN — temp, install only)
+        ├── Network:  vmbr2 (SERVERS) · vmbr0 (WAN — temp, install only)
         ├── IP:       10.22.7.67  (Static — post-install)
         └── Role:     Wazuh Manager · Indexer · Dashboard
 
 Telemetry Sources
-├── pfSense Firewall  ──►  Syslog UDP/514   ──►  Wazuh Manager
+├── pfSense Firewall  ──►  Syslog UDP/514      ──►  Wazuh Manager
 └── Domain Controller ──►  Wazuh Agent TCP/1514 ──►  Wazuh Manager
 ```
 
@@ -2910,7 +2888,7 @@ Telemetry Sources
 
 #### Step 1 — Create the Wazuh Virtual Machine
 
-<img width="1108" height="487" alt="1" src="https://github.com/user-attachments/assets/cb4351c7-1d59-44f9-b1c3-915cdfe4030e" />
+![1](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/10-wazuh-siem/1.png)
 
 Create **VM 104** in Proxmox. Wazuh requires substantial resources to run the Manager, Indexer, and Dashboard concurrently:
 
@@ -2921,7 +2899,7 @@ Create **VM 104** in Proxmox. Wazuh requires substantial resources to run the Ma
 | Memory | `8192 MiB (8 GB)` |
 | CPU Cores | `2` (Type: `host`) |
 | Hard Disk | `100 GB` (VirtIO SCSI) |
-| Network 1 | `vmbr5` — SERVERS zone |
+| Network 1 | `vmbr2` — SERVERS zone |
 | Network 2 | `vmbr0` — WAN *(temporary, install only)* |
 
 > ℹ️ The WAN interface (`vmbr0`) is attached temporarily to allow the install script to download packages from the internet. It can be removed after installation is complete.
@@ -2930,7 +2908,7 @@ Create **VM 104** in Proxmox. Wazuh requires substantial resources to run the Ma
 
 #### Step 2 — Ubuntu Network Configuration
 
-<img width="1313" height="810" alt="2" src="https://github.com/user-attachments/assets/2ea256f9-3966-4b53-b6d6-b11afd82754c" />
+![2](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/10-wazuh-siem/2.png)
 
 Boot the Ubuntu Server ISO. On the **Network Configuration** screen, verify both interfaces have acquired a lease:
 
@@ -2945,8 +2923,7 @@ Click **Done**.
 
 #### Step 3 — Profile Configuration
 
-<img width="1291" height="804" alt="3" src="https://github.com/user-attachments/assets/6ece4b02-6fad-4deb-ba35-a1df0e47821e" />
-
+![3](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/10-wazuh-siem/3.png)
 
 | Field | Value |
 |-------|-------|
@@ -2961,7 +2938,7 @@ Click **Done**.
 
 #### Step 4 — SSH Configuration
 
-<img width="1304" height="806" alt="4" src="https://github.com/user-attachments/assets/267323e8-76ab-461b-977f-9cc87b8f825d" />
+![4](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/10-wazuh-siem/4.png)
 
 Check **Install OpenSSH server** — this is required for remote management and running the installation scripts headless.
 
@@ -2973,7 +2950,7 @@ Leave all remaining options at defaults → click **Done** → allow installatio
 
 #### Step 5 — SSH Connection & System Verification
 
-<img width="974" height="519" alt="5" src="https://github.com/user-attachments/assets/94a417c1-113f-44e2-9b73-6d08bad8d330" />
+![5](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/10-wazuh-siem/5.png)
 
 From your host machine, SSH into the Wazuh server using its temporary WAN IP:
 
@@ -2987,7 +2964,7 @@ Verify successful login and confirm the system is ready to proceed.
 
 #### Step 6 — Execute the Unattended Installation
 
-<img width="973" height="513" alt="6" src="https://github.com/user-attachments/assets/9315c475-4cf2-4af6-8266-41dadf9ec122" />
+![6](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/10-wazuh-siem/6.png)
 
 Elevate to root and download the official Wazuh installation script. Execute it with the `-a` flag for a full All-in-One deployment:
 
@@ -3003,7 +2980,7 @@ bash ./wazuh-install.sh -a
 
 #### Step 7 — Access the Wazuh Dashboard
 
-<img width="1906" height="1023" alt="7" src="https://github.com/user-attachments/assets/1f9db4e9-6bc9-4e4f-9d66-c6ab0e63e6c4" />
+![7](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/10-wazuh-siem/7.png)
 
 Open a browser and navigate to the Wazuh Web UI:
 
@@ -3019,9 +2996,9 @@ Bypass the self-signed certificate warning and log in with the `admin` credentia
 
 #### Step 8 — Create Agent Management Groups
 
-<img width="1898" height="471" alt="8" src="https://github.com/user-attachments/assets/7ec6719f-38b6-4e8d-8e05-e733b59c19d6" />
+![8](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/10-wazuh-siem/8.png)
 
-Navigate to **Management → Groups → Add new group** and create two logical containers to organize future endpoints:
+Navigate to **Management → Groups → Add new group** and create two logical containers:
 
 | Group Name | Purpose |
 |------------|---------|
@@ -3032,7 +3009,7 @@ Navigate to **Management → Groups → Add new group** and create two logical c
 
 #### Step 9 — Configure Wazuh to Accept Syslog
 
-<img width="1122" height="605" alt="9" src="https://github.com/user-attachments/assets/9b17eaaa-b982-4acb-a028-59f3f926c3c3" />
+![9](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/10-wazuh-siem/9.png)
 
 SSH back into the Wazuh server and open the main configuration file:
 
@@ -3058,9 +3035,7 @@ Save and exit: `Ctrl+O` → `Enter` → `Ctrl+X`
 
 #### Step 10 — Assign Static IP via pfSense
 
-<img width="1462" height="734" alt="10" src="https://github.com/user-attachments/assets/be91fdc8-109b-4279-a5be-bba762a1b793" />
-
-The Wazuh server must be anchored to a predictable static IP so all endpoints and firewalls can reliably deliver telemetry.
+![10](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/10-wazuh-siem/10.png)
 
 Navigate to **Services → DHCP Server → SERVERS → Static MAC Mappings → Add**:
 
@@ -3082,9 +3057,9 @@ ip a
 
 #### Step 11 — Configure pfSense Remote Logging
 
-<img width="1265" height="793" alt="11" src="https://github.com/user-attachments/assets/0a2c2ca7-685b-461d-b740-5703e74c3185" />
+![11](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/10-wazuh-siem/11.png)
 
-Navigate to **Status → System Logs → Settings** in the pfSense WebConfigurator. Scroll to the **Remote Logging** section:
+Navigate to **Status → System Logs → Settings → Remote Logging**:
 
 | Setting | Value |
 |---------|-------|
@@ -3093,13 +3068,13 @@ Navigate to **Status → System Logs → Settings** in the pfSense WebConfigurat
 | Remote log servers | `10.22.7.67:514` |
 | Remote Syslog Contents | ✅ Everything |
 
-Click **Save** — pfSense will immediately begin forwarding perimeter telemetry to the SIEM.
+Click **Save**.
 
 ---
 
 #### Step 12 — Verify pfSense Logs in Wazuh
 
-<img width="1835" height="938" alt="12" src="https://github.com/user-attachments/assets/98cd6856-a2c1-46f9-8ca1-4d53991ccb43" />
+![12](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/10-wazuh-siem/12.png)
 
 Navigate to **Wazuh Dashboard → Modules → Security Events**. Verify that syslog messages are actively arriving from pfSense. An event such as `Syslogd restarted` associated with source `10.22.7.1` confirms the UDP/514 pipeline is fully operational.
 
@@ -3107,12 +3082,12 @@ Navigate to **Wazuh Dashboard → Modules → Security Events**. Verify that sys
 
 #### Step 13 — Simulate & Detect SSH Brute Force
 
-<img width="1894" height="644" alt="13" src="https://github.com/user-attachments/assets/5ab99726-4dac-4bb5-81b8-d3f39001248a" />
+![13](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/10-wazuh-siem/13.png)
 
 To validate the SIEM's detection logic, simulate an SSH brute-force attack by attempting multiple failed logins to a monitored host. Wazuh immediately correlates the activity, triggering **Level 5** alerts (`sshd: authentication failed`) mapped to **MITRE ATT&CK** tactics:
 
 ```
-Tactic:   Credential Access
+Tactic:    Credential Access
 Technique: T1110 — Brute Force
 ```
 
@@ -3120,7 +3095,7 @@ Technique: T1110 — Brute Force
 
 #### Step 14 — Review Security Events Stream
 
-<img width="1906" height="893" alt="14" src="https://github.com/user-attachments/assets/d88fba99-e421-4d33-9bed-fa8f79b73df0" />
+![14](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/10-wazuh-siem/14.png)
 
 Switch to the **Events** tab within Security Events. This interface provides granular, filterable logs of all triggered rules across the environment, giving the Blue Team full real-time visibility into the telemetry stream.
 
@@ -3130,7 +3105,7 @@ Switch to the **Events** tab within Security Events. This interface provides gra
 
 #### Step 15 — Generate Agent Deployment Command
 
-<img width="1894" height="893" alt="15" src="https://github.com/user-attachments/assets/b93cd204-ca11-4872-9468-8377c4705b58" />
+![15](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/10-wazuh-siem/15.png)
 
 Navigate to **Wazuh → Agents → Deploy new agent** and configure:
 
@@ -3147,7 +3122,7 @@ Copy the generated PowerShell deployment block.
 
 #### Step 16 — Configure Wazuh Agent Listener (TCP 1514)
 
-<img width="1065" height="787" alt="16" src="https://github.com/user-attachments/assets/b6c4878a-3b7b-403a-a5d0-6f5334c9d2c4" />
+![16](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/10-wazuh-siem/16.png)
 
 Before deploying the Windows agent, ensure the Wazuh manager is listening for encrypted agent connections. SSH into the Wazuh server and append a second `<remote>` block to `/var/ossec/etc/ossec.conf`, directly below the syslog block:
 
@@ -3170,7 +3145,7 @@ sudo systemctl restart wazuh-manager
 
 #### Step 17 — Execute Agent Deployment on DC
 
-<img width="1082" height="814" alt="17" src="https://github.com/user-attachments/assets/cc18f929-4ba9-4c65-b353-b83d0e0d5d22" />
+![17](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/10-wazuh-siem/17.png)
 
 Log into the **Domain Controller** (VM 101). Open an **elevated Administrator PowerShell** session and paste the `Invoke-WebRequest` deployment command from Step 15 to silently download and install the MSI package.
 
@@ -3178,7 +3153,7 @@ Log into the **Domain Controller** (VM 101). Open an **elevated Administrator Po
 
 #### Step 18 — Authenticate and Start the Agent
 
-<img width="1079" height="818" alt="18" src="https://github.com/user-attachments/assets/41a133d6-4722-4fcf-b579-041cf710a2af" />
+![18](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/10-wazuh-siem/18.png)
 
 Navigate to the agent installation directory, authenticate the endpoint against the SIEM manager to obtain a valid registration key, then start the Wazuh service:
 
@@ -3192,7 +3167,7 @@ net start wazuh
 
 #### Step 19 — Verify Agent Registration
 
-<img width="1905" height="541" alt="19" src="https://github.com/user-attachments/assets/8ad42d61-abbe-4242-8362-a39ec0766c8b" />
+![19](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/10-wazuh-siem/19.png)
 
 Return to the Wazuh Dashboard and navigate to **Agents**. The DC endpoint should appear with status **Active** — confirming successful registration and full SIEM integration.
 
@@ -3204,15 +3179,15 @@ The SOC now has centralized visibility into the Active Directory environment.
 
 | VM | OS | Bridge | IP | Role |
 |:--:|:--:|:------:|:--:|------|
-| VM 104 — Wazuh | Ubuntu Server 22.04 | vmbr5 | `10.22.7.67` | Centralized SIEM · Manager · Indexer · Dashboard |
-| VM 101 — DC | Windows Server 2019 | vmbr5 | `10.22.7.3` | Monitored Endpoint — Wazuh Agent |
+| VM 104 — Wazuh | Ubuntu Server 22.04 | vmbr2 | `10.22.7.67` | Centralized SIEM · Manager · Indexer · Dashboard |
+| VM 101 — DC | Windows Server 2019 | vmbr2 | `10.22.7.3` | Monitored Endpoint — Wazuh Agent |
 
 ---
 
 ### ✅ Phase Checklist
 
 - [ ] Ubuntu Server VM provisioned — `2 cores · 8 GB RAM · 100 GB disk`
-- [ ] Both NICs attached — `vmbr5` (SERVERS) + `vmbr0` (WAN temp)
+- [ ] Both NICs attached — `vmbr2` (SERVERS) + `vmbr0` (WAN temp)
 - [ ] OpenSSH server installed during Ubuntu setup
 - [ ] SSH login confirmed from host machine
 - [ ] Wazuh All-in-One script executed successfully — `bash ./wazuh-install.sh -a`
@@ -3235,43 +3210,43 @@ The SOC now has centralized visibility into the Active Directory environment.
 
 <div align="center"><br>
 
-**🟢 Phase 3 · [10] Complete**
+**🟢 Phase 3 Complete**
 
 `[09] LAN/DMZ Traffic Isolation` ◄── **`[10] Wazuh SIEM Installation`** ──► `[11] Antivirus Integration`
 
 <br></div>
 
 </details>
- 
+
 ---
- 
+
 ## 📁 Repository Structure
- 
+
 ```
 Project-Mursad/
 │
-├── 📂 assets/                        # Screenshots, diagrams, topology SVG
-│   ├── diagrams/
-│   │   └── mursad-topology.svg
+├── 📂 assets/
 │   ├── phase-1/
-│   │   ├── 02-proxmox-deployment/
-│   │   ├── 03-pfsense-installation/
-│   │   └── 04-firewall-routing/
+│   │   ├── 02-proxmox-deployment/     # 24 screenshots
+│   │   ├── 03-pfsense-installation/   # 38 screenshots
+│   │   └── 04-firewall-routing/       # 21 screenshots
 │   ├── phase-2/
-│   │   ├── 05-dc-provisioning/
-│   │   ├── 06/
-│   │   ├── 07/
-│   │   └── 08-suricata-ids-ips/
-│   └── phase-3/  phase-4/  ...
+│   │   ├── 05-dc-provisioning/        # 30 screenshots
+│   │   ├── 06-active-directory/       # 33 screenshots
+│   │   ├── 07-dmz-architecture/       # 15 screenshots
+│   │   └── 08-suricata/               # 30 screenshots
+│   └── phase-3/
+│       ├── 09-lan-dmz-isolation/      # 9 screenshots
+│       └── 10-wazuh-siem/             # 19 screenshots
 │
-├── 📂 configs/                       # Exported configs and rule sets
+├── 📂 configs/
 │   ├── pfsense/
 │   ├── suricata/
 │   ├── wazuh/
 │   ├── active-directory/
 │   └── windows/
 │
-├── 📂 docs/                          # Phase-by-phase deployment guides
+├── 📂 docs/
 │   ├── phase-1/
 │   │   ├── 02-proxmox-deployment.md
 │   │   ├── 03-pfsense-installation.md
@@ -3282,10 +3257,11 @@ Project-Mursad/
 │   │   ├── 07-dmz-architecture.md
 │   │   └── 08-suricata-ids-ips.md
 │   ├── phase-3/
-│   │   └── 09-lan-dmz-isolation.md
-│   └── phase-4/  ...
+│   │   ├── 09-lan-dmz-isolation.md
+│   │   └── 10-wazuh-siem.md
+│   └── phase-4/
 │
-├── 📂 scripts/                       # Automation scripts
+├── 📂 scripts/
 │   ├── ad-provisioning.ps1
 │   ├── wazuh-agent-deploy.sh
 │   └── cis-audit.sh
@@ -3293,17 +3269,17 @@ Project-Mursad/
 ├── README.md
 └── LICENSE
 ```
- 
+
 ---
- 
+
 ## ⚠️ Disclaimer
- 
+
 This project is built strictly for **educational purposes** and authorized security research in a fully isolated, privately-owned virtual environment. All attack simulations, penetration tests, and adversary emulations are conducted exclusively within this lab. Do not reproduce any offensive techniques outside of your own authorized and controlled environment. The author assumes no liability for misuse.
- 
+
 ---
- 
+
 <div align="center">
- 
+
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0d1117,50:e94560,100:0d1117&height=120&section=footer&text=Built+to+understand+the+attack.+Designed+to+defend+against+it.&fontSize=13&fontColor=ffffff&fontAlignY=65&animation=fadeIn" width="100%"/>
- 
+
 </div>
