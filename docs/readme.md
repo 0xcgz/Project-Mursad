@@ -23,20 +23,20 @@
 ```
 docs/
 │
-├── phase-1/                          ✅ Complete
+├── phase-1/                          
 │   ├── 01-project-architecture.md
 │   ├── 02-proxmox-deployment.md
 │   ├── 03-pfsense-installation.md
 │   └── 04-firewall-routing.md
 │
-├── phase-2/                          🔄 In Progress
+├── phase-2/                          
 │   ├── 05-domain-controller.md
 │   ├── 06-active-directory.md
 │   ├── 07-dmz-architecture.md
-│   └── 08-traffic-isolation.md
+│   └── 08-suricata-ids-ips.md
 │
-├── phase-3/                          ⬜ Pending
-│   ├── 09-suricata-ids-ips.md
+├── phase-3/                          
+│   ├── 09-traffic-isolation.md
 │   └── 10-wazuh-siem.md
 │
 └── phase-4/                          ⬜ Pending
@@ -67,10 +67,10 @@ docs/
 
 | # | Document | Description | Status |
 |:---:|----------|-------------|:------:|
-| `[05]` | [05-domain-controller.md](./phase-2/05-domain-controller.md) | Windows Server 2022 VM deployment + network integration | `🔄` |
-| `[06]` | [06-active-directory.md](./phase-2/06-active-directory.md) | AD DS install, `mursad.local` domain, users, OUs, GPOs | `⬜` |
-| `[07]` | [07-dmz-architecture.md](./phase-2/07-dmz-architecture.md) | DMZ server provisioning + service isolation | `⬜` |
-| `[08]` | [08-traffic-isolation.md](./phase-2/08-traffic-isolation.md) | Inter-zone firewall rules + local DNS mapping | `⬜` |
+| `[05]` | [05-domain-controller.md](./phase-2/05-domain-controller.md) | Windows Server 2022 VM deployment + network integration | `✅` |
+| `[06]` | [06-active-directory.md](./phase-2/06-active-directory.md) | AD DS install, `mursad.local` domain, users, OUs, GPOs | `✅` |
+| `[07]` | [07-dmz-architecture.md](./phase-2/07-dmz-architecture.md) | DMZ server provisioning + service isolation | `✅` |
+| `[08]` | [08-suricata-ids-ips.md](./phase-2/08-suricata-ids-ips.md) | Suricata install on pfSense + rule sets + inline IPS mode | `✅` |
 
 ---
 
@@ -79,8 +79,8 @@ docs/
 
 | # | Document | Description | Status |
 |:---:|----------|-------------|:------:|
-| `[09]` | [09-suricata-ids-ips.md](./phase-3/09-suricata-ids-ips.md) | Suricata install on pfSense + rule sets + inline IPS mode | `⬜` |
-| `[10]` | [10-wazuh-siem.md](./phase-3/10-wazuh-siem.md) | Wazuh server install, syslog ingestion, agent rollout to all endpoints | `⬜` |
+| `[09]` | [08-traffic-isolation.md](./phase-3/08-traffic-isolation.md) | Inter-zone firewall rules + local DNS mapping | `✅` |
+| `[10]` | [10-wazuh-siem.md](./phase-3/10-wazuh-siem.md) | Wazuh server install, syslog ingestion, agent rollout to all endpoints | `✅` |
 
 ---
 
@@ -93,31 +93,6 @@ docs/
 | `[12]` | [12-cis-benchmarks.md](./phase-4/12-cis-benchmarks.md) | CIS Level 1/2 benchmark auditing on all hosts | `⬜` |
 | `[13]` | [13-kaspersky-edr.md](./phase-4/13-kaspersky-edr.md) | Kaspersky Security Center enterprise EDR deployment | `⬜` |
 | `[14]` | [14-final-review.md](./phase-4/14-final-review.md) | Full security review, attack simulations, detection validation | `⬜` |
-
----
-
-## 📝 Document Template
-
-Every guide in this folder follows the same structure:
-
-```markdown
-# Phase X · [XX] — Title
-
-> **Scope:** What this step covers.
-
-## Overview
-[ ASCII diagram or summary table ]
-
-## Part A — ...
-### Step 1 — ...
-### Step 2 — ...
-
-## Part B — ...
-## Part C — ...
-
-## ✅ Checklist
-- [ ] Item
-```
 
 ---
 
