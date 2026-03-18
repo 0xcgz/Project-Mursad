@@ -1311,7 +1311,7 @@ Navigate to **Services → DHCP Server → SERVERS** tab.
 
 > **Note:** The range starts at `.3` to reserve `.1` for the gateway and `.2` for future use.
 
-![1](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/1.png)
+![1](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/1.png)
 
 ---
 
@@ -1319,7 +1319,7 @@ Navigate to **Services → DHCP Server → SERVERS** tab.
 
 Navigate to **System → Advanced → Networking → DHCP Backend**, select **Kea DHCP**, and click **Save**.
 
-![2](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/2.png)
+![2](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/2.png)
 
 ---
 
@@ -1327,7 +1327,7 @@ Navigate to **System → Advanced → Networking → DHCP Backend**, select **Ke
 
 Navigate back to **Services → DHCP Server → SERVERS → Servers** section. Add `10.22.7.1` as the primary DNS server.
 
-![3](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/3.png)
+![3](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/3.png)
 
 ---
 
@@ -1339,7 +1339,7 @@ Navigate back to **Services → DHCP Server → SERVERS → Servers** section. A
 
 VM ID: `101` · Name: `DC`
 
-![4](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/4.png)
+![4](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/4.png)
 
 ---
 
@@ -1347,7 +1347,7 @@ VM ID: `101` · Name: `DC`
 
 Guest OS Type: `Microsoft Windows` · ISO: Windows Server
 
-![5](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/5.png)
+![5](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/5.png)
 
 ---
 
@@ -1355,7 +1355,7 @@ Guest OS Type: `Microsoft Windows` · ISO: Windows Server
 
 Bus/Device: **VirtIO Block** · Disk Size: **60 GB**
 
-![6](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/6.png)
+![6](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/6.png)
 
 ---
 
@@ -1365,7 +1365,7 @@ Cores: `2` · Type: `host`
 
 > ⚠️ **Critical:** CPU type `host` is required for nested virtualization stability.
 
-![7](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/7.png)
+![7](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/7.png)
 
 ---
 
@@ -1381,7 +1381,7 @@ Memory: **8192 MiB (8 GB)**
 
 Bridge: `vmbr2` (SERVERS) · Model: `VirtIO` · Firewall: Unchecked
 
-![9](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/9.png)
+![9](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/9.png)
 
 ---
 
@@ -1389,7 +1389,7 @@ Bridge: `vmbr2` (SERVERS) · Model: `VirtIO` · Firewall: Unchecked
 
 Navigate to **VM 101 → Hardware → Add → CD/DVD Drive** and select the `virtio-win` ISO.
 
-![10](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/10.png)
+![10](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/10.png)
 
 ---
 
@@ -1397,13 +1397,13 @@ Navigate to **VM 101 → Hardware → Add → CD/DVD Drive** and select the `vir
 
 #### Step 11 — Power On and Start Setup
 
-![11](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/11.png)
+![11](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/11.png)
 
 ---
 
 #### Step 12 — Install Now
 
-![12](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/12.png)
+![12](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/12.png)
 
 ---
 
@@ -1411,7 +1411,7 @@ Navigate to **VM 101 → Hardware → Add → CD/DVD Drive** and select the `vir
 
 Choose **Windows Server (Desktop Experience)** — Server Core has no GUI.
 
-![13](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/13.png)
+![13](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/13.png)
 
 ---
 
@@ -1419,7 +1419,7 @@ Choose **Windows Server (Desktop Experience)** — Server Core has no GUI.
 
 Select **Custom: Install Windows only (advanced)**.
 
-![14](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/14.png)
+![14](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/14.png)
 
 ---
 
@@ -1427,19 +1427,19 @@ Select **Custom: Install Windows only (advanced)**.
 
 Select **Drive 0** (60 GB). If it doesn't appear, load the `viostor` driver from the VirtIO CD.
 
-![15](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/15.png)
+![15](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/15.png)
 
 ---
 
 #### Step 16 — Set Local Administrator Password
 
-![16](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/16.png)
+![16](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/16.png)
 
 ---
 
 #### Step 17 — Welcome to Windows Server
 
-![17](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/17.png)
+![17](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/17.png)
 
 ---
 
@@ -1449,13 +1449,13 @@ Select **Drive 0** (60 GB). If it doesn't appear, load the `viostor` driver from
 
 Navigate to the `virtio-win` CD Drive and run **`virtio-win-gt-x64`**.
 
-![18](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/18.png)
+![18](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/18.png)
 
 ---
 
 #### Step 19 — Complete VirtIO Setup
 
-![19](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/19.png)
+![19](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/19.png)
 
 ---
 
@@ -1467,7 +1467,7 @@ ipconfig
 
 Expected lease: `10.22.7.3`
 
-![20](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/20.png)
+![20](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/20.png)
 
 ---
 
@@ -1475,7 +1475,7 @@ Expected lease: `10.22.7.3`
 
 **Control Panel → System and Security → System → Change settings**
 
-![21](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/21.png)
+![21](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/21.png)
 
 ---
 
@@ -1483,13 +1483,13 @@ Expected lease: `10.22.7.3`
 
 Set description to `DC`, then click **Change...** to modify the hostname.
 
-![22](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/22.png)
+![22](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/22.png)
 
 ---
 
 #### Step 23 — Rename Computer to DC
 
-![23](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/23.png)
+![23](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/23.png)
 
 ---
 
@@ -1499,7 +1499,7 @@ Set description to `DC`, then click **Change...** to modify the hostname.
 
 Yellow warning triangle on the network icon — outbound route to WAN is not yet defined.
 
-![24](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/24.png)
+![24](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/24.png)
 
 ---
 
@@ -1507,13 +1507,13 @@ Yellow warning triangle on the network icon — outbound route to WAN is not yet
 
 **System → Routing → Gateways → Add**
 
-![25](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/25.png)
+![25](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/25.png)
 
 ---
 
 #### Step 26 — Configure External Gateway
 
-![26](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/26.png)
+![26](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/26.png)
 
 ---
 
@@ -1526,7 +1526,7 @@ Yellow warning triangle on the network icon — outbound route to WAN is not yet
 | DNS | IPv4 UDP | SERVERS net | This Firewall | `53` | DNS queries to pfSense |
 | Outbound | IPv4 Any | SERVERS net | Any | Any | Internet access |
 
-![27](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/27.png)
+![27](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/27.png)
 
 ---
 
@@ -1534,7 +1534,7 @@ Yellow warning triangle on the network icon — outbound route to WAN is not yet
 
 **Status → Services** — restart `dpinger` and `kea-dhcp4`.
 
-![28](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/28.png)
+![28](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/28.png)
 
 ---
 
@@ -1546,7 +1546,7 @@ ping 8.8.8.8
 
 `DC → SERVERS VLAN → pfSense → WAN → Internet` ✅
 
-![29](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/29.png)
+![29](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/29.png)
 
 ---
 
@@ -1554,7 +1554,7 @@ ping 8.8.8.8
 
 Navigate to `google.com` in Edge — full connectivity confirmed.
 
-![30](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/30.png)
+![30](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/30.png)
 
 ---
 
@@ -2683,7 +2683,7 @@ Before applying isolation rules, the current routing state must be verified to c
 
 Initiate a ping from `DMZ-SRV-01` to the IT Workstation subnet.
 
-![2](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-lan-dmz-isolation/2.png)
+![2](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-traffic-isolation/2.png)
 
 ```powershell
 # Executed from DMZ-SRV-01
@@ -2698,7 +2698,7 @@ ping 10.22.1.2
 
 Perform the reverse test from the IT Workstation to the DMZ server.
 
-![3](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-lan-dmz-isolation/3.png)
+![3](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-traffic-isolation/3.png)
 
 ```powershell
 # Executed from IT-Workstation
@@ -2717,13 +2717,13 @@ Navigate to **Firewall → Rules → IT** and click **Add ↑** to insert a new 
 
 > ⚠️ **Rule order is critical.** pfSense evaluates rules top-to-bottom — the block rule must appear above any existing pass rules to take effect.
 
-![4](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-lan-dmz-isolation/4.png)
+![4](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-traffic-isolation/4.png)
 
 ---
 
 #### Step 5 — Configure IT → DMZ Block Rule
 
-![5](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-lan-dmz-isolation/5.png)
+![5](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-traffic-isolation/5.png)
 
 | Field | Value |
 |-------|-------|
@@ -2741,7 +2741,7 @@ Click **Save** → **Apply Changes**.
 
 #### Step 6 — Validate IT Isolation
 
-![6](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-lan-dmz-isolation/6.png)
+![6](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-traffic-isolation/6.png)
 
 ```powershell
 # Executed from IT-Workstation
@@ -2756,7 +2756,7 @@ ping 192.168.50.10
 
 The most critical step in DMZ architecture is preventing a **compromised DMZ asset from pivoting into the internal network**. A breached web server must never be able to reach domain controllers, workstations, or the SIEM.
 
-![7](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-lan-dmz-isolation/7.png)
+![7](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-traffic-isolation/7.png)
 
 Navigate to **Firewall → Rules → DMZ** and click **Add ↑** to create a block rule at the top:
 
@@ -2782,7 +2782,7 @@ Click **Save** → **Apply Changes**.
 
 To provide a professional, enterprise-grade access point — and to make Red Team targeting more realistic — we map a custom domain to the WAN IP that forwards to the DMZ web server.
 
-![8](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-lan-dmz-isolation/8.png)
+![8](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-traffic-isolation/8.png)
 
 On the local router (or pfSense **Services → DNS Resolver → Host Overrides**), add a static DNS entry:
 
@@ -2799,7 +2799,7 @@ Click **Save** → **Apply Changes**.
 
 #### Step 9 — Final Web Validation
 
-![9](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-lan-dmz-isolation/9.png)
+![9](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-3/09-traffic-isolation/9.png)
 
 Open a browser and navigate to the custom domain:
 
