@@ -1655,7 +1655,7 @@ Proxmox Node: mursad
 
 #### Step 1 — Open Add Roles and Features
 
-![Image 1](../assets/phase-2/06/1.png)
+![Image 1](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/1.png)
 
 Open **Server Manager → Manage → Add Roles and Features**.
 
@@ -1663,7 +1663,7 @@ Open **Server Manager → Manage → Add Roles and Features**.
 
 #### Step 2 — Before You Begin
 
-![Image 2](../assets/phase-2/06/2.png)
+![Image 2](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/2.png)
 
 Click **Next**.
 
@@ -1671,7 +1671,7 @@ Click **Next**.
 
 #### Step 3 — Select Installation Type
 
-![Image 3](../assets/phase-2/06/3.png)
+![Image 3](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/3.png)
 
 Select **"Role-based or feature-based installation"** and click **Next**.
 
@@ -1679,7 +1679,7 @@ Select **"Role-based or feature-based installation"** and click **Next**.
 
 #### Step 4 — Select Destination Server
 
-![Image 4](../assets/phase-2/06/4.png)
+![Image 4](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/4.png)
 
 Verify the local server — hostname `DC`, IP `10.22.7.3`. Click **Next**.
 
@@ -1687,7 +1687,7 @@ Verify the local server — hostname `DC`, IP `10.22.7.3`. Click **Next**.
 
 #### Step 5 — Select Server Roles
 
-![Image 5](../assets/phase-2/06/5.png)
+![Image 5](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/5.png)
 
 Check both:
 - **Active Directory Domain Services**
@@ -1699,7 +1699,7 @@ Accept any prompts for required features. Click **Next**.
 
 #### Step 6 — Select Features
 
-![Image 6](../assets/phase-2/06/6.png)
+![Image 6](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/6.png)
 
 Optionally add **Telnet Client** for network troubleshooting. Click **Next**.
 
@@ -1707,7 +1707,7 @@ Optionally add **Telnet Client** for network troubleshooting. Click **Next**.
 
 #### Step 7 — Confirm Installation
 
-![Image 7](../assets/phase-2/06/7.png)
+![Image 7](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/7.png)
 
 Review selections and click **Install**.
 
@@ -1715,7 +1715,7 @@ Review selections and click **Install**.
 
 #### Step 8 — Installation Complete
 
-![Image 8](../assets/phase-2/06/8.png)
+![Image 8](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/8.png)
 
 Role binaries installed. The server must now be **promoted** to become an actual Domain Controller.
 
@@ -1725,7 +1725,7 @@ Role binaries installed. The server must now be **promoted** to become an actual
 
 #### Step 9 — Promote the Server
 
-![Image 9](../assets/phase-2/06/9.png)
+![Image 9](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/9.png)
 
 In **Server Manager**, click the **yellow warning triangle** → **"Promote this server to a domain controller"**.
 
@@ -1733,7 +1733,7 @@ In **Server Manager**, click the **yellow warning triangle** → **"Promote this
 
 #### Step 10 — Add a New Forest
 
-![Image 10](../assets/phase-2/06/10.png)
+![Image 10](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/10.png)
 
 Select **"Add a new forest"**. Set Root domain name:
 
@@ -1745,7 +1745,7 @@ mursad.local
 
 #### Step 11 — DSRM Password
 
-![Image 11](../assets/phase-2/06/11.png)
+![Image 11](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/11.png)
 
 Set a strong **Directory Services Restore Mode (DSRM)** password and store it securely. Click **Next**.
 
@@ -1753,7 +1753,7 @@ Set a strong **Directory Services Restore Mode (DSRM)** password and store it se
 
 #### Step 12 — Verify NetBIOS Name
 
-![Image 12](../assets/phase-2/06/12.png)
+![Image 12](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/12.png)
 
 Confirm NetBIOS name auto-populated as `MURSAD`. Click **Next**.
 
@@ -1761,7 +1761,7 @@ Confirm NetBIOS name auto-populated as `MURSAD`. Click **Next**.
 
 #### Step 13 — AD DS Database Paths
 
-![Image 13](../assets/phase-2/06/13.png)
+![Image 13](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/13.png)
 
 Leave default paths for the AD DS database, log files, and SYSVOL. Click **Next**.
 
@@ -1769,7 +1769,7 @@ Leave default paths for the AD DS database, log files, and SYSVOL. Click **Next*
 
 #### Step 14 — Prerequisites Check
 
-![Image 14](../assets/phase-2/06/14.png)
+![Image 14](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/14.png)
 
 Once the green checkmark appears, click **Install**.
 
@@ -1777,7 +1777,7 @@ Once the green checkmark appears, click **Install**.
 
 #### Step 15 — Reboot to Apply DC Configuration
 
-![Image 15](../assets/phase-2/06/15.png)
+![Image 15](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/15.png)
 
 The system will sign out and **automatically restart** to finalize the Domain Controller configuration.
 
@@ -1787,7 +1787,7 @@ The system will sign out and **automatically restart** to finalize the Domain Co
 
 #### Step 16 — Provision the IT Workstation VM
 
-![Image 16](../assets/phase-2/06/16.png)
+![Image 16](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/16.png)
 
 While the DC reboots, create a new Windows 10 VM in Proxmox for the IT department.
 
@@ -1795,7 +1795,7 @@ While the DC reboots, create a new Windows 10 VM in Proxmox for the IT departmen
 
 #### Step 17 — Install Windows 10 Pro
 
-![Image 17](../assets/phase-2/06/17.png)
+![Image 17](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/17.png)
 
 > ⚠️ Always select **Windows 10 Pro** — the Home edition cannot join a domain.
 
@@ -1803,7 +1803,7 @@ While the DC reboots, create a new Windows 10 VM in Proxmox for the IT departmen
 
 #### Step 18 — Open Active Directory Users and Computers
 
-![Image 18](../assets/phase-2/06/18.png)
+![Image 18](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/18.png)
 
 **Server Manager → Tools → Active Directory Users and Computers**
 
@@ -1811,7 +1811,7 @@ While the DC reboots, create a new Windows 10 VM in Proxmox for the IT departmen
 
 #### Step 19 — Create a New User
 
-![Image 19](../assets/phase-2/06/19.png)
+![Image 19](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/19.png)
 
 Right-click the **Users** container → **New → User**.
 
@@ -1819,7 +1819,7 @@ Right-click the **Users** container → **New → User**.
 
 #### Step 20 — Enter User Details
 
-![Image 20](../assets/phase-2/06/20.png)
+![Image 20](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/20.png)
 
 Set User logon name: `a.alaradi@mursad.local`. Click **Next**.
 
@@ -1827,7 +1827,7 @@ Set User logon name: `a.alaradi@mursad.local`. Click **Next**.
 
 #### Step 21 — Set User Password
 
-![Image 21](../assets/phase-2/06/21.png)
+![Image 21](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/21.png)
 
 Set a password. **"Password never expires"** selected for lab use.
 
@@ -1835,7 +1835,7 @@ Set a password. **"Password never expires"** selected for lab use.
 
 #### Step 22 — Confirm User Settings
 
-![Image 22](../assets/phase-2/06/22.png)
+![Image 22](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/22.png)
 
 Verify all details and click **Finish**.
 
@@ -1843,7 +1843,7 @@ Verify all details and click **Finish**.
 
 #### Step 23 — User Created Successfully
 
-![Image 23](../assets/phase-2/06/23.png)
+![Image 23](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/23.png)
 
 The user `a.alaradi` is now visible in the AD Users and Computers directory.
 
@@ -1853,7 +1853,7 @@ The user `a.alaradi` is now visible in the AD Users and Computers directory.
 
 #### Step 24 — Mount VirtIO Drivers on the Workstation
 
-![Image 24](../assets/phase-2/06/24.png)
+![Image 24](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/24.png)
 
 Shut down the Windows 10 VM. In Proxmox Hardware settings, add the `virtio-win` ISO to CD/DVD.
 
@@ -1861,7 +1861,7 @@ Shut down the Windows 10 VM. In Proxmox Hardware settings, add the `virtio-win` 
 
 #### Step 25 — Install VirtIO Drivers
 
-![Image 25](../assets/phase-2/06/25.png)
+![Image 25](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/25.png)
 
 Run the VirtIO installer and click **Finish**. Restart the VM.
 
@@ -1871,7 +1871,7 @@ Run the VirtIO installer and click **Finish**. Restart the VM.
 
 #### Step 26 — Enable DHCP for the IT Workstation Interface
 
-![Image 26](../assets/phase-2/06/26.png)
+![Image 26](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/26.png)
 
 **pfSense → Services → DHCP Server → ITWORKSTATION**
 
@@ -1885,7 +1885,7 @@ Run the VirtIO installer and click **Finish**. Restart the VM.
 
 #### Step 27 — Add NAT Mapping for IT Subnet
 
-![Image 27](../assets/phase-2/06/27.png)
+![Image 27](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/27.png)
 
 **Firewall → NAT → Outbound** — add manual mapping for `10.22.1.0/24`.
 
@@ -1893,7 +1893,7 @@ Run the VirtIO installer and click **Finish**. Restart the VM.
 
 #### Step 28 — Add Firewall Rules for IT Workstation
 
-![Image 28](../assets/phase-2/06/28.png)
+![Image 28](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/28.png)
 
 **Firewall → Rules → ITWORKSTATION** — add pass rules for outbound traffic.
 
@@ -1901,7 +1901,7 @@ Run the VirtIO installer and click **Finish**. Restart the VM.
 
 #### Step 29 — Verify Connectivity from Workstation
 
-![Image 29](../assets/phase-2/06/29.png)
+![Image 29](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/29.png)
 
 ```cmd
 ping 10.22.7.3
@@ -1912,7 +1912,7 @@ ping 10.22.1.1
 
 #### Step 30 — Configure DNS on the Workstation
 
-![Image 30](../assets/phase-2/06/30.png)
+![Image 30](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/30.png)
 
 **Network → Ethernet → IPv4 Properties**
 
@@ -1927,7 +1927,7 @@ ping 10.22.1.1
 
 #### Step 31 — Initiate Domain Join
 
-![Image 31](../assets/phase-2/06/31.png)
+![Image 31](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/31.png)
 
 **Settings → System → About → Advanced system settings → Computer Name → Change...**
 
@@ -1937,7 +1937,7 @@ Select **Domain** and enter `mursad.local`.
 
 #### Step 32 — Authenticate with Domain Admin Credentials
 
-![Image 32](../assets/phase-2/06/32.png)
+![Image 32](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/32.png)
 
 Enter Domain Admin credentials when prompted.
 
@@ -1945,7 +1945,7 @@ Enter Domain Admin credentials when prompted.
 
 #### Step 33 — Domain Join Successful
 
-![Image 33](../assets/phase-2/06/33.png)
+![Image 33](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/06-active-directory/33.png)
 
 
 ```
