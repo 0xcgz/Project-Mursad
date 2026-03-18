@@ -1947,6 +1947,7 @@ Enter Domain Admin credentials when prompted.
 
 ![Image 33](../assets/phase-2/06/33.png)
 
+
 ```
 Welcome to the mursad.local domain.
 ```
@@ -2864,6 +2865,379 @@ After Lockdown:
 **🟢 Phase 3 · [09] Complete**
 
 `[08] Suricata IDS/IPS Configuration` ◄── **`[09] LAN/DMZ Traffic Isolation`** ──► `[10] Wazuh SIEM Installation`
+
+<br></div>
+
+</details>
+
+---
+
+<details>
+<summary><b>📘 Phase 3 · [10] — Wazuh SIEM Installation · Syslog Ingestion · Agent Rollout</b></summary>
+<a name="phase-3--10"></a>
+
+<br>
+
+> **Scope:** Provisioning the Wazuh SIEM server within the SERVERS zone, executing the All-in-One installation script, establishing a syslog pipeline from the pfSense firewall, and deploying the Wazuh endpoint agent to establish centralized SOC telemetry.
+
+---
+
+### Overview
+
+```text
+Proxmox Node: mursad
+└── VM 104  —  Wazuh  (Ubuntu Server 22.04 LTS)
+        ├── Network:  vmbr5 (SERVERS) · vmbr0 (WAN — temp, install only)
+        ├── IP:       10.22.7.67  (Static — post-install)
+        └── Role:     Wazuh Manager · Indexer · Dashboard
+
+Telemetry Sources
+├── pfSense Firewall  ──►  Syslog UDP/514   ──►  Wazuh Manager
+└── Domain Controller ──►  Wazuh Agent TCP/1514 ──►  Wazuh Manager
+```
+
+| Part | Section | Description |
+|:----:|---------|-------------|
+| **A** | VM Provisioning & OS Setup | Deploy Ubuntu Server and configure network interfaces |
+| **B** | Wazuh Installation | Execute the unattended All-in-One installation script |
+| **C** | Initial Configuration | Set up groups, syslog listeners, and static IP assignment |
+| **D** | pfSense Syslog Integration | Configure remote logging and verify ingestion pipeline |
+| **E** | Endpoint Agent Rollout | Deploy and register the Wazuh agent on the Domain Controller |
+
+---
+
+### Part A — VM Provisioning & OS Setup
+
+#### Step 1 — Create the Wazuh Virtual Machine
+
+<img width="1108" height="487" alt="1" src="https://github.com/user-attachments/assets/cb4351c7-1d59-44f9-b1c3-915cdfe4030e" />
+
+Create **VM 104** in Proxmox. Wazuh requires substantial resources to run the Manager, Indexer, and Dashboard concurrently:
+
+| Component | Value |
+|-----------|-------|
+| VM ID | `104` |
+| Name | `WAZUH` |
+| Memory | `8192 MiB (8 GB)` |
+| CPU Cores | `2` (Type: `host`) |
+| Hard Disk | `100 GB` (VirtIO SCSI) |
+| Network 1 | `vmbr5` — SERVERS zone |
+| Network 2 | `vmbr0` — WAN *(temporary, install only)* |
+
+> ℹ️ The WAN interface (`vmbr0`) is attached temporarily to allow the install script to download packages from the internet. It can be removed after installation is complete.
+
+---
+
+#### Step 2 — Ubuntu Network Configuration
+
+<img width="1313" height="810" alt="2" src="https://github.com/user-attachments/assets/2ea256f9-3966-4b53-b6d6-b11afd82754c" />
+
+Boot the Ubuntu Server ISO. On the **Network Configuration** screen, verify both interfaces have acquired a lease:
+
+| Interface | Zone | Address |
+|-----------|------|---------|
+| `ens18` | SERVERS | `10.22.7.x` *(DHCP — temporary)* |
+| `ens19` | WAN | `192.168.140.x` *(DHCP — internet access for install)* |
+
+Click **Done**.
+
+---
+
+#### Step 3 — Profile Configuration
+
+<img width="1291" height="804" alt="3" src="https://github.com/user-attachments/assets/6ece4b02-6fad-4deb-ba35-a1df0e47821e" />
+
+
+| Field | Value |
+|-------|-------|
+| Your name | `wazuh` |
+| Server name | `wazuh` |
+| Username | `socadmin` |
+| Password | *(set a strong password)* |
+
+Click **Done**.
+
+---
+
+#### Step 4 — SSH Configuration
+
+<img width="1304" height="806" alt="4" src="https://github.com/user-attachments/assets/267323e8-76ab-461b-977f-9cc87b8f825d" />
+
+Check **Install OpenSSH server** — this is required for remote management and running the installation scripts headless.
+
+Leave all remaining options at defaults → click **Done** → allow installation to complete → **Reboot**.
+
+---
+
+### Part B — Wazuh All-in-One Installation
+
+#### Step 5 — SSH Connection & System Verification
+
+<img width="974" height="519" alt="5" src="https://github.com/user-attachments/assets/94a417c1-113f-44e2-9b73-6d08bad8d330" />
+
+From your host machine, SSH into the Wazuh server using its temporary WAN IP:
+
+```bash
+ssh socadmin@192.168.140.133
+```
+
+Verify successful login and confirm the system is ready to proceed.
+
+---
+
+#### Step 6 — Execute the Unattended Installation
+
+<img width="973" height="513" alt="6" src="https://github.com/user-attachments/assets/9315c475-4cf2-4af6-8266-41dadf9ec122" />
+
+Elevate to root and download the official Wazuh installation script. Execute it with the `-a` flag for a full All-in-One deployment:
+
+```bash
+sudo su
+curl -sO https://packages.wazuh.com/4.5/wazuh-install.sh
+bash ./wazuh-install.sh -a
+```
+
+> 🔐 **Critical:** When the script completes, the generated `admin` password is printed to the terminal. **Save this immediately** — it cannot be recovered without resetting it manually.
+
+---
+
+#### Step 7 — Access the Wazuh Dashboard
+
+<img width="1906" height="1023" alt="7" src="https://github.com/user-attachments/assets/1f9db4e9-6bc9-4e4f-9d66-c6ab0e63e6c4" />
+
+Open a browser and navigate to the Wazuh Web UI:
+
+```
+https://192.168.140.133/
+```
+
+Bypass the self-signed certificate warning and log in with the `admin` credentials generated in the previous step.
+
+---
+
+### Part C — Initial Configuration & Syslog Preparation
+
+#### Step 8 — Create Agent Management Groups
+
+<img width="1898" height="471" alt="8" src="https://github.com/user-attachments/assets/7ec6719f-38b6-4e8d-8e05-e733b59c19d6" />
+
+Navigate to **Management → Groups → Add new group** and create two logical containers to organize future endpoints:
+
+| Group Name | Purpose |
+|------------|---------|
+| `Servers` | Domain Controllers, SIEM, infrastructure hosts |
+| `Workstations` | IT, HR, and OPs domain-joined endpoints |
+
+---
+
+#### Step 9 — Configure Wazuh to Accept Syslog
+
+<img width="1122" height="605" alt="9" src="https://github.com/user-attachments/assets/9b17eaaa-b982-4acb-a028-59f3f926c3c3" />
+
+SSH back into the Wazuh server and open the main configuration file:
+
+```bash
+nano /var/ossec/etc/ossec.conf
+```
+
+Add the following `<remote>` block to instruct Wazuh to listen for incoming UDP syslog traffic from the pfSense firewall:
+
+```xml
+<remote>
+  <connection>syslog</connection>
+  <port>514</port>
+  <protocol>udp</protocol>
+  <allowed-ips>10.22.7.0/24</allowed-ips>
+  <local_ip>10.22.7.67</local_ip>
+</remote>
+```
+
+Save and exit: `Ctrl+O` → `Enter` → `Ctrl+X`
+
+---
+
+#### Step 10 — Assign Static IP via pfSense
+
+<img width="1462" height="734" alt="10" src="https://github.com/user-attachments/assets/be91fdc8-109b-4279-a5be-bba762a1b793" />
+
+The Wazuh server must be anchored to a predictable static IP so all endpoints and firewalls can reliably deliver telemetry.
+
+Navigate to **Services → DHCP Server → SERVERS → Static MAC Mappings → Add**:
+
+| Field | Value |
+|-------|-------|
+| MAC Address | *(Wazuh VM MAC from Proxmox hardware tab)* |
+| IP Address | `10.22.7.67` |
+| Description | `Wazuh SIEM — Static Lease` |
+
+Run `sudo reboot` on the Wazuh server to acquire the new static address. Validate with:
+
+```bash
+ip a
+```
+
+---
+
+### Part D — pfSense Syslog Integration
+
+#### Step 11 — Configure pfSense Remote Logging
+
+<img width="1265" height="793" alt="11" src="https://github.com/user-attachments/assets/0a2c2ca7-685b-461d-b740-5703e74c3185" />
+
+Navigate to **Status → System Logs → Settings** in the pfSense WebConfigurator. Scroll to the **Remote Logging** section:
+
+| Setting | Value |
+|---------|-------|
+| Enable Remote Logging | ✅ Checked |
+| Source Address | `SERVERS` |
+| Remote log servers | `10.22.7.67:514` |
+| Remote Syslog Contents | ✅ Everything |
+
+Click **Save** — pfSense will immediately begin forwarding perimeter telemetry to the SIEM.
+
+---
+
+#### Step 12 — Verify pfSense Logs in Wazuh
+
+<img width="1835" height="938" alt="12" src="https://github.com/user-attachments/assets/98cd6856-a2c1-46f9-8ca1-4d53991ccb43" />
+
+Navigate to **Wazuh Dashboard → Modules → Security Events**. Verify that syslog messages are actively arriving from pfSense. An event such as `Syslogd restarted` associated with source `10.22.7.1` confirms the UDP/514 pipeline is fully operational.
+
+---
+
+#### Step 13 — Simulate & Detect SSH Brute Force
+
+<img width="1894" height="644" alt="13" src="https://github.com/user-attachments/assets/5ab99726-4dac-4bb5-81b8-d3f39001248a" />
+
+To validate the SIEM's detection logic, simulate an SSH brute-force attack by attempting multiple failed logins to a monitored host. Wazuh immediately correlates the activity, triggering **Level 5** alerts (`sshd: authentication failed`) mapped to **MITRE ATT&CK** tactics:
+
+```
+Tactic:   Credential Access
+Technique: T1110 — Brute Force
+```
+
+---
+
+#### Step 14 — Review Security Events Stream
+
+<img width="1906" height="893" alt="14" src="https://github.com/user-attachments/assets/d88fba99-e421-4d33-9bed-fa8f79b73df0" />
+
+Switch to the **Events** tab within Security Events. This interface provides granular, filterable logs of all triggered rules across the environment, giving the Blue Team full real-time visibility into the telemetry stream.
+
+---
+
+### Part E — Endpoint Agent Rollout
+
+#### Step 15 — Generate Agent Deployment Command
+
+<img width="1894" height="893" alt="15" src="https://github.com/user-attachments/assets/b93cd204-ca11-4872-9468-8377c4705b58" />
+
+Navigate to **Wazuh → Agents → Deploy new agent** and configure:
+
+| Field | Value |
+|-------|-------|
+| Operating System | Windows |
+| Version | Windows 7+ |
+| Wazuh server address | `10.22.7.67` |
+| Group | `Servers` |
+
+Copy the generated PowerShell deployment block.
+
+---
+
+#### Step 16 — Configure Wazuh Agent Listener (TCP 1514)
+
+<img width="1065" height="787" alt="16" src="https://github.com/user-attachments/assets/b6c4878a-3b7b-403a-a5d0-6f5334c9d2c4" />
+
+Before deploying the Windows agent, ensure the Wazuh manager is listening for encrypted agent connections. SSH into the Wazuh server and append a second `<remote>` block to `/var/ossec/etc/ossec.conf`, directly below the syslog block:
+
+```xml
+<remote>
+  <connection>secure</connection>
+  <port>1514</port>
+  <protocol>tcp</protocol>
+  <queue_size>131072</queue_size>
+</remote>
+```
+
+Restart the manager to apply:
+
+```bash
+sudo systemctl restart wazuh-manager
+```
+
+---
+
+#### Step 17 — Execute Agent Deployment on DC
+
+<img width="1082" height="814" alt="17" src="https://github.com/user-attachments/assets/cc18f929-4ba9-4c65-b353-b83d0e0d5d22" />
+
+Log into the **Domain Controller** (VM 101). Open an **elevated Administrator PowerShell** session and paste the `Invoke-WebRequest` deployment command from Step 15 to silently download and install the MSI package.
+
+---
+
+#### Step 18 — Authenticate and Start the Agent
+
+<img width="1079" height="818" alt="18" src="https://github.com/user-attachments/assets/41a133d6-4722-4fcf-b579-041cf710a2af" />
+
+Navigate to the agent installation directory, authenticate the endpoint against the SIEM manager to obtain a valid registration key, then start the Wazuh service:
+
+```powershell
+cd "C:\Program Files (x86)\ossec-agent"
+.\agent-auth.exe -m 10.22.7.67
+net start wazuh
+```
+
+---
+
+#### Step 19 — Verify Agent Registration
+
+<img width="1905" height="541" alt="19" src="https://github.com/user-attachments/assets/8ad42d61-abbe-4242-8362-a39ec0766c8b" />
+
+Return to the Wazuh Dashboard and navigate to **Agents**. The DC endpoint should appear with status **Active** — confirming successful registration and full SIEM integration.
+
+The SOC now has centralized visibility into the Active Directory environment.
+
+---
+
+### VM Summary
+
+| VM | OS | Bridge | IP | Role |
+|:--:|:--:|:------:|:--:|------|
+| VM 104 — Wazuh | Ubuntu Server 22.04 | vmbr5 | `10.22.7.67` | Centralized SIEM · Manager · Indexer · Dashboard |
+| VM 101 — DC | Windows Server 2019 | vmbr5 | `10.22.7.3` | Monitored Endpoint — Wazuh Agent |
+
+---
+
+### ✅ Phase Checklist
+
+- [ ] Ubuntu Server VM provisioned — `2 cores · 8 GB RAM · 100 GB disk`
+- [ ] Both NICs attached — `vmbr5` (SERVERS) + `vmbr0` (WAN temp)
+- [ ] OpenSSH server installed during Ubuntu setup
+- [ ] SSH login confirmed from host machine
+- [ ] Wazuh All-in-One script executed successfully — `bash ./wazuh-install.sh -a`
+- [ ] Admin dashboard credentials securely saved
+- [ ] Wazuh Dashboard accessible at `https://192.168.140.133/`
+- [ ] Agent groups created — `Servers` and `Workstations`
+- [ ] `ossec.conf` updated with UDP syslog `<remote>` block on port `514`
+- [ ] pfSense Static MAC Mapping applied — Wazuh anchored to `10.22.7.67`
+- [ ] Wazuh server rebooted and static IP confirmed via `ip a`
+- [ ] pfSense Remote Syslog configured to forward `Everything` to `10.22.7.67:514`
+- [ ] Syslog ingestion verified via `Syslogd restarted` event in Security Events
+- [ ] SSH brute-force simulation triggered and detected — Level 5 alerts visible
+- [ ] `ossec.conf` updated with TCP secure `<remote>` block on port `1514`
+- [ ] `wazuh-manager` restarted successfully
+- [ ] Windows agent deployment command generated from Wazuh Dashboard
+- [ ] Agent MSI silently installed on DC via elevated PowerShell
+- [ ] Agent authenticated via `agent-auth.exe -m 10.22.7.67`
+- [ ] Wazuh service started — `net start wazuh`
+- [ ] DC endpoint showing as **Active** in Wazuh Agents dashboard
+
+<div align="center"><br>
+
+**🟢 Phase 3 · [10] Complete**
+
+`[09] LAN/DMZ Traffic Isolation` ◄── **`[10] Wazuh SIEM Installation`** ──► `[11] Antivirus Integration`
 
 <br></div>
 
