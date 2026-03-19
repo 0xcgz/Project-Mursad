@@ -2486,7 +2486,7 @@ Select **TCP** · Specific local ports: `80, 443`.
 
 Select **Allow the connection**.
 
-![22](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata/22.png)
+![22](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/22.png)
 
 ---
 
@@ -2494,7 +2494,7 @@ Select **Allow the connection**.
 
 Check all three: **Domain**, **Private**, **Public**.
 
-![23](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata/23.png)
+![23](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-208-suricata-ids-ips/23.png)
 
 ---
 
@@ -2502,7 +2502,7 @@ Check all three: **Domain**, **Private**, **Public**.
 
 Name: `Allow Web Traffic (HTTP/HTTPS)` → **Finish**.
 
-![24](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata/24.png)
+![24](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/24.png)
 
 ---
 
@@ -2510,7 +2510,7 @@ Name: `Allow Web Traffic (HTTP/HTTPS)` → **Finish**.
 
 Navigate to `http://192.168.140.130/` from the Host machine. The pfSense Destination NAT correctly forwards the request to the DMZ — the custom Mursad landing page loads.
 
-![25](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata/25.png)
+![25](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/25.png)
 
 ---
 
@@ -2520,7 +2520,7 @@ Navigate to `http://192.168.140.130/` from the Host machine. The pfSense Destina
 
 Verify Kali Linux can access `http://192.168.140.130/`. Connectivity confirmed — proceed with attacks.
 
-![26](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata/26.png)
+![26](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/26.png)
 
 ---
 
@@ -3213,6 +3213,358 @@ The SOC now has centralized visibility into the Active Directory environment.
 **🟢 Phase 3 Complete**
 
 `[09] LAN/DMZ Traffic Isolation` ◄── **`[10] Wazuh SIEM Installation`** ──► `[11] Antivirus Integration`
+
+<br></div>
+
+</details>
+
+---
+
+<details>
+<summary><b>📘 Phase 4 · [11] — Antivirus Integration & SIEM Efficiency Testing</b></summary>
+<a name="phase-4--11"></a>
+
+<br>
+
+> **Scope:** Verifying Wazuh agent registration on the Domain Controller, deploying **Kaspersky Small Office Security** as the endpoint AV solution, and executing a **Pass-the-Hash (PtH) attack** from Kali Linux via `crackmapexec` to validate the SIEM's ability to detect NTLM-based lateral movement mapped to **MITRE ATT&CK T1550.002**.
+
+---
+
+### Overview
+
+```text
+Endpoint Protection
+└── VM 101  —  DC  (Windows Server 2019)
+        ├── Wazuh Agent v4.5.4    — Active · ID: 001
+        └── Kaspersky KSOS        — File Server mode · 30-day trial
+
+Red Team Simulation
+└── Kali Linux (WAN)
+        └── crackmapexec smb 10.22.7.3 -u Administrator -H <NTLM hash>
+                └── STATUS_LOGON_FAILURE  (hash invalid — attack blocked)
+
+Blue Team Validation  ──►  Wazuh · DC Agent  ──►  Security Events
+        ├── Rule 92652  — Possible Pass-the-Hash (Level 6 · T1550.002 + T1078.002)
+        ├── Rule 60122  — Logon Failure, Unknown user or bad password (Level 5 · T1078 + T1531)
+        └── Rule 60137  — Windows User Logoff (Level 3 · session cleanup)
+```
+
+| Part | Section | Description |
+|:----:|---------|-------------|
+| **A** | Agent Verification | Confirm Wazuh agent registration and live connectivity on the DC |
+| **B** | Antivirus Deployment | Install and configure Kaspersky Small Office Security |
+| **C** | Red Team Simulation | Execute Pass-the-Hash attack from Kali Linux via CrackMapExec |
+| **D** | SIEM Validation | Analyse Wazuh detections, MITRE mappings, and forensic event fields |
+
+---
+
+### Part A — Wazuh Agent Verification
+
+#### Step 1 — Open the Wazuh Agent Manager
+
+<img width="974" height="519" alt="1" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/1.png" />
+
+SSH into the Wazuh server and launch the agent management CLI:
+
+```bash
+sudo /var/ossec/bin/manage_agents
+```
+
+The **Wazuh v4.5.4 Agent Manager** presents four options. Select `l` to list all currently registered agents.
+
+---
+
+#### Step 2 — Confirm DC Agent Registration
+
+<img width="974" height="519" alt="2" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/2.png" />
+
+The agent list confirms the Domain Controller is fully registered:
+
+| Field | Value |
+|-------|-------|
+| ID | `001` |
+| Name | `DC` |
+| IP | `any` *(dynamic — accepts from SERVERS subnet)* |
+
+> ✅ The Wazuh agent on the DC is registered and actively reporting. Proceed to antivirus deployment.
+
+---
+
+#### Step 3 — Verify Agent Logs on the DC
+
+<img width="1080" height="810" alt="3" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/3.png" />
+
+On the **Domain Controller**, navigate to the agent installation directory:
+
+```
+C:\Program Files (x86)\ossec-agent\
+```
+
+Open `ossec.log` to inspect the agent runtime log. Key entries confirm healthy operation:
+
+```
+agent-auth: INFO: Valid key received
+wazuh-agent: INFO: Connected to the server
+wazuh-agent: INFO: Using AES as encryption method
+rootcheck: INFO: Started (monitoring registry keys...)
+```
+
+> ℹ️ `ossec.log` is your first diagnostic stop if the agent goes silent — version mismatches between the agent and manager surface here immediately.
+
+---
+
+#### Step 4 — Inspect Agent Manager UI (win32ui)
+
+<img width="1080" height="810" alt="4" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/4.png" />
+
+Launch `win32ui.exe` from the same directory. The **Wazuh Agent Manager** GUI confirms:
+
+| Field | Value |
+|-------|-------|
+| Agent | `DC (001)` |
+| Status | **Running** |
+| Manager IP | `10.22.7.67` |
+| Authentication Key | *(auto-populated on registration)* |
+
+> 📋 Use **Refresh** if the connection state appears stale. The auth key shown here was generated during `agent-auth.exe` execution in `[10]`.
+
+---
+
+### Part B — Antivirus Deployment (Kaspersky KSOS)
+
+#### Step 5 — Download Kaspersky Small Office Security
+
+<img width="1214" height="862" alt="5" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/5.png" />
+
+Navigate to [kaspersky.com/small-to-medium-business-security/downloads](https://www.kaspersky.com/small-to-medium-business-security/downloads) and select **Kaspersky Small Office Security → Download**.
+
+> ℹ️ Other enterprise-grade AV vendors (CrowdStrike, Defender for Endpoint, Sophos) can be substituted depending on your lab objectives. For this deployment, Kaspersky KSOS is used for its free 30-day trial and straightforward server-mode support.
+
+---
+
+#### Step 6 — Launch the Installer
+
+<img width="1080" height="810" alt="6" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/6.png" />
+
+Launch the downloaded installer on the Domain Controller. When prompted to select the protection mode, choose **File Server** from the dropdown — this is the appropriate profile for a Windows Server deployment rather than a workstation.
+
+Click **Continue** to proceed through the installation wizard with default settings.
+
+---
+
+#### Step 7 — Remove Incompatible Software (Windows Defender)
+
+<img width="1080" height="810" alt="7" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/7.png" />
+
+Kaspersky detects **Windows Defender** as incompatible and flags it for automatic removal:
+
+| Software | Action |
+|----------|--------|
+| Windows Defender | Will be removed automatically |
+
+Click **Delete** to proceed. The system will automatically uninstall Defender and prompt for a restart to complete the transition.
+
+> ⚠️ This is expected behaviour — running two real-time AV engines simultaneously causes performance degradation and signature conflicts. Kaspersky fully replaces the Defender stack.
+
+---
+
+#### Step 8 — Activate — Try for Free
+
+<img width="1080" height="810" alt="8" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/8.png" />
+
+After the restart, relaunch `startup.exe`. The post-install screen prompts for an activation code. For this lab deployment, click **Try for free** to activate the 30-day trial without a license key.
+
+---
+
+#### Step 9 — Skip Account Registration
+
+<img width="1080" height="810" alt="9" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/9.png" />
+
+Kaspersky offers to save the activation code to a My Kaspersky account. Click **Skip** — account registration is not required for this isolated lab environment.
+
+---
+
+#### Step 10 — Kaspersky Dashboard — Protection Active
+
+<img width="1080" height="810" alt="10" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/10.png" />
+
+The Kaspersky **Small Office Security** dashboard loads — the DC is now protected:
+
+```
+We've got you covered
+● Main protection components are running
+● The databases and the application require an update
+```
+
+The endpoint is operating in **File Server** mode with AI-enhanced Security components active. Run a database update to pull the latest threat signatures before proceeding to the attack simulation.
+
+---
+
+### Part C — Red Team Simulation: Pass-the-Hash Attack
+
+#### Step 11 — Execute SMB Pass-the-Hash via CrackMapExec
+
+<img width="1280" height="720" alt="11" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/11.png" />
+
+Switch to the **Kali Linux** machine. Execute a Pass-the-Hash (PtH) attack targeting the Domain Controller's SMB service using a captured NTLM hash:
+
+```bash
+crackmapexec smb 192.168.140.135 -u Administrator -H 43ba4b0afe48d65e5f47b0f7ac1e6f8e
+```
+
+CrackMapExec correctly identifies the target:
+
+```
+SMB  192.168.140.135  445  DC  Windows 10 / Server 2019  (name:DC) (domain:mursad.local)
+SMB  192.168.140.135  445  DC  mursad.local\Administrator:43ba4b0...  STATUS_LOGON_FAILURE
+```
+
+> 🔴 **Result:** `STATUS_LOGON_FAILURE` — the hash was invalid or the account was protected. The attack failed at the authentication layer. However, the attempt still generated full Windows Security event logs, which Wazuh ingested and alerted on.
+
+> ℹ️ **What is Pass-the-Hash?** PtH is a credential theft technique (`MITRE T1550.002`) where an attacker captures an NTLM password hash from memory (e.g., via Mimikatz) and reuses it directly for authentication — without ever knowing the plaintext password. Because NTLM accepts the hash itself as proof of identity, a valid hash is as good as the password. The attack bypasses all standard password policies and multi-factor controls that operate at the credential-entry layer.
+
+---
+
+### Part D — Blue Team SIEM Validation
+
+#### Step 12 — Wazuh Security Events Dashboard
+
+<img width="1540" height="560" alt="12" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/12.png" />
+
+Navigate to **Wazuh → Modules → DC → Security Events**. The dashboard immediately surfaces three correlated detections triggered by the CrackMapExec attack:
+
+---
+
+**Rule 92652 — Pass-the-Hash Detection** *(Primary alert)*
+
+> `Successful Remote Logon Detected - User:\ANONYMOUS LOGON - NTLM authentication, possible pass-the-hash attack`
+
+| Field | Value |
+|-------|-------|
+| Severity Level | `6` *(Medium-High)* |
+| MITRE Techniques | `T1550.002` · `T1078.002` |
+| Tactics | Lateral Movement · Defense Evasion · Persistence · Privilege Escalation · Initial Access |
+
+---
+
+**Rule 60122 — Failed Logon Attempts**
+
+> `Logon failure - Unknown user or bad password`
+
+| Field | Value |
+|-------|-------|
+| Severity Level | `5` |
+| MITRE Techniques | `T1078` · `T1531` |
+| Tactics | Defense Evasion · Persistence · Privilege Escalation · Initial Access · Impact |
+
+---
+
+**Rule 60137 — Session Cleanup**
+
+> `Windows User Logoff`
+
+Wazuh tracks the full session lifecycle — the logon attempt followed immediately by a logoff as CrackMapExec completed and closed the connection. This chained sequence (logon → logoff within milliseconds) is itself a behavioural indicator of automated tooling.
+
+---
+
+#### Step 13 — MITRE ATT&CK Reference: T1550.002 (Pass the Hash)
+
+<img width="1540" height="810" alt="13" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/13.png" />
+
+The MITRE ATT&CK framework documents this technique at [attack.mitre.org/techniques/T1550/002](https://attack.mitre.org/techniques/T1550/002/):
+
+**MITRE Techniques Triggered in This Exercise:**
+
+| Technique | ID | Description |
+|-----------|:--:|-------------|
+| Pass the Hash | `T1550.002` | Stolen NTLM hash used directly for auth — no plaintext needed |
+| Valid Accounts: Domain Accounts | `T1078.002` | Real `Administrator` account used — blends into normal admin activity |
+| Valid Accounts (Parent) | `T1078` | General use of valid credentials to maintain access |
+| Account Access Removal | `T1531` | Session termination detected after attack completed |
+
+---
+
+#### Step 14 — Forensic Event Analysis (Expanded Log)
+
+<img width="1540" height="810" alt="14" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/14.png" />
+
+Expanding **Rule 92652** in Wazuh reveals the full forensic telemetry from **Event ID 4624** on `DC.mursad.local`:
+
+| Field | Value | Why It Matters |
+|-------|-------|----------------|
+| `data.win.eventdata.ipAddress` | `192.168.140.131` | Attacker Kali Linux IP — source of the attack |
+| `data.win.eventdata.authenticationPackageName` | `NTLM` | No Kerberos = classic PtH indicator |
+| `data.win.eventdata.logonType` | `3` | Remote network logon — not interactive |
+| `data.win.eventdata.targetUserName` | `ANONYMOUS LOGON` | Definitive PtH signature |
+| `data.win.system.computer` | `DC.mursad.local` | Domain Controller was the target |
+| `data.win.system.eventID` | `4624` | Successful logon event (logon was processed, auth failed at SMB layer) |
+| `data.win.eventdata.logonGuid` | `{000...000}` | Null GUID = NTLM, not Kerberos |
+| `data.win.eventdata.lmPackageName` | `NTLM V1` | Older, weaker NTLM version — less secure |
+| `data.win.eventdata.logonProcessName` | `NtLmSsp` | Hash-based SSP — confirms PtH mechanism |
+
+> 🔍 **Analyst Note:** The combination of `logonType: 3` + `ANONYMOUS LOGON` + `NTLM V1` + a null `logonGuid` is the definitive forensic signature of a Pass-the-Hash attempt in Windows Security event logs. Wazuh rule 92652 fires specifically on this pattern, mapped directly to `T1550.002`.
+
+---
+
+### Attack Chain Summary
+
+```
+Kali Linux (192.168.140.131)
+│
+├── crackmapexec smb 192.168.140.135 -u Administrator -H <hash>
+│        └── NTLM authentication attempt → STATUS_LOGON_FAILURE
+│
+└── Windows Security Events on DC.mursad.local
+         ├── Event 4624 — Logon Type 3 · ANONYMOUS LOGON · NTLM V1
+         ├── Event 4625 — Logon failure
+         └── Event 4634 — Logoff (session cleanup)
+                  │
+                  └── Wazuh Agent (ID: 001) ──► SIEM (10.22.7.67)
+                           ├── Rule 92652  Level 6  T1550.002  [PASS-THE-HASH]
+                           ├── Rule 60122  Level 5  T1078      [LOGON FAILURE]
+                           └── Rule 60137  Level 3             [USER LOGOFF]
+```
+
+---
+
+### VM Summary
+
+| VM | Role | IP | Key Action |
+|:--:|------|:--:|------------|
+| VM 101 — DC | Target · Wazuh Agent · Kaspersky KSOS | `10.22.7.3` | Generated Event ID 4624 (PtH) |
+| VM 104 — Wazuh | SIEM · Alert Engine | `10.22.7.67` | Correlated and alerted Rule 92652 |
+| Kali Linux | Red Team Attacker | `192.168.140.131` | Executed CrackMapExec PtH attempt |
+
+---
+
+### ✅ Phase Checklist
+
+- [ ] Wazuh agent manager launched — `sudo /var/ossec/bin/manage_agents`
+- [ ] Agent list confirmed — `ID: 001 · Name: DC · IP: any`
+- [ ] `ossec.log` reviewed on DC — `Valid key received` + `Connected to server`
+- [ ] `win32ui.exe` opened — Status: **Running** · Manager IP: `10.22.7.67`
+- [ ] Kaspersky KSOS installer downloaded from kaspersky.com
+- [ ] Installer launched in **File Server** mode
+- [ ] Windows Defender flagged and removed automatically
+- [ ] System restarted after Defender removal
+- [ ] `startup.exe` relaunched — **Try for free** selected
+- [ ] Account registration skipped
+- [ ] Kaspersky dashboard loaded — protection components active
+- [ ] `crackmapexec smb` PtH command executed from Kali Linux
+- [ ] `STATUS_LOGON_FAILURE` confirmed — attack blocked at auth layer
+- [ ] Wazuh → DC → Security Events reviewed
+- [ ] Rule 92652 triggered — Level 6 · `T1550.002` · `T1078.002`
+- [ ] Rule 60122 triggered — Level 5 · `T1078` · `T1531`
+- [ ] Rule 60137 triggered — Level 3 · session cleanup
+- [ ] Expanded Event ID 4624 reviewed — `ANONYMOUS LOGON` · `NTLM V1` · `logonType: 3` confirmed
+- [ ] Attacker IP `192.168.140.131` identified in `data.win.eventdata.ipAddress`
+- [ ] MITRE ATT&CK T1550.002 cross-referenced and documented
+
+<div align="center"><br>
+
+**🟢 Phase 4 · [11] Complete**
+
+`[10] Wazuh SIEM Installation` ◄── **`[11] Antivirus Integration & SIEM Testing`** ──► `[12] Infrastructure Auditing via CIS Benchmarks`
 
 <br></div>
 
