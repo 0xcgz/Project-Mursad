@@ -3226,35 +3226,49 @@ The SOC now has centralized visibility into the Active Directory environment.
 
 <br>
 
-> **Scope:** Verifying Wazuh agent registration on the Domain Controller, deploying **Kaspersky Small Office Security** as the endpoint AV solution, and executing a **Pass-the-Hash (PtH) attack** from Kali Linux via `crackmapexec` to validate the SIEM's ability to detect NTLM-based lateral movement mapped to **MITRE ATT&CK T1550.002**.
+> **Scope:** Verifying Wazuh agent health on the Domain Controller, deploying **Kaspersky Small Office Security**, installing **Sysmon v15.15** for deep process telemetry, hardening the endpoint via the **Rasad** audit policy script and Group Policy, and executing **Atomic Red Team T1003.001** (LSASS credential dump) and a **Pass-the-Hash** attack from Kali Linux — validating the full defensive stack end-to-end.
 
 ---
 
 ### Overview
 
 ```text
-Endpoint Protection
-└── VM 101  —  DC  (Windows Server 2019)
-        ├── Wazuh Agent v4.5.4    — Active · ID: 001
-        └── Kaspersky KSOS        — File Server mode · 30-day trial
+Endpoint Protection Stack  (VM 101 — DC)
+├── Wazuh Agent v4.5.4        — Active · ID: 001
+├── Kaspersky KSOS             — File Server mode · 30-day trial
+└── Sysmon v15.15              — SwiftOnSecurity config · schema 4.50
 
-Red Team Simulation
-└── Kali Linux (WAN)
-        └── crackmapexec smb 10.22.7.3 -u Administrator -H <NTLM hash>
-                └── STATUS_LOGON_FAILURE  (hash invalid — attack blocked)
+Telemetry Pipeline
+├── Microsoft-Windows-PowerShell/Operational  ──►  ossec.conf  ──►  Wazuh
+└── Microsoft-Windows-Sysmon/Operational      ──►  ossec.conf  ──►  Wazuh
 
-Blue Team Validation  ──►  Wazuh · DC Agent  ──►  Security Events
-        ├── Rule 92652  — Possible Pass-the-Hash (Level 6 · T1550.002 + T1078.002)
-        ├── Rule 60122  — Logon Failure, Unknown user or bad password (Level 5 · T1078 + T1531)
-        └── Rule 60137  — Windows User Logoff (Level 3 · session cleanup)
+Endpoint Hardening
+├── Rasad script               — Bulk audit policy configuration
+└── gpedit.msc                 — Audit Policy · User Rights · PowerShell logging
+
+Red Team Simulations
+├── Atomic Red Team T1003.001  — LSASS credential dump (Sysmon-enriched alerts)
+└── crackmapexec PtH           — NTLM Pass-the-Hash toward DC (MITRE T1550.002)
+
+Wazuh Detections
+├── Rule 92032  — Suspicious Windows cmd shell execution (Level 3)
+├── Rule 92052  — Windows cmd started by abnormal process (Level 4)
+├── Rule 91815  — PowerShell executing process discovery (Level 4)
+├── Rule 92027  — PowerShell process spawned PowerShell instance (Level 4)
+├── Rule 92652  — Possible Pass-the-Hash · NTLM ANONYMOUS LOGON (Level 6)
+├── Rule 60122  — Logon failure, unknown user or bad password (Level 5)
+└── Rule 60137  — Windows User Logoff · session cleanup (Level 3)
 ```
 
 | Part | Section | Description |
 |:----:|---------|-------------|
 | **A** | Agent Verification | Confirm Wazuh agent registration and live connectivity on the DC |
 | **B** | Antivirus Deployment | Install and configure Kaspersky Small Office Security |
-| **C** | Red Team Simulation | Execute Pass-the-Hash attack from Kali Linux via CrackMapExec |
-| **D** | SIEM Validation | Analyse Wazuh detections, MITRE mappings, and forensic event fields |
+| **C** | Sysmon Deployment | Install Sysmon v15.15 with SwiftOnSecurity config and pipe telemetry to Wazuh |
+| **D** | Endpoint Hardening | Apply audit policies, user rights, and PowerShell logging via Rasad + GPO |
+| **E** | Red Team — LSASS Dump | Execute Atomic Red Team T1003.001 credential dump simulation |
+| **F** | Red Team — Pass-the-Hash | Execute CrackMapExec NTLM PtH attack from Kali Linux |
+| **G** | SIEM Validation | Analyse all Wazuh detections, MITRE mappings, and forensic event fields |
 
 ---
 
@@ -3346,7 +3360,7 @@ Navigate to [kaspersky.com/small-to-medium-business-security/downloads](https://
 
 <img width="1080" height="810" alt="6" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/6.png" />
 
-Launch the downloaded installer on the Domain Controller. When prompted to select the protection mode, choose **File Server** from the dropdown — this is the appropriate profile for a Windows Server deployment rather than a workstation.
+Launch the downloaded installer on the Domain Controller. When prompted to select the protection mode, choose **File Server** from the dropdown.
 
 Click **Continue** to proceed through the installation wizard with default settings.
 
@@ -3362,9 +3376,9 @@ Kaspersky detects **Windows Defender** as incompatible and flags it for automati
 |----------|--------|
 | Windows Defender | Will be removed automatically |
 
-Click **Delete** to proceed. The system will automatically uninstall Defender and prompt for a restart to complete the transition.
+Click **Delete** → system restarts to complete the transition.
 
-> ⚠️ This is expected behaviour — running two real-time AV engines simultaneously causes performance degradation and signature conflicts. Kaspersky fully replaces the Defender stack.
+> ⚠️ Running two real-time AV engines simultaneously causes performance degradation and signature conflicts. Kaspersky fully replaces the Defender stack.
 
 ---
 
@@ -3372,7 +3386,7 @@ Click **Delete** to proceed. The system will automatically uninstall Defender an
 
 <img width="1080" height="810" alt="8" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/8.png" />
 
-After the restart, relaunch `startup.exe`. The post-install screen prompts for an activation code. For this lab deployment, click **Try for free** to activate the 30-day trial without a license key.
+After the restart, relaunch `startup.exe`. Click **Try for free** to activate the 30-day trial without a license key.
 
 ---
 
@@ -3380,7 +3394,7 @@ After the restart, relaunch `startup.exe`. The post-install screen prompts for a
 
 <img width="1080" height="810" alt="9" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/9.png" />
 
-Kaspersky offers to save the activation code to a My Kaspersky account. Click **Skip** — account registration is not required for this isolated lab environment.
+Click **Skip** — account registration is not required for this isolated lab environment.
 
 ---
 
@@ -3388,7 +3402,7 @@ Kaspersky offers to save the activation code to a My Kaspersky account. Click **
 
 <img width="1080" height="810" alt="10" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/10.png" />
 
-The Kaspersky **Small Office Security** dashboard loads — the DC is now protected:
+The Kaspersky **Small Office Security** dashboard confirms the DC is now protected in **File Server** mode. Run a database update to pull the latest threat signatures before proceeding.
 
 ```
 We've got you covered
@@ -3396,42 +3410,356 @@ We've got you covered
 ● The databases and the application require an update
 ```
 
-The endpoint is operating in **File Server** mode with AI-enhanced Security components active. Run a database update to pull the latest threat signatures before proceeding to the attack simulation.
+---
+
+### Part C — Sysmon Deployment & Telemetry Pipeline
+
+#### Step 11 — Download Sysmon v15.15
+
+<img width="1540" height="760" alt="15" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/15.png" />
+
+Navigate to [learn.microsoft.com/en-us/sysinternals/downloads/sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon) and download **Sysmon v15.15** (4.6 MB).
+
+**System Monitor (Sysmon)** is a Windows system service and kernel driver that survives reboots and logs granular system activity to the Windows Event Log — process creations with full command lines, network connections, file creation timestamps, and more. Unlike native Windows Security logs, Sysmon captures the *parent process*, *hash*, and *command line* of every spawned process, making it invaluable for detecting living-off-the-land attacks like LSASS dumps.
 
 ---
 
-### Part C — Red Team Simulation: Pass-the-Hash Attack
+#### Step 12 — Download the SwiftOnSecurity Configuration
 
-#### Step 11 — Execute SMB Pass-the-Hash via CrackMapExec
+<img width="1540" height="810" alt="16" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/16.png" />
+
+Rather than writing a Sysmon config from scratch, we use the industry-standard **SwiftOnSecurity** config from [github.com/SwiftOnSecurity/sysmon-config](https://github.com/SwiftOnSecurity/sysmon-config). This 1200-line XML file provides a production-grade baseline that:
+
+- Logs all process creations with full command lines (Event ID 1)
+- Captures network connections (Event ID 3)
+- Logs image/driver loads with hash verification (Event ID 7)
+- Includes exclusion rules for ~50 noisy Microsoft processes to prevent alert fatigue
+- Enables MD5, SHA256, and IMPHASH algorithms for binary fingerprinting
+
+> 📋 The `sysmonconfig-export.xml` used in this deployment is committed to the project repository under `configs/windows/sysmonconfig-export.xml`.
+
+---
+
+#### Step 13 — Install Sysmon with the Config
+
+<img width="1080" height="810" alt="17" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/17.png" />
+
+On the **Domain Controller**, open an elevated **Administrator PowerShell** session and run:
+
+```powershell
+.\Sysmon64.exe -accepteula -i .\sysmonconfig-export.xml
+```
+
+The output confirms a clean installation:
+
+```
+System Monitor v15.15 — System activity monitor
+Loading configuration file with schema version 4.50
+Sysmon schema version: 4.90
+Configuration file validated.
+Sysmon64 installed.
+SysmonDrv installed.
+Starting SysmonDrv.
+SysmonDrv started.
+Starting Sysmon64..
+Sysmon64 started.
+```
+
+> ✅ Sysmon is now running as a protected kernel-level service. It begins populating `Microsoft-Windows-Sysmon/Operational` in the Windows Event Log immediately.
+
+---
+
+#### Step 14 — Configure Wazuh Agent to Collect Sysmon and PowerShell Logs
+
+<img width="1080" height="810" alt="18" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/18.png" />
+
+By default, the Wazuh agent does not collect Sysmon or PowerShell Operational logs. Open `ossec.conf` on the DC:
+
+```
+C:\Program Files (x86)\ossec-agent\ossec.conf
+```
+
+Add the following two `<localfile>` blocks at the end of the existing log collection section:
+
+```xml
+<!-- PowerShell logs -->
+<localfile>
+  <location>Microsoft-Windows-PowerShell/Operational</location>
+  <log_format>eventchannel</log_format>
+</localfile>
+
+<!-- Sysmon logs -->
+<localfile>
+  <location>Microsoft-Windows-Sysmon/Operational</location>
+  <log_format>eventchannel</log_format>
+</localfile>
+```
+
+Restart the Wazuh agent service to apply:
+
+```powershell
+net stop wazuh
+net start wazuh
+```
+
+> ℹ️ **Why both channels?** PowerShell Operational logs capture script block content (`4104`) and command execution (`4103`). Sysmon provides the process tree context — parent PID, image path, and hashes — that raw PowerShell logs lack. Together they give the SIEM full visibility into what ran, how it was invoked, and what it spawned.
+
+---
+
+### Part D — Endpoint Hardening (Rasad Script + Group Policy)
+
+#### Step 15 — Run the Rasad Hardening Script
+
+<img width="1080" height="810" alt="19" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/19.png" />
+
+**Rasad** is a custom PowerShell hardening script developed for this project that automates Windows audit policy configuration in bulk. Launch an elevated PowerShell session and execute it:
+
+```powershell
+.\Rasad.ps1
+```
+
+The script configures the following audit subcategories — each `[OK]` line confirms a successful policy application:
+
+```
+[*] Starting Rasad — Endpoint Hardening...
+
+[+] Configuring Audit Policies...
+    [OK] Security State Change
+    [OK] Other Logon/Logoff Events
+    [OK] Distribution Group Management
+    [OK] User Account Management
+    [OK] Central Policy Staging
+    [OK] Logon
+    [OK] File System
+    [OK] Detailed Directory Service Replication
+    [OK] User / Device Claims
+    [OK] Filtering Platform Packet Drop
+    [OK] Other Privilege Use Events
+    [OK] Logoff
+    [OK] Filtering Platform Policy Change
+    [OK] Special Logon
+    [OK] Application Group Management
+    [OK] Application Generated
+    [OK] SAM
+    [OK] Group Membership
+    [OK] IPsec Driver
+    [OK] Authorization Policy Change
+    [OK] Kerberos Authentication Service
+    [OK] Detailed File Share
+    [OK] System Integrity
+    [OK] Directory Service Access
+    [OK] Directory Service Changes
+    ... (continues)
+```
+
+> 📋 The full `Rasad.ps1` script is committed to the project repository under `scripts/Rasad.ps1`.
+
+---
+
+#### Step 16 — Open Group Policy Editor
+
+<img width="1080" height="810" alt="20" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/20.png" />
+
+Press **Win + R** → type `gpedit.msc` → click **OK** to open the **Local Group Policy Editor**.
+
+> ℹ️ For a domain-joined DC, changes here apply locally. In production, these policies would be distributed via a linked GPO at the domain or OU level to enforce settings across all managed endpoints.
+
+---
+
+#### Step 17 — Review Audit Policy Configuration
+
+<img width="1080" height="810" alt="21" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/21.png" />
+
+Navigate to:
+
+```
+Local Computer Policy → Computer Configuration → Windows Settings
+  → Security Settings → Local Policies → Audit Policy
+```
+
+The Rasad script has applied the following audit settings:
+
+| Audit Category | Setting |
+|----------------|---------|
+| Audit account logon events | Success, Failure |
+| Audit account management | Success, Failure |
+| Audit directory service access | Failure |
+| Audit logon events | No auditing *(advanced audit overrides this)* |
+| Audit object access | Failure |
+| Audit policy change | Success, Failure |
+| Audit privilege use | Failure |
+| Audit process tracking | Success, Failure |
+| Audit system events | Success, Failure |
+
+> ℹ️ **Why "No auditing" on logon events?** The legacy Audit Policy is superseded by **Advanced Audit Policy Configuration** for modern Windows Server. The Rasad script configures audit subcategories at the advanced level, which take precedence — so the basic logon entry showing "No auditing" is expected and correct.
+
+---
+
+#### Step 18 — Review User Rights Assignment
+
+<img width="1080" height="810" alt="22" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/22.png" />
+
+Navigate to:
+
+```
+Local Computer Policy → Computer Configuration → Windows Settings
+  → Security Settings → Local Policies → User Rights Assignment
+```
+
+This section controls which accounts can perform privileged operations — such as `Debug programs` (Administrators only), `Allow log on locally`, and `Deny access to this computer from the network`. Review and tighten these assignments as needed based on the principle of least privilege.
+
+> ⚠️ **Security Note:** In production environments, `Debug programs` should be removed from all accounts including Administrators to prevent tools like ProcDump and Mimikatz from attaching to privileged processes such as `lsass.exe`.
+
+---
+
+#### Step 19 — Enable PowerShell Logging via Group Policy
+
+<img width="1080" height="810" alt="23" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/23.png" />
+
+Navigate to:
+
+```
+Local Computer Policy → Computer Configuration → Administrative Templates
+  → Windows Components → Windows PowerShell
+```
+
+Enable the following three policies:
+
+| Policy | State | Purpose |
+|--------|-------|---------|
+| Turn on PowerShell Script Block Logging | **Enabled** | Captures every script block executed, even obfuscated ones |
+| Turn on Script Execution | **Enabled** | Controls execution policy enforcement |
+| Turn on PowerShell Transcription | **Enabled** | Writes full session transcripts to disk |
+
+> 🔍 **Why this matters for the SIEM:** Script Block Logging generates **Event ID 4104** — the full text of every PowerShell command that executes, including de-obfuscated content. This is how Wazuh catches `Invoke-AtomicTest`, `Invoke-Mimikatz`, and other offensive PowerShell frameworks even when they are encoded in Base64 or use string concatenation to evade simple string matching.
+
+---
+
+### Part E — Red Team Simulation: LSASS Credential Dump (T1003.001)
+
+#### Step 20 — Inspect the Atomic Test Details
+
+<img width="1080" height="810" alt="24" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/24.png" />
+
+On the **Domain Controller**, open an elevated PowerShell session and inspect the Atomic Red Team test before execution:
+
+```powershell
+Invoke-AtomicTest T1003.001 -ShowDetails
+```
+
+This displays the full test plan for **OS Credential Dumping: LSASS Memory (T1003.001)**:
+
+```
+Technique: OS Credential Dumping: LSASS Memory  T1003.001
+Atomic Test Name: Dump LSASS.exe Memory using ProcDump
+Attack Commands:
+  "#{procdump_exe}" -accepteula -ma lsass.exe #{output_file}
+  → C:\AtomicRedTeam\atomics\..\ExternalPayloads\procdump.exe
+    -accepteula -ma lsass.exe C:\Windows\Temp\lsass_dump.dmp
+```
+
+> ℹ️ **MITRE T1003.001 — LSASS Memory Dump:** `lsass.exe` (Local Security Authority Subsystem Service) holds the credentials of every logged-in user in memory — NTLM hashes, Kerberos tickets, and plaintext passwords in some configurations. Attackers dump this process memory using tools like ProcDump, comsvcs.dll, Dumpert, or Mimikatz to extract these credentials offline, enabling lateral movement and privilege escalation across the domain.
+
+---
+
+#### Step 21 — Execute the Atomic Test
+
+<img width="1080" height="810" alt="25" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/25.png" />
+
+Execute all sub-tests for T1003.001:
+
+```powershell
+Invoke-AtomicTest T1003.001
+```
+
+The results show each sub-technique attempt and its outcome:
+
+| Sub-test | Method | Result | Why |
+|----------|--------|--------|-----|
+| T1003.001-1 | ProcDump | `Access is denied (0x00000005)` — Exit `-2` | Kaspersky KSOS blocked ProcDump from attaching to `lsass.exe` |
+| T1003.001-2 | comsvcs.dll | Exit `0` | DLL-based technique completed *(hash extraction still requires offline analysis)* |
+| T1003.001-3 | Dumpert (direct syscalls) | `Failed to get processhandle` — Exit `1` | AV/PPL blocked the kernel handle request |
+| T1003.001-4 | NanoDump | Exit `0` | Attempted but handle acquisition silently failed |
+| T1003.001-6 | Mimikatz offline | Syntax error — Exit `1` | Tool path configuration issue |
+
+> 🔴 **Primary result:** Kaspersky KSOS successfully blocked the highest-fidelity ProcDump attempt with an access denied error. Despite some sub-tests returning exit code 0, all attempts to produce a usable credential dump were defeated. Critically — every attempt still produced rich Sysmon and PowerShell telemetry that Wazuh ingested and alerted on.
+
+---
+
+### Part F — Red Team Simulation: Pass-the-Hash Attack
+
+#### Step 22 — Execute SMB Pass-the-Hash via CrackMapExec
 
 <img width="1280" height="720" alt="11" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/11.png" />
 
-Switch to the **Kali Linux** machine. Execute a Pass-the-Hash (PtH) attack targeting the Domain Controller's SMB service using a captured NTLM hash:
+Switch to the **Kali Linux** machine. Execute a Pass-the-Hash (PtH) attack targeting the Domain Controller's SMB service:
 
 ```bash
 crackmapexec smb 192.168.140.135 -u Administrator -H 43ba4b0afe48d65e5f47b0f7ac1e6f8e
 ```
 
-CrackMapExec correctly identifies the target:
-
 ```
-SMB  192.168.140.135  445  DC  Windows 10 / Server 2019  (name:DC) (domain:mursad.local)
+SMB  192.168.140.135  445  DC  Windows 10 / Server 2019  (domain:mursad.local)
 SMB  192.168.140.135  445  DC  mursad.local\Administrator:43ba4b0...  STATUS_LOGON_FAILURE
 ```
 
-> 🔴 **Result:** `STATUS_LOGON_FAILURE` — the hash was invalid or the account was protected. The attack failed at the authentication layer. However, the attempt still generated full Windows Security event logs, which Wazuh ingested and alerted on.
+> 🔴 **Result:** `STATUS_LOGON_FAILURE` — the hash was invalid. The attack was blocked at the authentication layer, but the attempt still generated full Windows Security event logs which Wazuh ingested and correlated.
 
-> ℹ️ **What is Pass-the-Hash?** PtH is a credential theft technique (`MITRE T1550.002`) where an attacker captures an NTLM password hash from memory (e.g., via Mimikatz) and reuses it directly for authentication — without ever knowing the plaintext password. Because NTLM accepts the hash itself as proof of identity, a valid hash is as good as the password. The attack bypasses all standard password policies and multi-factor controls that operate at the credential-entry layer.
+> ℹ️ **What is Pass-the-Hash?** PtH (`MITRE T1550.002`) allows an attacker to authenticate using a captured NTLM hash — without ever knowing the plaintext password. NTLM accepts the hash itself as proof of identity, bypassing password policies entirely. This is why LSASS credential dumps (T1003.001) and PtH attacks (T1550.002) are so often chained in real-world intrusions.
 
 ---
 
-### Part D — Blue Team SIEM Validation
+### Part G — SIEM Validation
 
-#### Step 12 — Wazuh Security Events Dashboard
+#### Step 23 — Wazuh Security Events: Atomic Test Alerts
 
-<img width="1540" height="560" alt="12" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/12.png" />
+<img width="1540" height="680" alt="26" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/26.png" />
 
-Navigate to **Wazuh → Modules → DC → Security Events**. The dashboard immediately surfaces three correlated detections triggered by the CrackMapExec attack:
+Navigate to **Wazuh → Modules → DC → Security Events**. The Atomic Red Team execution generated **17 hits** in the 15-minute window around the test. Four distinct alert types surface immediately, all correlated to the attack:
+
+| Rule | Description | Level | Source |
+|------|-------------|:-----:|--------|
+| `92032` | Suspicious Windows cmd shell execution | 3 | Sysmon |
+| `92052` | Windows command prompt started by abnormal process | 4 | Sysmon |
+| `91815` | PowerShell executing process discovery | 4 | Sysmon |
+| `92027` | PowerShell process spawned PowerShell instance | 4 | Sysmon |
+
+> 🔍 **What the alerts reveal:** Atomic Red Team launched `cmd.exe` from within a PowerShell session (`92052`), then used PowerShell to enumerate running processes to locate `lsass.exe` (`91815`). The nested PowerShell spawning (`92027`) is a hallmark of offensive frameworks that execute their attack logic in a child process. Without Sysmon, these alerts would not have fired — native Windows Security logs only capture logon/logoff events, not process creation chains.
+
+---
+
+#### Step 24 — Forensic Analysis: Rule 92032 (Sysmon Process Event)
+
+<img width="1540" height="760" alt="27" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/27.png" />
+
+Expand the **Rule 92032** alert for the full Sysmon-enriched forensic record:
+
+| Field | Value | Significance |
+|-------|-------|--------------|
+| `data.win.eventdata.commandLine` | `C:\AtomicRedTeam\...\procdump.exe -accepteula -mm lsass.exe C:\Windows\Temp\lsass_dump.dmp` | Exact ProcDump command targeting lsass |
+| `data.win.eventdata.parentCommandLine` | `\"cmd.exe\" /c \"C:\AtomicRedTeam\...\procdump.exe\" -accepteula -mm lsass.exe ...` | cmd.exe used as launch wrapper |
+| `data.win.eventdata.parentImage` | `C:\Windows\System32\cmd.exe` | cmd spawned from PowerShell — abnormal parent |
+| `data.win.eventdata.image` | `C:\AtomicRedTeam\ExternalPayloads\procdump.exe` | Non-system-path binary touching lsass |
+| `data.win.eventdata.hashes` | `MD5=..., SHA256=..., IMPHASH=...` | Binary fingerprint for threat intel correlation |
+| `data.win.eventdata.integrityLevel` | `High` | Running with elevated privileges |
+| `data.win.eventdata.parentUser` | `MURSAD\Administrator` | Domain admin account used — full domain impact |
+| `agent.name` | `DC` | Domain Controller was the target |
+
+> 🔍 **Analyst Note:** The presence of `procdump.exe` with a command line targeting `lsass.exe`, spawned from `cmd.exe` under a domain admin account, is an unambiguous credential theft indicator. Sysmon's IMPHASH field enables matching this binary against known offensive tool signatures even if the file is renamed. Without Sysmon, only the AV block would have been visible — the full attack chain would have been invisible to the SIEM.
+
+---
+
+#### Step 25 — Rule 92032 Filtered View (5 Hits)
+
+<img width="1540" height="640" alt="28" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/28.png" />
+
+Filtering the Security Events view by `rule.id: 92032` isolates the five **Suspicious Windows cmd shell execution** alerts fired during the Atomic test window. Each represents a separate sub-technique attempt (ProcDump, comsvcs.dll, Dumpert, NanoDump, Mimikatz), all captured and correlated by Wazuh within seconds of execution.
+
+---
+
+#### Step 26 — Pass-the-Hash SIEM Detections (Rules 92652, 60122, 60137)
+
+Navigate to **Wazuh → Modules → DC → Security Events** and review the detections from the CrackMapExec attack:
 
 ---
 
@@ -3463,102 +3791,113 @@ Navigate to **Wazuh → Modules → DC → Security Events**. The dashboard imme
 
 > `Windows User Logoff`
 
-Wazuh tracks the full session lifecycle — the logon attempt followed immediately by a logoff as CrackMapExec completed and closed the connection. This chained sequence (logon → logoff within milliseconds) is itself a behavioural indicator of automated tooling.
+Wazuh tracks the full session lifecycle — logon → logoff within milliseconds. This chained sequence is itself a behavioural indicator of automated tooling.
 
 ---
 
-#### Step 13 — MITRE ATT&CK Reference: T1550.002 (Pass the Hash)
+#### Step 27 — Forensic Event Analysis: Event ID 4624 (Pass-the-Hash)
 
-<img width="1540" height="810" alt="13" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/13.png" />
-
-The MITRE ATT&CK framework documents this technique at [attack.mitre.org/techniques/T1550/002](https://attack.mitre.org/techniques/T1550/002/):
-
-**MITRE Techniques Triggered in This Exercise:**
-
-| Technique | ID | Description |
-|-----------|:--:|-------------|
-| Pass the Hash | `T1550.002` | Stolen NTLM hash used directly for auth — no plaintext needed |
-| Valid Accounts: Domain Accounts | `T1078.002` | Real `Administrator` account used — blends into normal admin activity |
-| Valid Accounts (Parent) | `T1078` | General use of valid credentials to maintain access |
-| Account Access Removal | `T1531` | Session termination detected after attack completed |
-
----
-
-#### Step 14 — Forensic Event Analysis (Expanded Log)
-
-<img width="1540" height="810" alt="14" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/14.png" />
-
-Expanding **Rule 92652** in Wazuh reveals the full forensic telemetry from **Event ID 4624** on `DC.mursad.local`:
+Expanding **Rule 92652** reveals the full forensic telemetry from **Event ID 4624** on `DC.mursad.local`:
 
 | Field | Value | Why It Matters |
 |-------|-------|----------------|
-| `data.win.eventdata.ipAddress` | `192.168.140.131` | Attacker Kali Linux IP — source of the attack |
+| `data.win.eventdata.ipAddress` | `192.168.140.131` | Attacker Kali Linux IP |
 | `data.win.eventdata.authenticationPackageName` | `NTLM` | No Kerberos = classic PtH indicator |
-| `data.win.eventdata.logonType` | `3` | Remote network logon — not interactive |
+| `data.win.eventdata.logonType` | `3` | Remote network logon |
 | `data.win.eventdata.targetUserName` | `ANONYMOUS LOGON` | Definitive PtH signature |
 | `data.win.system.computer` | `DC.mursad.local` | Domain Controller was the target |
-| `data.win.system.eventID` | `4624` | Successful logon event (logon was processed, auth failed at SMB layer) |
+| `data.win.system.eventID` | `4624` | Successful logon event processed |
 | `data.win.eventdata.logonGuid` | `{000...000}` | Null GUID = NTLM, not Kerberos |
-| `data.win.eventdata.lmPackageName` | `NTLM V1` | Older, weaker NTLM version — less secure |
+| `data.win.eventdata.lmPackageName` | `NTLM V1` | Older, weaker NTLM version |
 | `data.win.eventdata.logonProcessName` | `NtLmSsp` | Hash-based SSP — confirms PtH mechanism |
 
-> 🔍 **Analyst Note:** The combination of `logonType: 3` + `ANONYMOUS LOGON` + `NTLM V1` + a null `logonGuid` is the definitive forensic signature of a Pass-the-Hash attempt in Windows Security event logs. Wazuh rule 92652 fires specifically on this pattern, mapped directly to `T1550.002`.
+> 🔍 **Analyst Note:** The combination of `logonType: 3` + `ANONYMOUS LOGON` + `NTLM V1` + a null `logonGuid` is the definitive forensic signature of a Pass-the-Hash attempt. Wazuh rule 92652 fires specifically on this pattern, mapped directly to `T1550.002`.
 
 ---
 
 ### Attack Chain Summary
 
 ```
-Kali Linux (192.168.140.131)
-│
-├── crackmapexec smb 192.168.140.135 -u Administrator -H <hash>
-│        └── NTLM authentication attempt → STATUS_LOGON_FAILURE
-│
-└── Windows Security Events on DC.mursad.local
-         ├── Event 4624 — Logon Type 3 · ANONYMOUS LOGON · NTLM V1
-         ├── Event 4625 — Logon failure
-         └── Event 4634 — Logoff (session cleanup)
-                  │
-                  └── Wazuh Agent (ID: 001) ──► SIEM (10.22.7.67)
-                           ├── Rule 92652  Level 6  T1550.002  [PASS-THE-HASH]
-                           ├── Rule 60122  Level 5  T1078      [LOGON FAILURE]
-                           └── Rule 60137  Level 3             [USER LOGOFF]
+── Atomic Red Team (T1003.001) ─────────────────────────────────────
+  DC (PowerShell) → cmd.exe → procdump.exe → lsass.exe
+       │                └── Access Denied (Kaspersky blocked)
+       │
+       └── Sysmon Event ID 1 → ossec.conf → Wazuh Agent → SIEM
+                └── Rule 92032 · 92052 · 91815 · 92027 (17 hits)
+
+── Pass-the-Hash (T1550.002) ────────────────────────────────────────
+  Kali (192.168.140.131)
+       └── crackmapexec smb 192.168.140.135 -u Administrator -H <hash>
+                └── STATUS_LOGON_FAILURE
+
+       └── Windows Security Event ID 4624 → Wazuh Agent → SIEM
+                ├── Rule 92652  Level 6  T1550.002  [PASS-THE-HASH]
+                ├── Rule 60122  Level 5  T1078      [LOGON FAILURE]
+                └── Rule 60137  Level 3             [USER LOGOFF]
 ```
 
 ---
 
-### VM Summary
+### VM & Tool Summary
 
-| VM | Role | IP | Key Action |
-|:--:|------|:--:|------------|
-| VM 101 — DC | Target · Wazuh Agent · Kaspersky KSOS | `10.22.7.3` | Generated Event ID 4624 (PtH) |
-| VM 104 — Wazuh | SIEM · Alert Engine | `10.22.7.67` | Correlated and alerted Rule 92652 |
-| Kali Linux | Red Team Attacker | `192.168.140.131` | Executed CrackMapExec PtH attempt |
+| Component | Location | IP | Role |
+|-----------|:--------:|:--:|------|
+| VM 101 — DC | Servers zone | `10.22.7.3` | Target · Wazuh Agent · Kaspersky · Sysmon |
+| VM 104 — Wazuh | Servers zone | `10.22.7.67` | SIEM · Alert Correlation |
+| Kali Linux | WAN | `192.168.140.131` | Red Team Attacker |
+| Sysmon v15.15 | DC | — | Process telemetry pipeline to Wazuh |
+| Kaspersky KSOS | DC | — | AV — blocked ProcDump lsass access |
+| Rasad.ps1 | DC | — | Bulk audit policy hardening script |
 
 ---
 
 ### ✅ Phase Checklist
 
+**Agent & AV**
 - [ ] Wazuh agent manager launched — `sudo /var/ossec/bin/manage_agents`
 - [ ] Agent list confirmed — `ID: 001 · Name: DC · IP: any`
-- [ ] `ossec.log` reviewed on DC — `Valid key received` + `Connected to server`
+- [ ] `ossec.log` reviewed — `Valid key received` + `Connected to server`
 - [ ] `win32ui.exe` opened — Status: **Running** · Manager IP: `10.22.7.67`
-- [ ] Kaspersky KSOS installer downloaded from kaspersky.com
-- [ ] Installer launched in **File Server** mode
-- [ ] Windows Defender flagged and removed automatically
-- [ ] System restarted after Defender removal
-- [ ] `startup.exe` relaunched — **Try for free** selected
-- [ ] Account registration skipped
-- [ ] Kaspersky dashboard loaded — protection components active
+- [ ] Kaspersky KSOS downloaded and installed in **File Server** mode
+- [ ] Windows Defender removed, system restarted
+- [ ] Kaspersky trial activated — dashboard showing protection active
+
+**Sysmon & Telemetry**
+- [ ] Sysmon v15.15 downloaded from Microsoft Learn Sysinternals
+- [ ] SwiftOnSecurity `sysmonconfig-export.xml` downloaded and committed to `configs/windows/`
+- [ ] `.\Sysmon64.exe -accepteula -i .\sysmonconfig-export.xml` executed — `Sysmon64 started`
+- [ ] `ossec.conf` updated with `Microsoft-Windows-PowerShell/Operational` localfile block
+- [ ] `ossec.conf` updated with `Microsoft-Windows-Sysmon/Operational` localfile block
+- [ ] Wazuh agent restarted — `net stop wazuh && net start wazuh`
+
+**Endpoint Hardening**
+- [ ] `Rasad.ps1` executed — all audit policy categories showing `[OK]`
+- [ ] `gpedit.msc` opened and reviewed
+- [ ] Audit Policy verified — `Success, Failure` on account logon, account management, process tracking, system events
+- [ ] User Rights Assignment reviewed — `Debug programs` restricted
+- [ ] PowerShell Script Block Logging — **Enabled**
+- [ ] PowerShell Script Execution — **Enabled**
+- [ ] PowerShell Transcription — **Enabled**
+
+**Red Team — LSASS Dump (T1003.001)**
+- [ ] `Invoke-AtomicTest T1003.001 -ShowDetails` reviewed
+- [ ] `Invoke-AtomicTest T1003.001` executed — all sub-tests attempted
+- [ ] ProcDump blocked — `Access is denied (0x00000005)`
+- [ ] 17 Wazuh alerts generated from the Atomic test window
+- [ ] Rule 92032 fired — Suspicious Windows cmd shell execution
+- [ ] Rule 92052 fired — cmd started by abnormal process
+- [ ] Rule 91815 fired — PowerShell process discovery
+- [ ] Rule 92027 fired — PowerShell spawned PowerShell instance
+- [ ] Expanded Rule 92032 reviewed — ProcDump command line + IMPHASH visible
+
+**Red Team — Pass-the-Hash (T1550.002)**
 - [ ] `crackmapexec smb` PtH command executed from Kali Linux
-- [ ] `STATUS_LOGON_FAILURE` confirmed — attack blocked at auth layer
-- [ ] Wazuh → DC → Security Events reviewed
+- [ ] `STATUS_LOGON_FAILURE` confirmed
 - [ ] Rule 92652 triggered — Level 6 · `T1550.002` · `T1078.002`
 - [ ] Rule 60122 triggered — Level 5 · `T1078` · `T1531`
 - [ ] Rule 60137 triggered — Level 3 · session cleanup
-- [ ] Expanded Event ID 4624 reviewed — `ANONYMOUS LOGON` · `NTLM V1` · `logonType: 3` confirmed
-- [ ] Attacker IP `192.168.140.131` identified in `data.win.eventdata.ipAddress`
-- [ ] MITRE ATT&CK T1550.002 cross-referenced and documented
+- [ ] Event ID 4624 forensics reviewed — `ANONYMOUS LOGON` · `NTLM V1` · `logonType: 3`
+- [ ] Attacker IP `192.168.140.131` confirmed in `data.win.eventdata.ipAddress`
 
 <div align="center"><br>
 
