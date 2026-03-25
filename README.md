@@ -21,12 +21,12 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Phase_1-COMPLETE-2ecc71?style=flat-square&labelColor=0d1117"/>
   <img src="https://img.shields.io/badge/Phase_2-COMPLETE-2ecc71?style=flat-square&labelColor=0d1117"/>
-  <img src="https://img.shields.io/badge/Phase_3-IN_PROGRESS-e94560?style=flat-square&labelColor=0d1117"/>
-  <img src="https://img.shields.io/badge/Phase_4-PENDING-555555?style=flat-square&labelColor=0d1117"/>
+  <img src="https://img.shields.io/badge/Phase_3-COMPLETE-2ecc71?style=flat-square&labelColor=0d1117"/>
+  <img src="https://img.shields.io/badge/Phase_4-IN_PROGRESS-e94560?style=flat-square&labelColor=0d1117"/>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Progress-60%25-e94560?style=flat-square&labelColor=0d1117"/>
+  <img src="https://img.shields.io/badge/Progress-75%25-e94560?style=flat-square&labelColor=0d1117"/>
   <img src="https://img.shields.io/badge/Platform-Proxmox_VE_9.1-E57000?style=flat-square&logo=proxmox&logoColor=white&labelColor=0d1117"/>
   <img src="https://img.shields.io/badge/Domain-mursad.local-0078D4?style=flat-square&logo=microsoft&logoColor=white&labelColor=0d1117"/>
   <img src="https://img.shields.io/badge/FQDN-mursad.me-6B4CFF?style=flat-square&labelColor=0d1117"/>
@@ -62,6 +62,8 @@
   - [Phase 2 · 08 — Suricata IDS/IPS Configuration](#phase-2--08)
   - [Phase 3 · 09 — LAN/DMZ Traffic Isolation & DNS Mapping](#phase-3--09)
   - [Phase 3 · 10 — Wazuh SIEM Installation](#phase-3--10)
+  - [Phase 4 · 11 — Antivirus Integration & SIEM Testing](#phase-4--11)
+  - [Phase 4 · 12 — Infrastructure Auditing via CIS Benchmarks](#phase-4--12)
 - [Repository Structure](#-repository-structure)
 - [Disclaimer](#-disclaimer)
 
@@ -176,7 +178,7 @@ Project Mursad is a fully virtualized, enterprise-grade Security Operations Cent
   PHASE 1          PHASE 2              PHASE 3          PHASE 4
 Infrastructure  ──►  Identity       ──►  Telemetry   ──►  Hardening
   & Perimeter     & Segmentation       & Detection      & Validation
-  [ COMPLETE ]     [ COMPLETE ]         [ ACTIVE ]       [ PENDING ]
+  [ COMPLETE ]     [ COMPLETE ]        [ COMPLETE ]       [ ACTIVE ]
 ```
 
 </div>
@@ -226,8 +228,8 @@ Infrastructure  ──►  Identity       ──►  Telemetry   ──►  Hard
 
 | # | Task | Status |
 |:---:|------|:------:|
-| `[11]` | Antivirus Integration & SIEM Efficiency Testing | ⬜ |
-| `[12]` | Infrastructure Auditing via CIS Benchmarks | ⬜ |
+| `[11]` | Antivirus Integration & SIEM Efficiency Testing | ✅ |
+| `[12]` | Infrastructure Auditing via CIS Benchmarks | ✅ |
 | `[13]` | Kaspersky Security Center (EDR/AV) Enterprise Setup | ⬜ |
 | `[14]` | Final Security Review & Operations Wrap-Up | ⬜ |
 
@@ -2494,7 +2496,7 @@ Select **Allow the connection**.
 
 Check all three: **Domain**, **Private**, **Public**.
 
-![23](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-208-suricata-ids-ips/23.png)
+![23](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/08-suricata-ids-ips/23.png)
 
 ---
 
@@ -3528,28 +3530,7 @@ The script configures the following audit subcategories — each `[OK]` line con
     [OK] Other Logon/Logoff Events
     [OK] Distribution Group Management
     [OK] User Account Management
-    [OK] Central Policy Staging
-    [OK] Logon
-    [OK] File System
-    [OK] Detailed Directory Service Replication
-    [OK] User / Device Claims
-    [OK] Filtering Platform Packet Drop
-    [OK] Other Privilege Use Events
-    [OK] Logoff
-    [OK] Filtering Platform Policy Change
-    [OK] Special Logon
-    [OK] Application Group Management
-    [OK] Application Generated
-    [OK] SAM
-    [OK] Group Membership
-    [OK] IPsec Driver
-    [OK] Authorization Policy Change
-    [OK] Kerberos Authentication Service
-    [OK] Detailed File Share
-    [OK] System Integrity
-    [OK] Directory Service Access
-    [OK] Directory Service Changes
-    ... (continues)
+    ...
 ```
 
 > 📋 The full `Rasad.ps1` script is committed to the project repository under `scripts/Rasad.ps1`.
@@ -3561,8 +3542,6 @@ The script configures the following audit subcategories — each `[OK]` line con
 <img width="1080" height="810" alt="20" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/20.png" />
 
 Press **Win + R** → type `gpedit.msc` → click **OK** to open the **Local Group Policy Editor**.
-
-> ℹ️ For a domain-joined DC, changes here apply locally. In production, these policies would be distributed via a linked GPO at the domain or OU level to enforce settings across all managed endpoints.
 
 ---
 
@@ -3577,21 +3556,14 @@ Local Computer Policy → Computer Configuration → Windows Settings
   → Security Settings → Local Policies → Audit Policy
 ```
 
-The Rasad script has applied the following audit settings:
-
 | Audit Category | Setting |
 |----------------|---------|
 | Audit account logon events | Success, Failure |
 | Audit account management | Success, Failure |
 | Audit directory service access | Failure |
-| Audit logon events | No auditing *(advanced audit overrides this)* |
-| Audit object access | Failure |
 | Audit policy change | Success, Failure |
-| Audit privilege use | Failure |
 | Audit process tracking | Success, Failure |
 | Audit system events | Success, Failure |
-
-> ℹ️ **Why "No auditing" on logon events?** The legacy Audit Policy is superseded by **Advanced Audit Policy Configuration** for modern Windows Server. The Rasad script configures audit subcategories at the advanced level, which take precedence — so the basic logon entry showing "No auditing" is expected and correct.
 
 ---
 
@@ -3599,16 +3571,9 @@ The Rasad script has applied the following audit settings:
 
 <img width="1080" height="810" alt="22" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/22.png" />
 
-Navigate to:
+Navigate to **User Rights Assignment**. Review and tighten assignments based on least privilege.
 
-```
-Local Computer Policy → Computer Configuration → Windows Settings
-  → Security Settings → Local Policies → User Rights Assignment
-```
-
-This section controls which accounts can perform privileged operations — such as `Debug programs` (Administrators only), `Allow log on locally`, and `Deny access to this computer from the network`. Review and tighten these assignments as needed based on the principle of least privilege.
-
-> ⚠️ **Security Note:** In production environments, `Debug programs` should be removed from all accounts including Administrators to prevent tools like ProcDump and Mimikatz from attaching to privileged processes such as `lsass.exe`.
+> ⚠️ **Security Note:** In production environments, `Debug programs` should be removed from all accounts including Administrators to prevent tools like ProcDump from attaching to privileged processes such as `lsass.exe`.
 
 ---
 
@@ -3623,15 +3588,11 @@ Local Computer Policy → Computer Configuration → Administrative Templates
   → Windows Components → Windows PowerShell
 ```
 
-Enable the following three policies:
-
 | Policy | State | Purpose |
 |--------|-------|---------|
 | Turn on PowerShell Script Block Logging | **Enabled** | Captures every script block executed, even obfuscated ones |
 | Turn on Script Execution | **Enabled** | Controls execution policy enforcement |
 | Turn on PowerShell Transcription | **Enabled** | Writes full session transcripts to disk |
-
-> 🔍 **Why this matters for the SIEM:** Script Block Logging generates **Event ID 4104** — the full text of every PowerShell command that executes, including de-obfuscated content. This is how Wazuh catches `Invoke-AtomicTest`, `Invoke-Mimikatz`, and other offensive PowerShell frameworks even when they are encoded in Base64 or use string concatenation to evade simple string matching.
 
 ---
 
@@ -3641,24 +3602,9 @@ Enable the following three policies:
 
 <img width="1080" height="810" alt="24" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/24.png" />
 
-On the **Domain Controller**, open an elevated PowerShell session and inspect the Atomic Red Team test before execution:
-
 ```powershell
 Invoke-AtomicTest T1003.001 -ShowDetails
 ```
-
-This displays the full test plan for **OS Credential Dumping: LSASS Memory (T1003.001)**:
-
-```
-Technique: OS Credential Dumping: LSASS Memory  T1003.001
-Atomic Test Name: Dump LSASS.exe Memory using ProcDump
-Attack Commands:
-  "#{procdump_exe}" -accepteula -ma lsass.exe #{output_file}
-  → C:\AtomicRedTeam\atomics\..\ExternalPayloads\procdump.exe
-    -accepteula -ma lsass.exe C:\Windows\Temp\lsass_dump.dmp
-```
-
-> ℹ️ **MITRE T1003.001 — LSASS Memory Dump:** `lsass.exe` (Local Security Authority Subsystem Service) holds the credentials of every logged-in user in memory — NTLM hashes, Kerberos tickets, and plaintext passwords in some configurations. Attackers dump this process memory using tools like ProcDump, comsvcs.dll, Dumpert, or Mimikatz to extract these credentials offline, enabling lateral movement and privilege escalation across the domain.
 
 ---
 
@@ -3666,23 +3612,16 @@ Attack Commands:
 
 <img width="1080" height="810" alt="25" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/25.png" />
 
-Execute all sub-tests for T1003.001:
-
 ```powershell
 Invoke-AtomicTest T1003.001
 ```
 
-The results show each sub-technique attempt and its outcome:
-
-| Sub-test | Method | Result | Why |
-|----------|--------|--------|-----|
-| T1003.001-1 | ProcDump | `Access is denied (0x00000005)` — Exit `-2` | Kaspersky KSOS blocked ProcDump from attaching to `lsass.exe` |
-| T1003.001-2 | comsvcs.dll | Exit `0` | DLL-based technique completed *(hash extraction still requires offline analysis)* |
-| T1003.001-3 | Dumpert (direct syscalls) | `Failed to get processhandle` — Exit `1` | AV/PPL blocked the kernel handle request |
-| T1003.001-4 | NanoDump | Exit `0` | Attempted but handle acquisition silently failed |
-| T1003.001-6 | Mimikatz offline | Syntax error — Exit `1` | Tool path configuration issue |
-
-> 🔴 **Primary result:** Kaspersky KSOS successfully blocked the highest-fidelity ProcDump attempt with an access denied error. Despite some sub-tests returning exit code 0, all attempts to produce a usable credential dump were defeated. Critically — every attempt still produced rich Sysmon and PowerShell telemetry that Wazuh ingested and alerted on.
+| Sub-test | Method | Result |
+|----------|--------|--------|
+| T1003.001-1 | ProcDump | `Access is denied` — Kaspersky blocked |
+| T1003.001-2 | comsvcs.dll | Exit `0` |
+| T1003.001-3 | Dumpert | `Failed to get processhandle` — AV blocked |
+| T1003.001-4 | NanoDump | Silently failed |
 
 ---
 
@@ -3692,20 +3631,13 @@ The results show each sub-technique attempt and its outcome:
 
 <img width="1280" height="720" alt="11" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/11.png" />
 
-Switch to the **Kali Linux** machine. Execute a Pass-the-Hash (PtH) attack targeting the Domain Controller's SMB service:
-
 ```bash
 crackmapexec smb 192.168.140.135 -u Administrator -H 43ba4b0afe48d65e5f47b0f7ac1e6f8e
 ```
 
 ```
-SMB  192.168.140.135  445  DC  Windows 10 / Server 2019  (domain:mursad.local)
-SMB  192.168.140.135  445  DC  mursad.local\Administrator:43ba4b0...  STATUS_LOGON_FAILURE
+SMB  192.168.140.135  445  DC  STATUS_LOGON_FAILURE
 ```
-
-> 🔴 **Result:** `STATUS_LOGON_FAILURE` — the hash was invalid. The attack was blocked at the authentication layer, but the attempt still generated full Windows Security event logs which Wazuh ingested and correlated.
-
-> ℹ️ **What is Pass-the-Hash?** PtH (`MITRE T1550.002`) allows an attacker to authenticate using a captured NTLM hash — without ever knowing the plaintext password. NTLM accepts the hash itself as proof of identity, bypassing password policies entirely. This is why LSASS credential dumps (T1003.001) and PtH attacks (T1550.002) are so often chained in real-world intrusions.
 
 ---
 
@@ -3715,195 +3647,245 @@ SMB  192.168.140.135  445  DC  mursad.local\Administrator:43ba4b0...  STATUS_LOG
 
 <img width="1540" height="680" alt="26" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/26.png" />
 
-Navigate to **Wazuh → Modules → DC → Security Events**. The Atomic Red Team execution generated **17 hits** in the 15-minute window around the test. Four distinct alert types surface immediately, all correlated to the attack:
-
-| Rule | Description | Level | Source |
-|------|-------------|:-----:|--------|
-| `92032` | Suspicious Windows cmd shell execution | 3 | Sysmon |
-| `92052` | Windows command prompt started by abnormal process | 4 | Sysmon |
-| `91815` | PowerShell executing process discovery | 4 | Sysmon |
-| `92027` | PowerShell process spawned PowerShell instance | 4 | Sysmon |
-
-> 🔍 **What the alerts reveal:** Atomic Red Team launched `cmd.exe` from within a PowerShell session (`92052`), then used PowerShell to enumerate running processes to locate `lsass.exe` (`91815`). The nested PowerShell spawning (`92027`) is a hallmark of offensive frameworks that execute their attack logic in a child process. Without Sysmon, these alerts would not have fired — native Windows Security logs only capture logon/logoff events, not process creation chains.
+| Rule | Description | Level |
+|------|-------------|:-----:|
+| `92032` | Suspicious Windows cmd shell execution | 3 |
+| `92052` | Windows command prompt started by abnormal process | 4 |
+| `91815` | PowerShell executing process discovery | 4 |
+| `92027` | PowerShell process spawned PowerShell instance | 4 |
 
 ---
 
-#### Step 24 — Forensic Analysis: Rule 92032 (Sysmon Process Event)
+#### Step 24 — Forensic Analysis: Rule 92032
 
 <img width="1540" height="760" alt="27" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/27.png" />
 
-Expand the **Rule 92032** alert for the full Sysmon-enriched forensic record:
-
-| Field | Value | Significance |
-|-------|-------|--------------|
-| `data.win.eventdata.commandLine` | `C:\AtomicRedTeam\...\procdump.exe -accepteula -mm lsass.exe C:\Windows\Temp\lsass_dump.dmp` | Exact ProcDump command targeting lsass |
-| `data.win.eventdata.parentCommandLine` | `\"cmd.exe\" /c \"C:\AtomicRedTeam\...\procdump.exe\" -accepteula -mm lsass.exe ...` | cmd.exe used as launch wrapper |
-| `data.win.eventdata.parentImage` | `C:\Windows\System32\cmd.exe` | cmd spawned from PowerShell — abnormal parent |
-| `data.win.eventdata.image` | `C:\AtomicRedTeam\ExternalPayloads\procdump.exe` | Non-system-path binary touching lsass |
-| `data.win.eventdata.hashes` | `MD5=..., SHA256=..., IMPHASH=...` | Binary fingerprint for threat intel correlation |
-| `data.win.eventdata.integrityLevel` | `High` | Running with elevated privileges |
-| `data.win.eventdata.parentUser` | `MURSAD\Administrator` | Domain admin account used — full domain impact |
-| `agent.name` | `DC` | Domain Controller was the target |
-
-> 🔍 **Analyst Note:** The presence of `procdump.exe` with a command line targeting `lsass.exe`, spawned from `cmd.exe` under a domain admin account, is an unambiguous credential theft indicator. Sysmon's IMPHASH field enables matching this binary against known offensive tool signatures even if the file is renamed. Without Sysmon, only the AV block would have been visible — the full attack chain would have been invisible to the SIEM.
+| Field | Value |
+|-------|-------|
+| `commandLine` | `procdump.exe -accepteula -mm lsass.exe C:\Windows\Temp\lsass_dump.dmp` |
+| `parentImage` | `C:\Windows\System32\cmd.exe` |
+| `integrityLevel` | `High` |
+| `parentUser` | `MURSAD\Administrator` |
 
 ---
 
-#### Step 25 — Rule 92032 Filtered View (5 Hits)
+#### Step 25 — Pass-the-Hash SIEM Detections
 
-<img width="1540" height="640" alt="28" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/28.png" />
-
-Filtering the Security Events view by `rule.id: 92032` isolates the five **Suspicious Windows cmd shell execution** alerts fired during the Atomic test window. Each represents a separate sub-technique attempt (ProcDump, comsvcs.dll, Dumpert, NanoDump, Mimikatz), all captured and correlated by Wazuh within seconds of execution.
-
----
-
-#### Step 26 — Pass-the-Hash SIEM Detections (Rules 92652, 60122, 60137)
-
-Navigate to **Wazuh → Modules → DC → Security Events** and review the detections from the CrackMapExec attack:
-
----
-
-**Rule 92652 — Pass-the-Hash Detection** *(Primary alert)*
-
-> `Successful Remote Logon Detected - User:\ANONYMOUS LOGON - NTLM authentication, possible pass-the-hash attack`
+**Rule 92652 — Pass-the-Hash Detection**
 
 | Field | Value |
 |-------|-------|
-| Severity Level | `6` *(Medium-High)* |
+| Severity Level | `6` |
 | MITRE Techniques | `T1550.002` · `T1078.002` |
-| Tactics | Lateral Movement · Defense Evasion · Persistence · Privilege Escalation · Initial Access |
-
----
-
-**Rule 60122 — Failed Logon Attempts**
-
-> `Logon failure - Unknown user or bad password`
-
-| Field | Value |
-|-------|-------|
-| Severity Level | `5` |
-| MITRE Techniques | `T1078` · `T1531` |
-| Tactics | Defense Evasion · Persistence · Privilege Escalation · Initial Access · Impact |
-
----
-
-**Rule 60137 — Session Cleanup**
-
-> `Windows User Logoff`
-
-Wazuh tracks the full session lifecycle — logon → logoff within milliseconds. This chained sequence is itself a behavioural indicator of automated tooling.
-
----
-
-#### Step 27 — Forensic Event Analysis: Event ID 4624 (Pass-the-Hash)
-
-Expanding **Rule 92652** reveals the full forensic telemetry from **Event ID 4624** on `DC.mursad.local`:
-
-| Field | Value | Why It Matters |
-|-------|-------|----------------|
-| `data.win.eventdata.ipAddress` | `192.168.140.131` | Attacker Kali Linux IP |
-| `data.win.eventdata.authenticationPackageName` | `NTLM` | No Kerberos = classic PtH indicator |
-| `data.win.eventdata.logonType` | `3` | Remote network logon |
-| `data.win.eventdata.targetUserName` | `ANONYMOUS LOGON` | Definitive PtH signature |
-| `data.win.system.computer` | `DC.mursad.local` | Domain Controller was the target |
-| `data.win.system.eventID` | `4624` | Successful logon event processed |
-| `data.win.eventdata.logonGuid` | `{000...000}` | Null GUID = NTLM, not Kerberos |
-| `data.win.eventdata.lmPackageName` | `NTLM V1` | Older, weaker NTLM version |
-| `data.win.eventdata.logonProcessName` | `NtLmSsp` | Hash-based SSP — confirms PtH mechanism |
-
-> 🔍 **Analyst Note:** The combination of `logonType: 3` + `ANONYMOUS LOGON` + `NTLM V1` + a null `logonGuid` is the definitive forensic signature of a Pass-the-Hash attempt. Wazuh rule 92652 fires specifically on this pattern, mapped directly to `T1550.002`.
-
----
-
-### Attack Chain Summary
-
-```
-── Atomic Red Team (T1003.001) ─────────────────────────────────────
-  DC (PowerShell) → cmd.exe → procdump.exe → lsass.exe
-       │                └── Access Denied (Kaspersky blocked)
-       │
-       └── Sysmon Event ID 1 → ossec.conf → Wazuh Agent → SIEM
-                └── Rule 92032 · 92052 · 91815 · 92027 (17 hits)
-
-── Pass-the-Hash (T1550.002) ────────────────────────────────────────
-  Kali (192.168.140.131)
-       └── crackmapexec smb 192.168.140.135 -u Administrator -H <hash>
-                └── STATUS_LOGON_FAILURE
-
-       └── Windows Security Event ID 4624 → Wazuh Agent → SIEM
-                ├── Rule 92652  Level 6  T1550.002  [PASS-THE-HASH]
-                ├── Rule 60122  Level 5  T1078      [LOGON FAILURE]
-                └── Rule 60137  Level 3             [USER LOGOFF]
-```
-
----
-
-### VM & Tool Summary
-
-| Component | Location | IP | Role |
-|-----------|:--------:|:--:|------|
-| VM 101 — DC | Servers zone | `10.22.7.3` | Target · Wazuh Agent · Kaspersky · Sysmon |
-| VM 104 — Wazuh | Servers zone | `10.22.7.67` | SIEM · Alert Correlation |
-| Kali Linux | WAN | `192.168.140.131` | Red Team Attacker |
-| Sysmon v15.15 | DC | — | Process telemetry pipeline to Wazuh |
-| Kaspersky KSOS | DC | — | AV — blocked ProcDump lsass access |
-| Rasad.ps1 | DC | — | Bulk audit policy hardening script |
+| `authenticationPackageName` | `NTLM` |
+| `targetUserName` | `ANONYMOUS LOGON` |
+| `logonType` | `3` |
+| Attacker IP | `192.168.140.131` |
 
 ---
 
 ### ✅ Phase Checklist
 
-**Agent & AV**
-- [ ] Wazuh agent manager launched — `sudo /var/ossec/bin/manage_agents`
-- [ ] Agent list confirmed — `ID: 001 · Name: DC · IP: any`
-- [ ] `ossec.log` reviewed — `Valid key received` + `Connected to server`
-- [ ] `win32ui.exe` opened — Status: **Running** · Manager IP: `10.22.7.67`
-- [ ] Kaspersky KSOS downloaded and installed in **File Server** mode
-- [ ] Windows Defender removed, system restarted
-- [ ] Kaspersky trial activated — dashboard showing protection active
-
-**Sysmon & Telemetry**
-- [ ] Sysmon v15.15 downloaded from Microsoft Learn Sysinternals
-- [ ] SwiftOnSecurity `sysmonconfig-export.xml` downloaded and committed to `configs/windows/`
-- [ ] `.\Sysmon64.exe -accepteula -i .\sysmonconfig-export.xml` executed — `Sysmon64 started`
-- [ ] `ossec.conf` updated with `Microsoft-Windows-PowerShell/Operational` localfile block
-- [ ] `ossec.conf` updated with `Microsoft-Windows-Sysmon/Operational` localfile block
-- [ ] Wazuh agent restarted — `net stop wazuh && net start wazuh`
-
-**Endpoint Hardening**
-- [ ] `Rasad.ps1` executed — all audit policy categories showing `[OK]`
-- [ ] `gpedit.msc` opened and reviewed
-- [ ] Audit Policy verified — `Success, Failure` on account logon, account management, process tracking, system events
-- [ ] User Rights Assignment reviewed — `Debug programs` restricted
-- [ ] PowerShell Script Block Logging — **Enabled**
-- [ ] PowerShell Script Execution — **Enabled**
-- [ ] PowerShell Transcription — **Enabled**
-
-**Red Team — LSASS Dump (T1003.001)**
-- [ ] `Invoke-AtomicTest T1003.001 -ShowDetails` reviewed
-- [ ] `Invoke-AtomicTest T1003.001` executed — all sub-tests attempted
-- [ ] ProcDump blocked — `Access is denied (0x00000005)`
+- [ ] Wazuh agent confirmed active — `ID: 001 · Name: DC`
+- [ ] Kaspersky KSOS installed in **File Server** mode · trial activated
+- [ ] Sysmon v15.15 installed with SwiftOnSecurity config
+- [ ] `ossec.conf` updated with PowerShell and Sysmon log channels
+- [ ] `Rasad.ps1` executed — all audit policies showing `[OK]`
+- [ ] PowerShell Script Block Logging enabled via GPO
+- [ ] `Invoke-AtomicTest T1003.001` executed — ProcDump blocked by Kaspersky
 - [ ] 17 Wazuh alerts generated from the Atomic test window
-- [ ] Rule 92032 fired — Suspicious Windows cmd shell execution
-- [ ] Rule 92052 fired — cmd started by abnormal process
-- [ ] Rule 91815 fired — PowerShell process discovery
-- [ ] Rule 92027 fired — PowerShell spawned PowerShell instance
-- [ ] Expanded Rule 92032 reviewed — ProcDump command line + IMPHASH visible
-
-**Red Team — Pass-the-Hash (T1550.002)**
-- [ ] `crackmapexec smb` PtH command executed from Kali Linux
-- [ ] `STATUS_LOGON_FAILURE` confirmed
-- [ ] Rule 92652 triggered — Level 6 · `T1550.002` · `T1078.002`
-- [ ] Rule 60122 triggered — Level 5 · `T1078` · `T1531`
-- [ ] Rule 60137 triggered — Level 3 · session cleanup
-- [ ] Event ID 4624 forensics reviewed — `ANONYMOUS LOGON` · `NTLM V1` · `logonType: 3`
-- [ ] Attacker IP `192.168.140.131` confirmed in `data.win.eventdata.ipAddress`
+- [ ] PtH attack executed from Kali — `STATUS_LOGON_FAILURE`
+- [ ] Rule 92652 triggered — Level 6 · `T1550.002`
+- [ ] Event ID 4624 forensics reviewed — `ANONYMOUS LOGON · NTLM V1`
 
 <div align="center"><br>
 
 **🟢 Phase 4 · [11] Complete**
 
 `[10] Wazuh SIEM Installation` ◄── **`[11] Antivirus Integration & SIEM Testing`** ──► `[12] Infrastructure Auditing via CIS Benchmarks`
+
+<br></div>
+
+</details>
+
+---
+
+<details>
+<summary><b>📙 Phase 4 · [12] — Infrastructure Auditing via CIS Benchmarks</b></summary>
+<a name="phase-4--12"></a>
+
+<br>
+
+> **Objective:** *Assess the security posture of the Windows Server infrastructure against industry-standard CIS Controls benchmarks using CIS-CAT Lite, identify misconfigurations, and establish a baseline for hardening.*
+
+---
+
+### 🔍 Why CIS-CAT Lite?
+
+**CIS-CAT Lite** (Configuration Assessment Tool) is a free, vendor-neutral auditing tool developed by the **Center for Internet Security (CIS)**. It evaluates a system's configuration against the **CIS Benchmarks** — globally recognized best practices for securing operating systems, applications, and network devices.
+
+In the context of this SOC lab, CIS-CAT Lite serves as a **compliance baseline scanner** that gives us a measurable, scored snapshot of how hardened our Domain Controller is before any manual hardening takes place. Running this assessment allows us to:
+
+- **Identify** out-of-the-box misconfigurations on the Windows Server that attackers could exploit.
+- **Prioritize** remediation efforts using scored results with built-in remediation guidance.
+- **Validate** future hardening changes by re-running assessments and comparing scores over time.
+- **Map** findings to CIS Controls (IG1 Sub-Controls), which align with frameworks like NIST CSF, ISO 27001, and SOC 2.
+
+> The **Lite** version is free and covers the most critical IG1 (Implementation Group 1) controls — the "essential cyber hygiene" baseline every organization should meet regardless of size.
+
+---
+
+### Step 1 — Tool Installation & File Structure
+
+After downloading **CIS-CAT Lite Assessor v4.56.0**, the extracted folder contains all components needed to run both GUI and CLI-based assessments.
+
+![CIS-CAT Lite Folder Structure](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/12-cis-benchmarks/1.png)
+
+> The `Assessor` directory contains the core executables (`Assessor-GUI`, `Assessor-CLI`), benchmark definitions under `benchmarks/`, and the `reports/` folder where all output is saved. The tool requires no installation — it runs directly from the extracted directory.
+
+---
+
+### Step 2 — Launching the GUI & Selecting Scan Mode
+
+Opening `Assessor-GUI` presents the CIS Configuration Assessment Tool welcome screen. Since we are auditing only the local system (the Domain Controller), the **Basic** scan mode is selected — this scans the local machine without needing remote credentials or network access.
+
+![CIS-CAT Lite Welcome Screen](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/12-cis-benchmarks/2.png)
+
+> The **Advanced** mode supports scanning remote systems over the network but is restricted in the Lite version. For our DC audit, Basic is sufficient.
+
+---
+
+### Step 3 — Benchmark & Profile Selection
+
+From the benchmark library, we select the **CIS Controls Assessment Module — Implementation Group 1 for Windows Server v1.0.0**. On the right panel, the profile **Implementation Group 1 for Windows Server (Full) — Automated Checks and Survey Questions** is chosen and added to the queue.
+
+![Benchmark Selection](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/12-cis-benchmarks/3.png)
+
+> **Implementation Group 1 (IG1)** represents the minimum set of cybersecurity controls every organization should implement. The **Full** profile combines both automated registry/configuration checks *and* manual survey questions, giving a complete picture of IG1 compliance. The selected benchmark is confirmed in the **Selected** panel at the bottom before proceeding.
+
+---
+
+### Step 4 — Report Output & Assessment Options
+
+The assessment options screen shows available output formats and the destination path for reports. In CIS-CAT Lite, only the **HTML** format is available — CSV, Text, ARF XML, and JSON are Pro-only features.
+
+![Assessment Options](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/12-cis-benchmarks/4.png)
+
+> Reports are saved to `C:\Users\Administrator\Desktop\CIS-CAT Lite Assessor v4.56.0\Assessor\reports`. The logging level is set to `WARN or ERROR` to keep output clean. No POST URL is configured as we are not integrating with a CIS-CAT Pro Dashboard in this lab.
+
+---
+
+### Step 5 — Assessment Execution & Completion
+
+CIS-CAT runs through the benchmark checklist automatically. The console output shows the tool generating the Asset Reporting Format, collecting checklist results, combining and saving them, then exiting with **Exit Code: 0** — indicating a clean, successful run.
+
+![Assessment Complete](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/12-cis-benchmarks/5.png)
+
+> The resulting HTML report is saved as `DC-CIS_Controls_Assessment_Module_-_Implementation_Group_1_for_Windows_Server-20260325T072122Z.html`. The session targets the **Local** system and the full report is accessible via the **View HTML** button.
+
+---
+
+### Step 6 — Report Overview
+
+The generated report is a detailed **Security Configuration Assessment Report for DC** targeting IP `10.22.7.3`, assessed on March 25, 2026 using the **Implementation Group 1 for Windows Server (Full)** profile.
+
+![Report Cover Page](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/12-cis-benchmarks/6.png)
+
+---
+
+### Step 7 — Summary Results: Overall Score 74%
+
+The summary table breaks down the assessment across two sections:
+
+| Section | Pass | Fail | Score | Max | Percent |
+|---|---|---|---|---|---|
+| Automated Checks | 4 | 11 | 4.0 | 14.0 | **29%** |
+| User Survey Questions | 28 | 1 | 28.0 | 29.0 | **97%** |
+| **Total** | **32** | **12** | **32.0** | **43.0** | **74%** |
+
+![Assessment Summary](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/12-cis-benchmarks/7.png)
+
+> The automated checks reveal the most significant gaps — only **29%** pass rate — because these are objective, technical controls the tool can verify directly against registry keys, GPO settings, and system configurations. The high survey score (97%) reflects policies and procedures that are manually answered. The overall **74% score** establishes our pre-hardening baseline.
+
+---
+
+### Step 8 — Full Assessment Results Breakdown
+
+The assessment results table lists every IG1 Sub-Control with its pass/fail result. Key failing automated checks include:
+
+- `1.1` — **3.4 Deploy Automated OS Patch Management Tools** → ❌ Fail
+- `1.2` — **4.2 Change Default Passwords** → ❌ Fail
+- `1.4` — **8.2 Ensure Anti-Malware Software and Signatures are Updated** → ❌ Fail
+- `1.5` — **8.4 Configure Anti-Malware Scanning of Removable Media** → ❌ Fail
+- `1.6` — **8.5(a) Configure Devices to Not Auto-Run Content (AutoRun)** → ❌ Fail
+- `1.7` — **8.5(b) Configure Devices to Not Auto-Run Content (AutoPlay)** → ❌ Fail
+- `1.9` — **10.1 Ensure Regular Automated Backups** → ❌ Fail
+- `1.10` — **10.2 Perform Complete System Backups** → ❌ Fail
+
+![Assessment Results List](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/12-cis-benchmarks/8.png)
+
+> Items that **Pass** include audit logging (6.2), host-based firewalls (9.4), AES encryption for wireless (15.7), dormant account management (16.9), and network boundary inventory (12.1) — indicating the DC has some baseline security controls in place from the Active Directory and pfSense setup in earlier phases.
+
+---
+
+### Step 9 — Failed Control Deep-Dive: Change Default Passwords (4.2)
+
+Control **1.2 — 4.2 Change Default Passwords** flagged as **FAIL**. The CIS automated check (CAM) verifies that the minimum password length policy meets the required threshold of **14 characters** — consistent with Windows Benchmark standards.
+
+![Change Default Passwords - Fail](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/12-cis-benchmarks/9.png)
+
+> **Remediation:** Navigate to `Computer Configuration > Windows Settings > Security Settings > Account Policies > Password Policy > Minimum password length` in the Local Group Policy Editor and set it to **14 or more characters**. This setting can also be enforced at the Domain level via Group Policy Management on the Domain Controller.
+
+---
+
+### Step 10 — Passed Control Deep-Dive: Activate Audit Logging (6.2)
+
+Control **1.3 — 6.2 Activate Audit Logging** returns **PASS**. The CAM check verifies that at least one audit sub-category of logging is enabled on the system.
+
+![Activate Audit Logging - Pass](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/12-cis-benchmarks/10.png)
+
+> Audit logging was already activated as part of the Wazuh SIEM integration in `[10]`. CIS-CAT confirms this is correctly configured. For full compliance, advanced audit policy sub-categories should be reviewed under `Computer Configuration > Windows Settings > Security Settings > Advanced Audit Policy Configuration > System Audit Policies` to ensure all critical categories (Logon/Logoff, Account Management, Object Access) are enabled.
+
+---
+
+### 📊 Baseline Summary
+
+| Metric | Value |
+|---|---|
+| Tool | CIS-CAT Lite Assessor v4.56.0 |
+| Benchmark | CIS Controls Assessment Module — IG1 for Windows Server v1.0.0 |
+| Profile | Implementation Group 1 for Windows Server (Full) |
+| Target | DC — `10.22.7.3` |
+| Assessment Date | March 25, 2026 |
+| **Pre-Hardening Score** | **74% (32/43)** |
+| Automated Pass Rate | 29% (4/15) |
+| Survey Pass Rate | 97% (28/29) |
+| Critical Fails | Patch Management, Password Policy, Anti-Malware, AutoRun, Backups |
+
+> This baseline score will serve as the benchmark for measuring the effectiveness of hardening steps introduced in subsequent phases, including **EDR deployment** via Kaspersky Security Center in `[13]`.
+
+---
+
+### ✅ Phase Checklist
+
+- [ ] CIS-CAT Lite Assessor v4.56.0 extracted and verified
+- [ ] `Assessor-GUI` launched — Basic scan mode selected
+- [ ] Benchmark selected — CIS Controls Assessment Module IG1 for Windows Server v1.0.0
+- [ ] Profile selected — Implementation Group 1 for Windows Server (Full)
+- [ ] Assessment options confirmed — HTML output · reports path set
+- [ ] Assessment run completed — Exit Code: 0
+- [ ] HTML report opened and verified — target IP `10.22.7.3`
+- [ ] Overall score recorded — **74% (32/43)**
+- [ ] Automated pass rate noted — 29% (4/15) · Survey pass rate — 97% (28/29)
+- [ ] All 11 failing automated controls reviewed
+- [ ] Rule 1.2 (4.2 Default Passwords) remediation path documented
+- [ ] Rule 1.3 (6.2 Audit Logging) confirmed as PASS — tied to `[10]` Wazuh work
+
+<div align="center"><br>
+
+**🟢 Phase 4 · [12] Complete**
+
+`[11] Antivirus Integration & SIEM Testing` ◄── **`[12] Infrastructure Auditing via CIS Benchmarks`** ──► `[13] Kaspersky Security Center`
 
 <br></div>
 
@@ -3926,9 +3908,12 @@ Project-Mursad/
 │   │   ├── 06-active-directory/       # 33 screenshots
 │   │   ├── 07-dmz-architecture/       # 15 screenshots
 │   │   └── 08-suricata/               # 30 screenshots
-│   └── phase-3/
-│       ├── 09-lan-dmz-isolation/      # 9 screenshots
-│       └── 10-wazuh-siem/             # 19 screenshots
+│   ├── phase-3/
+│   │   ├── 09-lan-dmz-isolation/      # 9 screenshots
+│   │   └── 10-wazuh-siem/             # 19 screenshots
+│   └── phase-4/
+│       ├── 11-antivirus-siem/         # 27 screenshots
+│       └── 12-cis-benchmarks/         # 10 screenshots
 │
 ├── 📂 configs/
 │   ├── pfsense/
@@ -3951,10 +3936,13 @@ Project-Mursad/
 │   │   ├── 09-lan-dmz-isolation.md
 │   │   └── 10-wazuh-siem.md
 │   └── phase-4/
+│       ├── 11-antivirus-siem.md
+│       └── 12-cis-benchmarks.md
 │
 ├── 📂 scripts/
 │   ├── ad-provisioning.ps1
 │   ├── wazuh-agent-deploy.sh
+│   ├── Rasad.ps1
 │   └── cis-audit.sh
 │
 ├── README.md
