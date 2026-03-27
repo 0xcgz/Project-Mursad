@@ -26,7 +26,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Progress-75%25-e94560?style=flat-square&labelColor=0d1117"/>
+  <img src="https://img.shields.io/badge/Progress-90%25-e94560?style=flat-square&labelColor=0d1117"/>
   <img src="https://img.shields.io/badge/Platform-Proxmox_VE_9.1-E57000?style=flat-square&logo=proxmox&logoColor=white&labelColor=0d1117"/>
   <img src="https://img.shields.io/badge/Domain-mursad.local-0078D4?style=flat-square&logo=microsoft&logoColor=white&labelColor=0d1117"/>
   <img src="https://img.shields.io/badge/FQDN-mursad.me-6B4CFF?style=flat-square&labelColor=0d1117"/>
@@ -64,6 +64,7 @@
   - [Phase 3 · 10 — Wazuh SIEM Installation](#phase-3--10)
   - [Phase 4 · 11 — Antivirus Integration & SIEM Testing](#phase-4--11)
   - [Phase 4 · 12 — Infrastructure Auditing via CIS Benchmarks](#phase-4--12)
+  - [Phase 4 · 13 — Kaspersky Security Center EDR/AV Enterprise Setup](#phase-4--13)
 - [Repository Structure](#-repository-structure)
 - [Disclaimer](#-disclaimer)
 
@@ -149,6 +150,7 @@ Project Mursad is a fully virtualized, enterprise-grade Security Operations Cent
 | pfSense — OPs | `10.22.2.1` | OPs Workstation | Operations segment gateway |
 | Windows Server DC | `10.22.7.3` | Servers | AD · DNS · `mursad.local` |
 | Wazuh SIEM | `10.22.7.67` | Servers | Log aggregation · alerting |
+| EDR Server (KSC) | `10.22.7.5` | Servers | Kaspersky Security Center |
 | IT Workstation | `10.22.1.x` | IT Workstation | Domain-joined · Wazuh agent |
 | OPs Workstation | `10.22.2.x` | OPs Workstation | Domain-joined · Wazuh agent |
 | DMZ Server | `192.168.50.10` | DMZ | Public-facing web server · XAMPP |
@@ -166,6 +168,7 @@ Project Mursad is a fully virtualized, enterprise-grade Security Operations Cent
 | <img src="https://img.shields.io/badge/Wazuh-6B4CFF?style=flat-square&logoColor=white"/> | SIEM · XDR · log aggregation · alerting | `4.x` |
 | <img src="https://img.shields.io/badge/Windows_Server_2019-0078D4?style=flat-square&logo=microsoft&logoColor=white"/> | Active Directory · DNS · AD CS | Eval |
 | <img src="https://img.shields.io/badge/Windows_10_Pro-0078D4?style=flat-square&logo=microsoft&logoColor=white"/> | Domain endpoints — IT · OPs | Eval |
+| <img src="https://img.shields.io/badge/Kaspersky_KSC-006D5C?style=flat-square&logoColor=white"/> | Enterprise EDR · AV · centralized management | `12.x` |
 | <img src="https://img.shields.io/badge/Kali_Linux-557C94?style=flat-square&logo=kali-linux&logoColor=white"/> | Red Team · penetration testing | Latest |
 
 ---
@@ -230,7 +233,7 @@ Infrastructure  ──►  Identity       ──►  Telemetry   ──►  Hard
 |:---:|------|:------:|
 | `[11]` | Antivirus Integration & SIEM Efficiency Testing | ✅ |
 | `[12]` | Infrastructure Auditing via CIS Benchmarks | ✅ |
-| `[13]` | Kaspersky Security Center (EDR/AV) Enterprise Setup | ⬜ |
+| `[13]` | Kaspersky Security Center (EDR/AV) Enterprise Setup | ✅ |
 | `[14]` | Final Security Review & Operations Wrap-Up | ⬜ |
 
 <br>
@@ -1375,7 +1378,7 @@ Cores: `2` · Type: `host`
 
 Memory: **8192 MiB (8 GB)**
 
-![8](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-dc-provisioning/8.png)
+![8](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-2/05-domain-controller/8.png)
 
 ---
 
@@ -3354,8 +3357,6 @@ Launch `win32ui.exe` from the same directory. The **Wazuh Agent Manager** GUI co
 
 Navigate to [kaspersky.com/small-to-medium-business-security/downloads](https://www.kaspersky.com/small-to-medium-business-security/downloads) and select **Kaspersky Small Office Security → Download**.
 
-> ℹ️ Other enterprise-grade AV vendors (CrowdStrike, Defender for Endpoint, Sophos) can be substituted depending on your lab objectives. For this deployment, Kaspersky KSOS is used for its free 30-day trial and straightforward server-mode support.
-
 ---
 
 #### Step 6 — Launch the Installer
@@ -3372,13 +3373,7 @@ Click **Continue** to proceed through the installation wizard with default setti
 
 <img width="1080" height="810" alt="7" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/7.png" />
 
-Kaspersky detects **Windows Defender** as incompatible and flags it for automatic removal:
-
-| Software | Action |
-|----------|--------|
-| Windows Defender | Will be removed automatically |
-
-Click **Delete** → system restarts to complete the transition.
+Kaspersky detects **Windows Defender** as incompatible and flags it for automatic removal. Click **Delete** → system restarts to complete the transition.
 
 > ⚠️ Running two real-time AV engines simultaneously causes performance degradation and signature conflicts. Kaspersky fully replaces the Defender stack.
 
@@ -3406,12 +3401,6 @@ Click **Skip** — account registration is not required for this isolated lab en
 
 The Kaspersky **Small Office Security** dashboard confirms the DC is now protected in **File Server** mode. Run a database update to pull the latest threat signatures before proceeding.
 
-```
-We've got you covered
-● Main protection components are running
-● The databases and the application require an update
-```
-
 ---
 
 ### Part C — Sysmon Deployment & Telemetry Pipeline
@@ -3420,9 +3409,7 @@ We've got you covered
 
 <img width="1540" height="760" alt="15" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/15.png" />
 
-Navigate to [learn.microsoft.com/en-us/sysinternals/downloads/sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon) and download **Sysmon v15.15** (4.6 MB).
-
-**System Monitor (Sysmon)** is a Windows system service and kernel driver that survives reboots and logs granular system activity to the Windows Event Log — process creations with full command lines, network connections, file creation timestamps, and more. Unlike native Windows Security logs, Sysmon captures the *parent process*, *hash*, and *command line* of every spawned process, making it invaluable for detecting living-off-the-land attacks like LSASS dumps.
+Navigate to [learn.microsoft.com/en-us/sysinternals/downloads/sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon) and download **Sysmon v15.15**.
 
 ---
 
@@ -3430,15 +3417,7 @@ Navigate to [learn.microsoft.com/en-us/sysinternals/downloads/sysmon](https://le
 
 <img width="1540" height="810" alt="16" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/16.png" />
 
-Rather than writing a Sysmon config from scratch, we use the industry-standard **SwiftOnSecurity** config from [github.com/SwiftOnSecurity/sysmon-config](https://github.com/SwiftOnSecurity/sysmon-config). This 1200-line XML file provides a production-grade baseline that:
-
-- Logs all process creations with full command lines (Event ID 1)
-- Captures network connections (Event ID 3)
-- Logs image/driver loads with hash verification (Event ID 7)
-- Includes exclusion rules for ~50 noisy Microsoft processes to prevent alert fatigue
-- Enables MD5, SHA256, and IMPHASH algorithms for binary fingerprinting
-
-> 📋 The `sysmonconfig-export.xml` used in this deployment is committed to the project repository under `configs/windows/sysmonconfig-export.xml`.
+Use the industry-standard **SwiftOnSecurity** config from [github.com/SwiftOnSecurity/sysmon-config](https://github.com/SwiftOnSecurity/sysmon-config).
 
 ---
 
@@ -3446,28 +3425,9 @@ Rather than writing a Sysmon config from scratch, we use the industry-standard *
 
 <img width="1080" height="810" alt="17" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/17.png" />
 
-On the **Domain Controller**, open an elevated **Administrator PowerShell** session and run:
-
 ```powershell
 .\Sysmon64.exe -accepteula -i .\sysmonconfig-export.xml
 ```
-
-The output confirms a clean installation:
-
-```
-System Monitor v15.15 — System activity monitor
-Loading configuration file with schema version 4.50
-Sysmon schema version: 4.90
-Configuration file validated.
-Sysmon64 installed.
-SysmonDrv installed.
-Starting SysmonDrv.
-SysmonDrv started.
-Starting Sysmon64..
-Sysmon64 started.
-```
-
-> ✅ Sysmon is now running as a protected kernel-level service. It begins populating `Microsoft-Windows-Sysmon/Operational` in the Windows Event Log immediately.
 
 ---
 
@@ -3475,36 +3435,19 @@ Sysmon64 started.
 
 <img width="1080" height="810" alt="18" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/18.png" />
 
-By default, the Wazuh agent does not collect Sysmon or PowerShell Operational logs. Open `ossec.conf` on the DC:
-
-```
-C:\Program Files (x86)\ossec-agent\ossec.conf
-```
-
-Add the following two `<localfile>` blocks at the end of the existing log collection section:
+Add the following two `<localfile>` blocks to `ossec.conf` on the DC:
 
 ```xml
-<!-- PowerShell logs -->
 <localfile>
   <location>Microsoft-Windows-PowerShell/Operational</location>
   <log_format>eventchannel</log_format>
 </localfile>
 
-<!-- Sysmon logs -->
 <localfile>
   <location>Microsoft-Windows-Sysmon/Operational</location>
   <log_format>eventchannel</log_format>
 </localfile>
 ```
-
-Restart the Wazuh agent service to apply:
-
-```powershell
-net stop wazuh
-net start wazuh
-```
-
-> ℹ️ **Why both channels?** PowerShell Operational logs capture script block content (`4104`) and command execution (`4103`). Sysmon provides the process tree context — parent PID, image path, and hashes — that raw PowerShell logs lack. Together they give the SIEM full visibility into what ran, how it was invoked, and what it spawned.
 
 ---
 
@@ -3514,26 +3457,9 @@ net start wazuh
 
 <img width="1080" height="810" alt="19" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/19.png" />
 
-**Rasad** is a custom PowerShell hardening script developed for this project that automates Windows audit policy configuration in bulk. Launch an elevated PowerShell session and execute it:
-
 ```powershell
 .\Rasad.ps1
 ```
-
-The script configures the following audit subcategories — each `[OK]` line confirms a successful policy application:
-
-```
-[*] Starting Rasad — Endpoint Hardening...
-
-[+] Configuring Audit Policies...
-    [OK] Security State Change
-    [OK] Other Logon/Logoff Events
-    [OK] Distribution Group Management
-    [OK] User Account Management
-    ...
-```
-
-> 📋 The full `Rasad.ps1` script is committed to the project repository under `scripts/Rasad.ps1`.
 
 ---
 
@@ -3541,20 +3467,13 @@ The script configures the following audit subcategories — each `[OK]` line con
 
 <img width="1080" height="810" alt="20" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/20.png" />
 
-Press **Win + R** → type `gpedit.msc` → click **OK** to open the **Local Group Policy Editor**.
+Press **Win + R** → type `gpedit.msc` → click **OK**.
 
 ---
 
 #### Step 17 — Review Audit Policy Configuration
 
 <img width="1080" height="810" alt="21" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/21.png" />
-
-Navigate to:
-
-```
-Local Computer Policy → Computer Configuration → Windows Settings
-  → Security Settings → Local Policies → Audit Policy
-```
 
 | Audit Category | Setting |
 |----------------|---------|
@@ -3573,26 +3492,17 @@ Local Computer Policy → Computer Configuration → Windows Settings
 
 Navigate to **User Rights Assignment**. Review and tighten assignments based on least privilege.
 
-> ⚠️ **Security Note:** In production environments, `Debug programs` should be removed from all accounts including Administrators to prevent tools like ProcDump from attaching to privileged processes such as `lsass.exe`.
-
 ---
 
 #### Step 19 — Enable PowerShell Logging via Group Policy
 
 <img width="1080" height="810" alt="23" src="https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/11-antivirus-siem/23.png" />
 
-Navigate to:
-
-```
-Local Computer Policy → Computer Configuration → Administrative Templates
-  → Windows Components → Windows PowerShell
-```
-
-| Policy | State | Purpose |
-|--------|-------|---------|
-| Turn on PowerShell Script Block Logging | **Enabled** | Captures every script block executed, even obfuscated ones |
-| Turn on Script Execution | **Enabled** | Controls execution policy enforcement |
-| Turn on PowerShell Transcription | **Enabled** | Writes full session transcripts to disk |
+| Policy | State |
+|--------|-------|
+| Turn on PowerShell Script Block Logging | **Enabled** |
+| Turn on Script Execution | **Enabled** |
+| Turn on PowerShell Transcription | **Enabled** |
 
 ---
 
@@ -3741,61 +3651,45 @@ After downloading **CIS-CAT Lite Assessor v4.56.0**, the extracted folder contai
 
 ![CIS-CAT Lite Folder Structure](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/12-cis-benchmarks/1.png)
 
-> The `Assessor` directory contains the core executables (`Assessor-GUI`, `Assessor-CLI`), benchmark definitions under `benchmarks/`, and the `reports/` folder where all output is saved. The tool requires no installation — it runs directly from the extracted directory.
-
 ---
 
 ### Step 2 — Launching the GUI & Selecting Scan Mode
 
-Opening `Assessor-GUI` presents the CIS Configuration Assessment Tool welcome screen. Since we are auditing only the local system (the Domain Controller), the **Basic** scan mode is selected — this scans the local machine without needing remote credentials or network access.
+Opening `Assessor-GUI` presents the CIS Configuration Assessment Tool welcome screen. Since we are auditing only the local system (the Domain Controller), the **Basic** scan mode is selected.
 
 ![CIS-CAT Lite Welcome Screen](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/12-cis-benchmarks/2.png)
-
-> The **Advanced** mode supports scanning remote systems over the network but is restricted in the Lite version. For our DC audit, Basic is sufficient.
 
 ---
 
 ### Step 3 — Benchmark & Profile Selection
 
-From the benchmark library, we select the **CIS Controls Assessment Module — Implementation Group 1 for Windows Server v1.0.0**. On the right panel, the profile **Implementation Group 1 for Windows Server (Full) — Automated Checks and Survey Questions** is chosen and added to the queue.
+From the benchmark library, we select the **CIS Controls Assessment Module — Implementation Group 1 for Windows Server v1.0.0**.
 
 ![Benchmark Selection](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/12-cis-benchmarks/3.png)
-
-> **Implementation Group 1 (IG1)** represents the minimum set of cybersecurity controls every organization should implement. The **Full** profile combines both automated registry/configuration checks *and* manual survey questions, giving a complete picture of IG1 compliance. The selected benchmark is confirmed in the **Selected** panel at the bottom before proceeding.
 
 ---
 
 ### Step 4 — Report Output & Assessment Options
 
-The assessment options screen shows available output formats and the destination path for reports. In CIS-CAT Lite, only the **HTML** format is available — CSV, Text, ARF XML, and JSON are Pro-only features.
-
 ![Assessment Options](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/12-cis-benchmarks/4.png)
-
-> Reports are saved to `C:\Users\Administrator\Desktop\CIS-CAT Lite Assessor v4.56.0\Assessor\reports`. The logging level is set to `WARN or ERROR` to keep output clean. No POST URL is configured as we are not integrating with a CIS-CAT Pro Dashboard in this lab.
 
 ---
 
 ### Step 5 — Assessment Execution & Completion
 
-CIS-CAT runs through the benchmark checklist automatically. The console output shows the tool generating the Asset Reporting Format, collecting checklist results, combining and saving them, then exiting with **Exit Code: 0** — indicating a clean, successful run.
+CIS-CAT runs through the benchmark checklist automatically, exiting with **Exit Code: 0**.
 
 ![Assessment Complete](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/12-cis-benchmarks/5.png)
-
-> The resulting HTML report is saved as `DC-CIS_Controls_Assessment_Module_-_Implementation_Group_1_for_Windows_Server-20260325T072122Z.html`. The session targets the **Local** system and the full report is accessible via the **View HTML** button.
 
 ---
 
 ### Step 6 — Report Overview
-
-The generated report is a detailed **Security Configuration Assessment Report for DC** targeting IP `10.22.7.3`, assessed on March 25, 2026 using the **Implementation Group 1 for Windows Server (Full)** profile.
 
 ![Report Cover Page](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/12-cis-benchmarks/6.png)
 
 ---
 
 ### Step 7 — Summary Results: Overall Score 74%
-
-The summary table breaks down the assessment across two sections:
 
 | Section | Pass | Fail | Score | Max | Percent |
 |---|---|---|---|---|---|
@@ -3805,13 +3699,11 @@ The summary table breaks down the assessment across two sections:
 
 ![Assessment Summary](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/12-cis-benchmarks/7.png)
 
-> The automated checks reveal the most significant gaps — only **29%** pass rate — because these are objective, technical controls the tool can verify directly against registry keys, GPO settings, and system configurations. The high survey score (97%) reflects policies and procedures that are manually answered. The overall **74% score** establishes our pre-hardening baseline.
-
 ---
 
 ### Step 8 — Full Assessment Results Breakdown
 
-The assessment results table lists every IG1 Sub-Control with its pass/fail result. Key failing automated checks include:
+Key failing automated checks include:
 
 - `1.1` — **3.4 Deploy Automated OS Patch Management Tools** → ❌ Fail
 - `1.2` — **4.2 Change Default Passwords** → ❌ Fail
@@ -3824,27 +3716,21 @@ The assessment results table lists every IG1 Sub-Control with its pass/fail resu
 
 ![Assessment Results List](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/12-cis-benchmarks/8.png)
 
-> Items that **Pass** include audit logging (6.2), host-based firewalls (9.4), AES encryption for wireless (15.7), dormant account management (16.9), and network boundary inventory (12.1) — indicating the DC has some baseline security controls in place from the Active Directory and pfSense setup in earlier phases.
-
 ---
 
 ### Step 9 — Failed Control Deep-Dive: Change Default Passwords (4.2)
 
-Control **1.2 — 4.2 Change Default Passwords** flagged as **FAIL**. The CIS automated check (CAM) verifies that the minimum password length policy meets the required threshold of **14 characters** — consistent with Windows Benchmark standards.
-
 ![Change Default Passwords - Fail](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/12-cis-benchmarks/9.png)
 
-> **Remediation:** Navigate to `Computer Configuration > Windows Settings > Security Settings > Account Policies > Password Policy > Minimum password length` in the Local Group Policy Editor and set it to **14 or more characters**. This setting can also be enforced at the Domain level via Group Policy Management on the Domain Controller.
+> **Remediation:** Navigate to `Computer Configuration > Windows Settings > Security Settings > Account Policies > Password Policy > Minimum password length` and set it to **14 or more characters**.
 
 ---
 
 ### Step 10 — Passed Control Deep-Dive: Activate Audit Logging (6.2)
 
-Control **1.3 — 6.2 Activate Audit Logging** returns **PASS**. The CAM check verifies that at least one audit sub-category of logging is enabled on the system.
-
 ![Activate Audit Logging - Pass](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/12-cis-benchmarks/10.png)
 
-> Audit logging was already activated as part of the Wazuh SIEM integration in `[10]`. CIS-CAT confirms this is correctly configured. For full compliance, advanced audit policy sub-categories should be reviewed under `Computer Configuration > Windows Settings > Security Settings > Advanced Audit Policy Configuration > System Audit Policies` to ensure all critical categories (Logon/Logoff, Account Management, Object Access) are enabled.
+> Audit logging was already activated as part of the Wazuh SIEM integration in `[10]`. CIS-CAT confirms this is correctly configured.
 
 ---
 
@@ -3861,8 +3747,6 @@ Control **1.3 — 6.2 Activate Audit Logging** returns **PASS**. The CAM check v
 | Automated Pass Rate | 29% (4/15) |
 | Survey Pass Rate | 97% (28/29) |
 | Critical Fails | Patch Management, Password Policy, Anti-Malware, AutoRun, Backups |
-
-> This baseline score will serve as the benchmark for measuring the effectiveness of hardening steps introduced in subsequent phases, including **EDR deployment** via Kaspersky Security Center in `[13]`.
 
 ---
 
@@ -3893,6 +3777,289 @@ Control **1.3 — 6.2 Activate Audit Logging** returns **PASS**. The CAM check v
 
 ---
 
+<details>
+<summary><b>📗 Phase 4 · [13] — Kaspersky Security Center EDR/AV Enterprise Setup</b></summary>
+<a name="phase-4--13"></a>
+
+<br>
+
+> **Scope:** Deploying **Kaspersky Security Center (KSC)** as a full enterprise EDR/AV management platform on a dedicated EDR server — including SQL Server 2022 backend, the KSC Web Console, agent package generation, and rolling out the Network Agent to the Domain Controller via the Run dialog.
+
+---
+
+### Overview
+
+```text
+Proxmox Node: mursad
+└── EDR Server  (Windows Server — SERVERS zone)
+        ├── SQL Server 2022       — KSC database backend
+        ├── Kaspersky Security Center 12.12.0
+        │       ├── Administration Server
+        │       ├── Web Console   (127.0.0.1:8080)
+        │       └── Network Agent package
+        └── Managed Devices
+                └── DC (10.22.7.3) ← Agent deployed via Run dialog
+```
+
+| Part | Section | Description |
+|:----:|---------|-------------|
+| **A** | SQL Server Setup | Install SQL Server 2022 as the KSC database backend |
+| **B** | KSC Installation | Install Kaspersky Security Center with Web Console |
+| **C** | Initial Configuration | Quick Start Wizard, activation, and OS targeting |
+| **D** | Web Console Access | Log in to the KSC Web Console and explore the dashboard |
+| **E** | Agent Deployment | Generate a stand-alone agent package and push it to the DC |
+| **F** | Verification | Confirm the DC appears as a managed device in KSC |
+
+---
+
+### Part A — SQL Server Installation
+
+#### Step 1 — SQL Server Basic Setup
+
+![1](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/1.png)
+
+Download **SQL Server 2022**. Execute the application and click on **Basic** to begin the installation.
+
+---
+
+#### Step 2 — Completing SQL Setup
+
+![2](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/2.png)
+
+Accept all the default settings and terms. Once the installation completes successfully, click **Close**.
+
+---
+
+### Part B — Kaspersky Security Center Installation
+
+#### Step 3 — Launching Kaspersky Installer
+
+![3](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/3.png)
+
+Download the **Kaspersky Security Center** for the EDR Server. Execute the application and click on **Install Kaspersky Security Center**.
+
+---
+
+#### Step 4 — Cluster Installation Type
+
+![4](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/4.png)
+
+Click **Next** through the default options and accept the license terms. On the **"Type of installation on cluster"** page, select **Locally**.
+
+> ℹ️ Select the cluster option only if you have more than one node. For this single-node lab deployment, **Locally** is the correct choice.
+
+---
+
+#### Step 5 — Administrator Consoles
+
+![5](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/5.png)
+
+Choose the default option to **Install both administrator consoles** — this installs both the desktop MMC console and prepares the Web Console.
+
+---
+
+#### Step 6 — Network Size Configuration
+
+![6](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/6.png)
+
+Since the project involves fewer than 100 devices, select **Fewer than 100 networked devices**.
+
+> ℹ️ This setting optimizes KSC's internal polling intervals and database indexing for a small-scale deployment.
+
+---
+
+#### Step 7 — Database Selection
+
+![7](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/7.png)
+
+Select **Microsoft SQL Server** as the database backend — corresponding to the SQL Server 2022 installation completed in Part A.
+
+---
+
+#### Step 8 — SQL Connection Settings
+
+![8](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/8.png)
+
+In the connection settings, click **Browse** to detect and select your SQL Server instance name, then click **Next**.
+
+---
+
+#### Step 9 — Authentication Mode
+
+![9](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/9.png)
+
+Keep the default **Microsoft Windows authentication mode** selected and click **Next**.
+
+---
+
+#### Step 10 — Web Console Configuration
+
+![10](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/10.png)
+
+Proceed through the previous default settings until you reach the **KSC Web Console** setup. Leave the default address (`127.0.0.1`) and port (`8080`) as-is, then click **Next**.
+
+---
+
+#### Step 11 — Finalizing Web Console Setup
+
+![11](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/11.png)
+
+Keep the default accounts and ensure the certificate is set to the EDR default before clicking **Next**. Leave trusted administration servers as default and click **Next**. On the **Identity and Access Management (IAM)** page, uncheck the IAM box unless you specifically want IAM configured in this environment.
+
+---
+
+### Part C — Initial KSC Configuration
+
+#### Step 12 — Initial KSC Launch
+
+![12](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/12.png)
+
+Open the **KSC** desktop application. It will verify that your certificate is valid.
+
+> ⚠️ **Note:** Ensure your EDR Server is connected through the Domain Controller before proceeding. Click **Yes** to accept the certificate and continue.
+
+---
+
+#### Step 13 — Quick Start Wizard
+
+![13](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/13.png)
+
+The **KSC Quick Start Wizard** will launch automatically. Work through the wizard as follows:
+
+1. Click **Next**
+2. Leave the proxy server settings **unchecked** (assuming no proxy) → click **Next**
+3. Choose **Activate Application later** → click **Next**
+4. Select the target OS environments: **Windows & Linux + Workstation** → click **Next**
+
+---
+
+### Part D — Web Console Access
+
+#### Step 14 — Web Console Login
+
+![14](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/14.png)
+
+Once setup is complete, switch to the **KSC Web Console** and sign in using your EDR Server credentials.
+
+---
+
+#### Step 15 — Web Console Dashboard
+
+![15](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/15.png)
+
+You will now see the main dashboard of the **KSC Web Console** — providing a centralized view of the managed device estate, policy status, and security event summaries.
+
+---
+
+#### Step 16 — Managing Users and Groups
+
+![16](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/16.png)
+
+In the Web Console, navigate to **Users & Groups** where you can manage, add, or delete users and configure role-based access control for the KSC administration hierarchy.
+
+---
+
+#### Step 17 — Application Management
+
+![17](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/17.png)
+
+In the desktop KSC application, navigate to **Advanced → Application management**. Here you can configure policies to allow or deny specific applications from starting, manage application categories, and configure inventory controls across managed endpoints.
+
+---
+
+### Part E — Agent Deployment
+
+#### Step 18 — Extracting the Agent Package
+
+![18](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/18.png)
+
+Navigate to **Remote installation → Installation packages**. Select **KSC for Windows 12.12.0** and click **Create stand-alone installation package**.
+
+---
+
+#### Step 19 — Stand-alone Package Wizard
+
+![19](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/19.png)
+
+In the creation wizard, choose the option to **move the device to the list of managed devices** and select the appropriate group. You can customize the target group based on your deployment strategy — for example, creating dedicated packages for the DMZ or specific workstation groups. Click **Next** to generate the package.
+
+---
+
+#### Step 20 — Installing Agent on DC
+
+![20](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/20.png)
+
+Copy the generated file path or command, switch to the **Domain Controller (DC)**, and paste it into the **Run** dialog (**Win + R**) to execute and install the EDR Network Agent directly onto the DC.
+
+---
+
+#### Step 21 — EDR Agent Installation
+
+![21](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/21.png)
+
+The installation process will begin on the Domain Controller. This typically takes a few minutes to complete.
+
+> ⚠️ A **system restart** is required once the installation finishes to fully initialize the Kaspersky Network Agent service.
+
+---
+
+### Part F — Verification
+
+#### Step 22 — Verifying Connection in KSC
+
+![22](https://github.com/0xcgz/Project-Mursad/blob/main/assets/phase-4/13-kaspersky-edr/22.png)
+
+Once the restart is complete, return to the **Kaspersky Security Center** console. Navigate to **Managed devices** — the Domain Controller should now appear in the list, confirming it has connected successfully and is under centralized KSC management.
+
+---
+
+### VM Summary
+
+| VM | Role | Zone | Key Services |
+|:--:|------|:----:|-------------|
+| EDR Server | Kaspersky Security Center | SERVERS | SQL Server 2022 · KSC Admin · Web Console `:8080` |
+| VM 101 — DC | Managed Endpoint | SERVERS | KSC Network Agent · `mursad.local` |
+
+---
+
+### ✅ Phase Checklist
+
+- [ ] SQL Server 2022 downloaded and installed via **Basic** mode
+- [ ] SQL Server installation completed successfully — Close clicked
+- [ ] Kaspersky Security Center installer downloaded for the EDR Server
+- [ ] KSC installed — cluster type set to **Locally**
+- [ ] Both administrator consoles selected for installation
+- [ ] Network size set to **Fewer than 100 networked devices**
+- [ ] **Microsoft SQL Server** selected as the database backend
+- [ ] SQL Server instance detected via **Browse** and confirmed
+- [ ] **Windows authentication mode** kept as default
+- [ ] KSC Web Console address left as `127.0.0.1:8080`
+- [ ] Web Console certificate set to EDR default
+- [ ] IAM unchecked (not required for this lab)
+- [ ] Desktop KSC application opened — certificate accepted
+- [ ] Quick Start Wizard completed — no proxy · activation deferred · Windows & Linux + Workstation selected
+- [ ] KSC Web Console login successful using EDR Server credentials
+- [ ] Main dashboard visible in Web Console
+- [ ] Users & Groups section reviewed in Web Console
+- [ ] Application Management explored in desktop KSC — **Advanced → Application management**
+- [ ] Stand-alone installation package created from **KSC for Windows 12.12.0**
+- [ ] Package targeted to correct managed device group
+- [ ] Agent installation command copied and executed on DC via **Run** dialog
+- [ ] Agent installation completed on DC — system restarted
+- [ ] DC appears in **Managed devices** in KSC console ✅
+
+<div align="center"><br>
+
+**🟢 Phase 4 · [13] Complete**
+
+`[12] Infrastructure Auditing via CIS Benchmarks` ◄── **`[13] Kaspersky Security Center EDR/AV Enterprise Setup`** ──► `[14] Final Security Review & Operations Wrap-Up`
+
+<br></div>
+
+</details>
+
+---
+
 ## 📁 Repository Structure
 
 ```
@@ -3913,7 +4080,8 @@ Project-Mursad/
 │   │   └── 10-wazuh-siem/             # 19 screenshots
 │   └── phase-4/
 │       ├── 11-antivirus-siem/         # 27 screenshots
-│       └── 12-cis-benchmarks/         # 10 screenshots
+│       ├── 12-cis-benchmarks/         # 10 screenshots
+│       └── 13-kaspersky-edr/          # 22 screenshots
 │
 ├── 📂 configs/
 │   ├── pfsense/
@@ -3937,7 +4105,8 @@ Project-Mursad/
 │   │   └── 10-wazuh-siem.md
 │   └── phase-4/
 │       ├── 11-antivirus-siem.md
-│       └── 12-cis-benchmarks.md
+│       ├── 12-cis-benchmarks.md
+│       └── 13-kaspersky-edr.md
 │
 ├── 📂 scripts/
 │   ├── ad-provisioning.ps1
