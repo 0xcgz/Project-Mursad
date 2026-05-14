@@ -43,7 +43,11 @@
 </div>
 
 ---
+##  SOC LAB SETUP
 
+<img width="1515" height="1282" alt="Topolgy" src="https://github.com/user-attachments/assets/8188b8c8-5c33-4c6f-a89a-6543f30fac34" />
+
+---
 ## 📑 Table of Contents
 
 - [Overview](#-overview)
